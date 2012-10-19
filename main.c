@@ -15,6 +15,7 @@ Main file for SLIP D embedded software
 #include "limits.h"
 
 #include "led.h"
+#include "USB.h"
 
 /* variables */
 volatile extern int USB_Message = 0;

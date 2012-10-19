@@ -87,8 +87,15 @@ efm32lib/src/efm32_int.c \
 efm32lib/src/efm32_emu.c \
 efm32lib/src/efm32_adc.c \
 efm32lib/src/efm32_rtc.c \
+efm32usb/src/efm32_usbtimer.c \
+efm32usb/src/efm32_usbd.c \
+efm32usb/src/efm32_usbdch9.c \
+efm32usb/src/efm32_usbdep.c \
+efm32usb/src/efm32_usbdint.c \
+efm32usb/src/efm32_usbhal.c \
 main.c \
-led.c
+led.c \
+USB.c
 
 
 S_SRC +=  \
