@@ -17,7 +17,8 @@ Main file for SLIP D embedded software
 #include "led.h"
 
 /* variables */
-
+volatile extern int USB_Message = 0;
+extern uint8_t usbMessage[32];
 
 /* prototypes */
 void InitClocks();
@@ -158,17 +159,11 @@ int main()
 	// show startup LEDs
 	startupLEDs();	
 	
-	uint8_t color = 0;
+	// init usb 
+	USB_Setup();
 	
-	while (1)
-	{
-		
-		updateLEDs(color);
-		
-		wait(1000);
-		
-		color = (++color) % 3;
-		
-	}
+	
+	
+	while (1);
 	
 }
