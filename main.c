@@ -11,24 +11,49 @@ Main file for SLIP D embedded software
 #include "efm32_rtc.h"
 #include "efm32_gpio.h"
 #include "efm32_cmu.h"
+#include "efm32_timer.h"
+#include "efm32_int.h"
 
-#include "limits.h"
+#include "stdint.h"
+#include "stdbool.h"
 
 #include "led.h"
-#include "USB.h"
+#include "trace.h"
+#include "radio.h"
+#include "timer.h"
+
+#include "node_config.h"
 
 /* variables */
-volatile extern int USB_Message = 0;
-extern uint8_t usbMessage[32];
 
 /* prototypes */
 void InitClocks();
 void HandleInterrupt();
 void startupLEDs();
-void updateLEDs(LED color);
 void wait(uint32_t ms);
 
 /* functions */
+void TIMER0_IRQHandler(void)
+{ 
+  
+  TIMER_IntClear(TIMER0, TIMER_IF_CC2);
+  
+  
+  
+}
+
+void TIMER1_IRQHandler(void)
+{ 
+  
+  LED_Toggle(BLUE);
+  
+  TIMER_IntClear(TIMER1, TIMER_IF_CC0);
+  TIMER_IntClear(TIMER1, TIMER_IF_CC2);
+  
+  TIMER_IntClear(TIMER1, TIMER_IF_OF);
+  
+}
+
 // messy interrupt handler
 void GPIO_EVEN_IRQHandler(void) 
 {
@@ -41,6 +66,8 @@ void GPIO_ODD_IRQHandler(void)
 
 void HandleInterrupt()
 {
+	
+	RADIO_Interrupt();
 	
 }
 
@@ -55,9 +82,9 @@ void wait(uint32_t ms)
 		
 		time = RTC_CounterGet();
 		
-		if (UINT_MAX - time < ((double)ms / 1000.0) * clockFreq)
+		if (16777215 - time < ((double)ms / 1000.0) * clockFreq)
 		{
-			ms -= (uint32_t)(1000.0 * ((UINT32_MAX - time) / (double)clockFreq));
+			ms -= (uint32_t)(1000.0 * ((16777215 - time) / (double)clockFreq));
 			while (RTC_CounterGet() > time);
 		}
 		else
@@ -70,17 +97,6 @@ void wait(uint32_t ms)
 	
 }
 
-void updateLEDs(LED led)
-{
-	
-	LED_Off(RED);
-	LED_Off(BLUE);
-	LED_Off(GREEN);
-	
-	LED_On(led);
-	
-}
-
 void startupLEDs()
 {
 	
@@ -88,22 +104,19 @@ void startupLEDs()
 	LED_Off(BLUE);
 	LED_Off(GREEN);
 	
-	uint32_t time = RTC_CounterGet();
-	while (RTC_CounterGet() < time + 32768);
+	wait(1000);
 	
 	LED_On(RED);
 	LED_On(BLUE);
 	LED_On(GREEN);
 	
-	time = RTC_CounterGet();
-	while (RTC_CounterGet() < time + 32768);
+	wait(1000);
 	
 	LED_Off(RED);
 	LED_Off(BLUE);
 	LED_Off(GREEN);
 	
-	time = RTC_CounterGet();
-	while (RTC_CounterGet() < time + 32768);
+	wait(1000);
 	
 }
 
@@ -139,6 +152,13 @@ void InitClocks()
 	// enable clock to RTC
 	CMU_ClockEnable(cmuClock_RTC, true);
 	RTC_Enable(true);
+	
+	// enable radio usart
+	CMU_ClockEnable(cmuClock_USART0, true);
+
+	// enable timers 
+	CMU_ClockEnable(cmuClock_TIMER0, true);
+	CMU_ClockEnable(cmuClock_TIMER1, true);
 
 }
 
@@ -158,11 +178,62 @@ int main()
 	LED_Init();
 	
 	// show startup LEDs
-	startupLEDs();	
+	startupLEDs();
 	
-	// init usb 
-	USB_Setup();
+	// enable gpio interrupts
+	NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
+	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 	
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+	NVIC_EnableIRQ(GPIO_ODD_IRQn);
+	
+	// start radio
+	RADIO_Init();
+	
+	#ifdef BASESTATION
+	
+	RADIO_QueueTDMAPulse();
+	
+	//TDMATIMER_ConfigBS();
+	
+	TDMATIMER_Init();
+	
+	LED_On(GREEN);
+	
+	#elif defined(NODE)
+	
+	TDMATIMER_ConfigNode();
+	
+	TDMATIMER_Init();
+	
+	INT_Enable();
+	
+	while (1)
+	{
+		
+		uint8_t payload[32];
+		
+		while (RADIO_GetBufferFill() > 0)
+		{
+			
+			LED_On(BLUE);
+			
+			RADIO_Recv(payload);
+			
+			if (payload[0] == 0xFF)
+			{
+				LED_Toggle(GREEN);
+			}
+			else
+			{
+				LED_Toggle(RED);
+			}
+			
+		}
+		
+	}
+	
+	#endif
 	
 	
 	while (1);
