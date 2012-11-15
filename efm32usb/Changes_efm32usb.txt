@@ -1,0 +1,18 @@
+================ Revision history ============================================
+2.3.2:
+ - 19/12-2011: MSD updates
+
+2.3.0:
+ - 29/11-2011: Initial version of host stack.
+ - 11/11-2011: Added Doxygen doc for host stack.
+
+2.2.2:
+ - 18/10-2011: Fixed bug in USBDHAL_AbortEpOut() which in some scenarios would hang.
+ - 18/10-2011: Added function USBD_Stop(), which disables device stack operation.
+
+2.2.1:
+ - 23/03-2011: Initial version.
+ - 15/04-2011: Added host device stack.
+ - 24/05-2011: First release candidate.
+ - 06/06-2011: Host driver port plug/unplug code improvements.
+ - 18/08-2011: Redesign of device abort transfer function.
