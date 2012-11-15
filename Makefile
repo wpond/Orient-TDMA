@@ -98,7 +98,7 @@ efm32usb/src/efm32_usbdint.c \
 efm32usb/src/efm32_usbhal.c \
 system/usart.c \
 system/usb.c \
-tasks/radio_task.c \
+tasks/radio_init_task.c \
 main.c \
 led.c \
 scheduler.c 

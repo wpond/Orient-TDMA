@@ -46,7 +46,7 @@ int main()
 	enableInterrupts();
 	
 	// init tasks
-	SCHEDULER_TaskInit(&radio_task, radio_task_entrypoint);
+	SCHEDULER_TaskInit(&radio_init_task, radio_init_task_entrypoint);
 	
 	// run
 	SCHEDULER_Run();
