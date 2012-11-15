@@ -14,7 +14,7 @@
 /* variables */
 
 /* prototypes */
-void radio_cs(USART0_ChipSelect set);
+void radio_cs(USART_ChipSelect set);
 uint8_t radio_readRegister(uint8_t reg);
 void radio_writeRegister(uint8_t reg, uint8_t value);
 void radio_interrupt_rt();
@@ -105,13 +105,17 @@ void radio_task_entrypoint()
 	radio_writeRegister(NRF_DYNPD, 0x00);
 	radio_writeRegister(NRF_FEATURE, 0x00);
 	
-	
+	uint8_t status = radio_readRegister(NRF_STATUS);
+	if (status == 0x0E)
+		LED_On(GREEN);
+	else
+		LED_On(RED);
 	
 	while(1);
 	
 }
 
-void radio_cs(USART0_ChipSelect set)
+void radio_cs(USART_ChipSelect set)
 {
 	
 	switch (set)

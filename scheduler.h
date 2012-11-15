@@ -6,8 +6,10 @@
 
 #define IN_USE_FLAG				0x00000001
 #define EXEC_FLAG					0x00000002
-#define USART0_FLAG				0x00000004
-#define USB_FLAG					0x00000008
+#define USB_FLAG					0x00000004
+#define USART0_FLAG				0x00000008
+#define USART1_FLAG				0x00000010
+#define USART2_FLAG				0x00000020
 
 #define MAX_TASKS 				32
 #define RT_QUEUE_SIZE 		4

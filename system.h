@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-#include "usart0.h"
+#include "usart.h"
 #include "usb.h"
 #include "trace.h"
 

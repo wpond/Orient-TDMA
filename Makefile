@@ -96,7 +96,7 @@ efm32usb/src/efm32_usbdch9.c \
 efm32usb/src/efm32_usbdep.c \
 efm32usb/src/efm32_usbdint.c \
 efm32usb/src/efm32_usbhal.c \
-system/usart0.c \
+system/usart.c \
 system/usb.c \
 tasks/radio_task.c \
 main.c \
