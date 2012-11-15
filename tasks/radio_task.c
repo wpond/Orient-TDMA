@@ -17,39 +17,52 @@
 void radio_cs(USART0_ChipSelect set);
 uint8_t radio_readRegister(uint8_t reg);
 void radio_writeRegister(uint8_t reg, uint8_t value);
+void radio_interrupt_rt();
 
 /* functions */
 void GPIO_EVEN_IRQHandler()
 {
-	GPIO_IntClear((1 << NRF_INT_PIN));
-	return;
 	
 	if (GPIO_IntGet() & (1 << NRF_INT_PIN))
 	{
 		
-		// handle interrupt
-		uint8_t status = radio_readRegister(NRF_STATUS);
+		SCHEDULER_RunRTTask(&radio_interrupt_rt);
 		
-		// tx
-		if (status & 0x20)
-		{
-			
-			LED_On(BLUE);
-			
-		}
-		
-		// rx
-		if (status & 0x40)
-		{
-			
-			
-			
-		}
-		
-		radio_writeRegister(NRF_STATUS,0x70);
-		//GPIO_IntClear((1 << NRF_INT_PIN));
+		GPIO_IntClear((1 << NRF_INT_PIN));
 		
 	}
+	
+}
+
+void radio_interrupt_rt()
+{
+	
+	uint8_t status = radio_readRegister(NRF_STATUS);
+	
+	uint8_t clr = 0x00;
+	
+	// max rt
+	if (status & 0x10)
+	{
+		
+		clr |= 0x10;
+	}
+	
+	// tx
+	if (status & 0x20)
+	{
+		
+		clr |= 0x20;
+	}
+	
+	// rx
+	if (status & 0x40)
+	{
+		
+		clr |= 0x20;
+	}
+	
+	radio_writeRegister(NRF_STATUS,clr);
 	
 }
 
@@ -92,29 +105,7 @@ void radio_task_entrypoint()
 	radio_writeRegister(NRF_DYNPD, 0x00);
 	radio_writeRegister(NRF_FEATURE, 0x00);
 	
-	radio_writeRegister(NRF_CONFIG,0x0E);
 	
-	uint8_t p[33];
-	
-	while ((~radio_readRegister(NRF_FIFO_STATUS)) & 0x20)
-	{
-		
-		p[0] = NRF_W_TX_PAYLOAD;
-		memset(&p[1],NRF_NOP,32);
-		
-		USART0_Transfer(p,33,radio_cs);
-		
-	}
-	
-	NRF_CE_hi;
-	
-	while ((~radio_readRegister(NRF_FIFO_STATUS)) & 0x10);
-	
-	NRF_CE_lo;
-	
-	LED_On(GREEN);
-	LED_On(RED);
-	LED_On(BLUE);
 	
 	while(1);
 	

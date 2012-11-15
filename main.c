@@ -58,6 +58,8 @@ void enableInterrupts()
 	
 	NVIC_EnableIRQ(SysTick_IRQn);
 	NVIC_EnableIRQ(PendSV_IRQn);
+	NVIC_SetPriority(PendSV_IRQn, 7);
+	NVIC_SetPriority(SysTick_IRQn, 7);
 	
 	NVIC_EnableIRQ(USART0_TX_IRQn);
 	NVIC_EnableIRQ(USART0_RX_IRQn);

@@ -227,7 +227,10 @@ void PendSV_Handler()
 	}
 	else
 	{
+		// reset time after running current rt task
+		uint32_t systick_val = SysTick->VAL;
 		SCHEDULER_RunRT();
+		SysTick->VAL = systick_val;
 	}
 	
 	__asm volatile(

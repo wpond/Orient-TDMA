@@ -142,12 +142,6 @@ void USART0_RX_IRQHandler()
 void USART0_Transfer(uint8_t *buffer, uint16_t size, void (*cs)(USART0_ChipSelect))
 {
 	
-	
-	
-	
-	
-	
-	
 	// create transfer
 	bool complete = false;
 	
