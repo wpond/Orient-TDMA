@@ -28,8 +28,6 @@ typedef struct
 	
 } packet_header_t;
 
-
-
 typedef struct
 {
 

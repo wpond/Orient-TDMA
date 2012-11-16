@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "packets.h"
 #include "tasks.h"
 #include "system.h"
 
@@ -13,10 +14,10 @@
 #include "led.h"
 
 /* variables */
-uint8_t txBufferMem[RADIO_BUFFER_SIZE][32],
-	rxBufferMem[RADIO_BUFFER_SIZE][32];
-static queue_t txBuffer, rxBuffer;
-static bool auto_refil = false;
+uint8_t txBufferMem[RADIO_BUFFER_SIZE * 32],
+	rxBufferMem[RADIO_BUFFER_SIZE * 32];
+queue_t txBuffer, rxBuffer;
+bool auto_refil = false;
 
 /* prototypes */
 void radio_cs(USART_ChipSelect set);
@@ -83,8 +84,8 @@ void radio_interrupt_rt()
 void radio_init_task_entrypoint()
 {
 	
-	QUEUE_Init(&txBuffer, (uint8_t**)txBufferMem, 32, RADIO_BUFFER_SIZE);
-	QUEUE_Init(&rxBuffer, (uint8_t**)rxBufferMem, 32, RADIO_BUFFER_SIZE);
+	QUEUE_Init(&txBuffer, txBufferMem, 32, RADIO_BUFFER_SIZE);
+	QUEUE_Init(&rxBuffer, rxBufferMem, 32, RADIO_BUFFER_SIZE);
 	
 	GPIO_PinModeSet(NRF_CE_PORT, NRF_CE_PIN, gpioModePushPull, 0);
 	GPIO_PinModeSet(NRF_CSN_PORT, NRF_CSN_PIN, gpioModePushPull, 1);
@@ -129,8 +130,8 @@ void radio_init_task_entrypoint()
 	
 	#ifdef BASESTATION
 		
-		SCHEDULER_TaskInit(&basestation_radio_task, basestation_radio_task_entrypoint);
-		
+		//SCHEDULER_TaskInit(&basestation_radio_task, basestation_radio_task_entrypoint);
+		while(1);
 	#else
 	
 		SCHEDULER_TaskInit(&node_radio_task, node_radio_task_entrypoint);

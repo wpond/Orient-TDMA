@@ -8,7 +8,7 @@
 typedef struct
 {
 	
-	uint8_t **queue;
+	uint8_t *queue;
 	uint16_t	queue_size,
 		item_size,
 		read_position,
@@ -16,7 +16,7 @@ typedef struct
 	
 } queue_t;
 
-void QUEUE_Init(queue_t *queue, uint8_t **mem, uint16_t item_size, uint16_t queue_size);
+void QUEUE_Init(queue_t *queue, uint8_t *mem, uint16_t item_size, uint16_t queue_size);
 bool QUEUE_Read(queue_t *queue, uint8_t *payload);
 bool QUEUE_Write(queue_t *queue, uint8_t *payload);
 
