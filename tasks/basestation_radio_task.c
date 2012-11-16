@@ -30,16 +30,13 @@ void TIMER1_IRQHandler()
 	
 	if (irq & TIMER_IF_CC0)
 	{
-		
-		
-		
 		TIMER_IntClear(TIMER1, TIMER_IF_CC0);
 	}
 	
 	if (irq & TIMER_IF_CC1)
 	{
 		
-		//SCHEDULER_RunRTTask(&basestation_receive_mode_rt);
+		SCHEDULER_RunRTTask(&basestation_receive_mode_rt);
 		
 		TIMER_IntClear(TIMER1, TIMER_IF_CC1);
 	}
@@ -68,7 +65,7 @@ void basestation_radio_task_entrypoint()
 		.sync       = false, 
 	};
 	
-	TIMER_TopSet(TIMER1, 255 * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
+	TIMER_TopSet(TIMER1, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
 	
 	TIMER_InitCC_TypeDef timerCCInit = 
 	{
@@ -102,7 +99,8 @@ void basestation_prepare_pulse_rt()
 	RADIO_SetMode(TX);
 	
 	uint8_t payload[32];
-	RADIO_Send(payload);
+	if (!RADIO_Send(payload))
+		LED_On(GREEN);
 	RADIO_TxBufferFill();
 	
 }

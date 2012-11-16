@@ -6,5 +6,6 @@
 #include "usart.h"
 #include "usb.h"
 #include "trace.h"
+#include "queue.h"
 
 #endif

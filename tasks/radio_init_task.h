@@ -24,10 +24,16 @@
 #define NRF_RXEN_lo GPIO_PinOutClear(NRF_RXEN_PORT, NRF_RXEN_PIN)
 #define NRF_RXEN_hi GPIO_PinOutSet(NRF_RXEN_PORT, NRF_RXEN_PIN)
 
-#define RADIO_BUFFER_SIZE 		16
+#define RADIO_BUFFER_SIZE 		2 //16
 
+/*
+#define TDMA_SLOT_COUNT				255
 #define TDMA_SLOT_WIDTH 			0.003
 #define TDMA_GUARD_PERIOD 		0.0005
+*/
+#define TDMA_SLOT_COUNT				2
+#define TDMA_SLOT_WIDTH 			0.4
+#define TDMA_GUARD_PERIOD 		0.05
 
 typedef enum 
 {

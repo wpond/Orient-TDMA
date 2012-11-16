@@ -99,6 +99,7 @@ efm32usb/src/efm32_usbdint.c \
 efm32usb/src/efm32_usbhal.c \
 system/usart.c \
 system/usb.c \
+system/queue.c \
 tasks/radio_init_task.c \
 tasks/basestation_radio_task.c \
 tasks/node_radio_task.c \
