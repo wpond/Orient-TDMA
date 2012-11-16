@@ -16,35 +16,6 @@ void basestation_prepare_pulse_rt();
 void basestation_receive_mode_rt();
 
 /* functions */
-void TIMER1_IRQHandler()
-{
-	
-	uint32_t irq = TIMER_IntGet(TIMER1);
-	
-	if (irq & TIMER_IF_OF)
-	{
-		
-		LED_Toggle(RED);
-		SCHEDULER_RunRTTask(&basestation_prepare_pulse_rt);
-		
-		TIMER_IntClear(TIMER1, TIMER_IF_OF);
-	}
-	
-	if (irq & TIMER_IF_CC0)
-	{
-		TIMER_IntClear(TIMER1, TIMER_IF_CC0);
-	}
-	
-	if (irq & TIMER_IF_CC1)
-	{
-		
-		SCHEDULER_RunRTTask(&basestation_receive_mode_rt);
-		
-		TIMER_IntClear(TIMER1, TIMER_IF_CC1);
-	}
-	
-}
-
 void basestation_radio_task_entrypoint()
 {
 	
@@ -86,7 +57,22 @@ void basestation_radio_task_entrypoint()
 	TIMER_InitCC(TIMER1, 0, &timerCCInit);
 	TIMER_CompareSet(TIMER1, 0, TDMA_GUARD_PERIOD * (48000000 / 1024));
 	
-	TIMER_IntEnable(TIMER1, TIMER_IF_CC0);
+	timerCCInit.cmoa = timerOutputActionNone;
+	TIMER_InitCC(TIMER1, 1, &timerCCInit);
+	TIMER_CompareSet(TIMER1, 1, (TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) * (48000000 / 1024));
+	
+	timer_cb_table_t callback;
+	
+	callback.timer = TIMER1;
+	callback.flags = TIMER_IF_OF;
+	callback.cb = &basestation_prepare_pulse_rt;
+	
+	TIMER_RegisterCallback(callback);
+	
+	callback.flags = TIMER_IF_CC1;
+	callback.cb = &basestation_receive_mode_rt;
+	
+	TIMER_RegisterCallback(callback);
 	
 	TIMER_Init(TIMER1, &timerInit);
 	

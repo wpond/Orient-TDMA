@@ -32,7 +32,10 @@ int main()
 	
 	// start clocks
 	initClocks();
-		
+	
+	// init timer service
+	TIMER_InitCallbacks();
+	
 	// init LEDs
 	LED_Init();
 	

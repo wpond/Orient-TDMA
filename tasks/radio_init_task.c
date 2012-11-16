@@ -167,7 +167,7 @@ void RADIO_SetMode(RADIO_Mode rm)
 	{
 		default:
 		case OFF:
-			radio_writeRegister(NRF_CONFIG, 0x0C);
+			radio_writeRegister(NRF_CONFIG, 0x0C); //LED_On(RED);LED_Off(GREEN);LED_Off(BLUE);
 			break;
 		case TX:
 			radio_writeRegister(NRF_CONFIG, 0x0E);

@@ -7,5 +7,6 @@
 #include "usb.h"
 #include "trace.h"
 #include "queue.h"
+#include "timer.h"
 
 #endif

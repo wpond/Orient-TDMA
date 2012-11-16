@@ -7,12 +7,17 @@
 #include <stdbool.h>
 
 #include "led.h"
+#include "system.h"
 
 /* variables */
 static bool msp_in_use = true;
 static task_table_t task_table[MAX_TASKS];
 static uint32_t current_task = 0;
-static void (*rt_task)(void);
+
+//void (*rt_task_mem[RT_QUEUE_SIZE])(void);
+uint8_t rt_task_mem[RT_QUEUE_SIZE * sizeof(void (*)(void))];
+queue_t rt_task_queue;
+
 static bool in_rt_task = false;
 
 /* prototypes */
@@ -25,6 +30,8 @@ void SCHEDULER_Init()
 	
 	INT_Disable();
 	
+	QUEUE_Init(&rt_task_queue, rt_task_mem, sizeof(void (*)(void)), RT_QUEUE_SIZE);
+	
 	SysTick_Config(TASK_DURATION);
 	
 	int i;
@@ -32,8 +39,6 @@ void SCHEDULER_Init()
 	{
 		task_table[i].flags = 0;
 	}
-	
-	rt_task = NULL;
 	
 }
 
@@ -49,7 +54,7 @@ void SCHEDULER_Run()
 void SCHEDULER_RunRTTask(void (*task)(void))
 {
 	
-	rt_task = task;
+	QUEUE_Write(&rt_task_queue, (uint8_t*)&task);
 	SCHEDULER_Yield();
 	
 }
@@ -182,13 +187,12 @@ void SysTick_Handler()
 	
 }
 
-void SCHEDULER_RunRT()
+void SCHEDULER_RunRT(void (*rt_task)(void))
 {
 	
 	in_rt_task = true;
 	rt_task();
 	in_rt_task = false;
-	rt_task = NULL;
 	
 }
 
@@ -205,7 +209,9 @@ void PendSV_Handler()
 		);
 	}
 	
-	if (rt_task == NULL)
+	void (*rt_task)(void);
+	
+	if (!QUEUE_Read(&rt_task_queue, (uint8_t*)&rt_task))
 	{
 		SysTick->VAL = 0; // reset the systick timer
 		msp_in_use = false;
@@ -229,7 +235,13 @@ void PendSV_Handler()
 	{
 		// reset time after running current rt task
 		uint32_t systick_val = SysTick->VAL;
-		SCHEDULER_RunRT();
+		
+		do
+		{
+			SCHEDULER_RunRT(rt_task);
+		}
+		while(QUEUE_Read(&rt_task_queue, (uint8_t*)&rt_task));
+		
 		SysTick->VAL = systick_val;
 	}
 	

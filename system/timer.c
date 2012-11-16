@@ -2,17 +2,26 @@
 
 #include "efm32_int.h"
 
+#include "scheduler.h"
+#include "led.h"
+
 /* variables */
 timer_cb_table_t timer_cb_table[MAX_TIMER_CALLBACKS];
 
 /* prototyes */
-uint32_t TIMER_Callbacks();
+void TIMER_Callbacks();
 
 /* functions */
-uint32_t TIMER_Callbacks(TIMER_TypeDef *timer, uint32_t flags)
+void TIMER1_IRQHandler()
 {
 	
-	uint32_t handled_flags = 0;
+	TIMER_Callbacks(TIMER1, TIMER_IntGet(TIMER1));
+	
+}
+
+void TIMER_Callbacks(TIMER_TypeDef *timer, uint32_t flags)
+{
+	
 	int i;
 	for (i = 0; i < MAX_TIMER_CALLBACKS; i++)
 	{
@@ -20,14 +29,13 @@ uint32_t TIMER_Callbacks(TIMER_TypeDef *timer, uint32_t flags)
 		if (timer_cb_table[i].timer == timer && timer_cb_table[i].flags & flags)
 		{
 			
-			timer_cb_table[i].cb();
-			handled_flags &= timer_cb_table[i].flags;
+			SCHEDULER_RunRTTask(timer_cb_table[i].cb);
 			
 		}
 		
 	}
 	
-	return handled_flags;
+	TIMER_IntClear(timer,flags);
 	
 }
 
@@ -64,6 +72,9 @@ bool TIMER_RegisterCallback(timer_cb_table_t entry)
 		
 	}
 	INT_Enable();
+	
+	TIMER_IntEnable(entry.timer, entry.flags);
+	
 	return false;
 	
 }

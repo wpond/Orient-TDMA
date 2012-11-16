@@ -1,6 +1,5 @@
 #include "system.h"
-#include "queue.h"
-#include "led.h"
+
 void QUEUE_Init(queue_t *queue, uint8_t *mem, uint16_t item_size, uint16_t queue_size)
 {
 	
