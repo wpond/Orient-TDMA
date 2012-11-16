@@ -130,8 +130,8 @@ void radio_init_task_entrypoint()
 	
 	#ifdef BASESTATION
 		
-		//SCHEDULER_TaskInit(&basestation_radio_task, basestation_radio_task_entrypoint);
-		while(1);
+		SCHEDULER_TaskInit(&basestation_radio_task, basestation_radio_task_entrypoint);
+		
 	#else
 	
 		SCHEDULER_TaskInit(&node_radio_task, node_radio_task_entrypoint);
