@@ -24,7 +24,7 @@
 #define NRF_RXEN_lo GPIO_PinOutClear(NRF_RXEN_PORT, NRF_RXEN_PIN)
 #define NRF_RXEN_hi GPIO_PinOutSet(NRF_RXEN_PORT, NRF_RXEN_PIN)
 
-#define RADIO_BUFFER_SIZE 		2 //16
+#define RADIO_BUFFER_SIZE 		16
 
 /*
 #define TDMA_SLOT_COUNT				255
