@@ -68,7 +68,8 @@ INCLUDEPATHS += \
 -Ifatfs/src \
 -Idrivers \
 -Itasks \
--Isystem
+-Isystem \
+-Iincludes
 
 ####################################################################
 # Files                                                            #
@@ -99,6 +100,8 @@ efm32usb/src/efm32_usbhal.c \
 system/usart.c \
 system/usb.c \
 tasks/radio_init_task.c \
+tasks/basestation_radio_task.c \
+tasks/node_radio_task.c \
 main.c \
 led.c \
 scheduler.c 

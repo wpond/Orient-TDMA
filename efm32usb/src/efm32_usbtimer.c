@@ -50,10 +50,10 @@
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
-#define TIMER             TIMER1
-#define TIMER_CLK         cmuClock_TIMER1
-#define TIMER_IRQ         TIMER1_IRQn
-#define TIMER_IRQHandler  TIMER1_IRQHandler
+#define TIMER             TIMER2
+#define TIMER_CLK         cmuClock_TIMER2
+#define TIMER_IRQ         TIMER2_IRQn
+#define TIMER_IRQHandler  TIMER2_IRQHandler
 
 typedef struct _timer
 {

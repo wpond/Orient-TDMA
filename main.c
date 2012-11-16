@@ -66,6 +66,8 @@ void enableInterrupts()
 	
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	
+	NVIC_EnableIRQ(TIMER1_IRQn);
+	
 }
 
 void initClocks()
@@ -104,5 +106,8 @@ void initClocks()
 
 	// enable radio usart
 	CMU_ClockEnable(cmuClock_USART0, true);
+	
+	// enable timers
+	CMU_ClockEnable(cmuClock_TIMER1, true);
 	
 }
