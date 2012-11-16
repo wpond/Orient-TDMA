@@ -6,14 +6,14 @@
 typedef enum
 {
 	
-	timing_pulse = 0,
-	session_config = 1,
-	magnetometer_calibration = 2,
-	start_stop = 3,
-	device_available = 4,
-	capture_data_header = 5,
-	capture_data = 6,
-	acknowledgement = 7
+	TIMING_PULSE = 0,
+	SESSION_CONFIG = 1,
+	MAGNETOMETER_CALIBRATION = 2,
+	START_STOP = 3,
+	DEVICE_AVAILABLE = 4,
+	CAPTURE_DATA_HEADER = 5,
+	CAPTURE_DATA = 6,
+	ACKNOWLEDGEMENT = 7
 	
 } packet_type_e;
 
@@ -34,10 +34,7 @@ typedef struct
 {
 
 	packet_header_t header;
-	typedef union
-	{
-		
-	} packet_payload;
+	uint8_t packet_payload[24];
 
 } packet_t;
 

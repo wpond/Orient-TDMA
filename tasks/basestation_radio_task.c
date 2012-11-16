@@ -4,6 +4,8 @@
 #include "tasks.h"
 #include "system.h"
 
+#include "config.h"
+#include "packets.h"
 #include "radio_init_task.h"
 #include "led.h"
 
@@ -98,9 +100,12 @@ void basestation_prepare_pulse_rt()
 	RADIO_Enable(OFF);
 	RADIO_SetMode(TX);
 	
-	uint8_t payload[32];
-	if (!RADIO_Send(payload))
-		LED_On(GREEN);
+	packet_t pulse;
+	pulse.header.origin_id = NODE_ID;
+	pulse.header.destination_id = 0xFF; // broadcast
+	pulse.header.message_type = 0x00; // timing pulse
+	pulse.header.sequence_number = 0x00;
+	RADIO_Send((uint8_t*)&pulse);
 	RADIO_TxBufferFill();
 	
 }
