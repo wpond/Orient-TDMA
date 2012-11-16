@@ -76,7 +76,12 @@ void basestation_radio_task_entrypoint()
 	
 	TIMER_Init(TIMER1, &timerInit);
 	
-	while(1);
+	while(1)
+	{
+		int i;
+		for (i = 0 ;i  < 100000; i++);
+		LED_Toggle(BLUE);
+	}
 	
 }
 
@@ -85,6 +90,8 @@ void basestation_prepare_pulse_rt()
 	
 	RADIO_Enable(OFF);
 	RADIO_SetMode(TX);
+	LED_On(RED);
+	LED_Off(GREEN);
 	
 	packet_t pulse;
 	pulse.header.origin_id = NODE_ID;
@@ -102,5 +109,7 @@ void basestation_receive_mode_rt()
 	RADIO_Enable(OFF);
 	RADIO_SetMode(RX);
 	RADIO_Enable(RX);
+	LED_Off(RED);
+	LED_On(GREEN);
 	
 }
