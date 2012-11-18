@@ -22,7 +22,7 @@ void node_radio_task_entrypoint()
 			
 			if (packet[1] == 0xFF &&
 				packet[2] == 0x00)
-				LED_Toggle(GREEN);
+				LED_Toggle(RED);
 		}
 		
 	}
