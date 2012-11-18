@@ -50,7 +50,7 @@ void basestation_radio_task_entrypoint()
 	TIMER_InitCC_TypeDef timerCCInit0 = 
 	{
 		.cufoa      = timerOutputActionNone,
-		.cofoa      = timerOutputActionNone,
+		.cofoa      = timerOutputActionClear,
 		.cmoa       = timerOutputActionSet,
 		.mode       = timerCCModeCompare,
 		.filter     = true,
@@ -92,8 +92,8 @@ void basestation_radio_task_entrypoint()
 	
 	TIMER_RegisterCallback(&callback);
 	
-	TIMER_InitCC(TIMER1, 0, &timerCCInit0);
 	TIMER_CompareSet(TIMER1, 0, (TDMA_GUARD_PERIOD) * (48000000 / 1024));
+	TIMER_InitCC(TIMER1, 0, &timerCCInit0);
 	
 	TIMER_InitCC(TIMER1, 1, &timerCCInit1);
 	TIMER_CompareSet(TIMER1, 1, (TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) * (48000000 / 1024));
@@ -107,7 +107,7 @@ void basestation_radio_task_entrypoint()
 void basestation_prepare_pulse_rt()
 {
 	
-	//RADIO_Enable(OFF);
+	RADIO_Enable(OFF);
 	RADIO_SetMode(TX);
 	
 	packet_t pulse;
@@ -125,9 +125,9 @@ void basestation_prepare_pulse_rt()
 void basestation_receive_mode_rt()
 {
 	
-	//RADIO_Enable(OFF);
+	RADIO_Enable(OFF);
 	RADIO_SetMode(RX);
-	//RADIO_Enable(RX);
+	RADIO_Enable(RX);
 	
 	TRACE("RECVING\n");
 	
