@@ -215,7 +215,7 @@ void PendSV_Handler()
 	{
 		SysTick->VAL = 0; // reset the systick timer
 		msp_in_use = false;
-	
+		
 		do
 		{
 

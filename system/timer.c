@@ -52,7 +52,7 @@ void TIMER_InitCallbacks()
 	
 }
 
-bool TIMER_RegisterCallback(timer_cb_table_t entry)
+bool TIMER_RegisterCallback(timer_cb_table_t *entry)
 {
 	
 	int i;
@@ -63,7 +63,8 @@ bool TIMER_RegisterCallback(timer_cb_table_t entry)
 		if (timer_cb_table[i].flags == 0)
 		{
 			
-			memcpy(&timer_cb_table[i], &entry, sizeof(timer_cb_table_t));
+			memcpy(&timer_cb_table[i], entry, sizeof(timer_cb_table_t));
+			TIMER_IntEnable(entry->timer, entry->flags);
 			
 			INT_Enable();
 			return true;
@@ -72,8 +73,6 @@ bool TIMER_RegisterCallback(timer_cb_table_t entry)
 		
 	}
 	INT_Enable();
-	
-	TIMER_IntEnable(entry.timer, entry.flags);
 	
 	return false;
 	

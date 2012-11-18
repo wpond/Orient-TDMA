@@ -20,7 +20,7 @@ typedef struct
 } timer_cb_table_t;
 
 void TIMER_InitCallbacks();
-bool TIMER_RegisterCallback(timer_cb_table_t entry);
+bool TIMER_RegisterCallback(timer_cb_table_t *entry);
 void TIMER_ClearCallback(timer_cb_table_t entry);
 
 #endif
