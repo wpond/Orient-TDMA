@@ -15,7 +15,7 @@
 #define RT_QUEUE_SIZE 		4
 
 #define TASK_STACK_SIZE 	1024
-#define TASK_DURATION 		240000 // ~ 5ms (200hz)
+#define TASK_DURATION 		240000 // 5ms (200hz)
 
 typedef struct 
 {

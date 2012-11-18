@@ -13,13 +13,19 @@ bool syncd = false;
 /* prototypes */
 void node_sync_timers();
 void node_enable_sync();
-void node_enable_tx();
+void node_config_tx();
 void node_config_rx();
 void node_disable_autoRefil();
 
 /* functions */
 void node_radio_task_entrypoint()
 {
+	
+	TIMER_Reset(TIMER0);
+	TIMER_Reset(TIMER1);
+	
+	TIMER_TopSet(TIMER0, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
+	TIMER_TopSet(TIMER1, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
 	
 	// enable timer 0
 	TIMER_Init_TypeDef timerInit =
@@ -37,8 +43,6 @@ void node_radio_task_entrypoint()
 		.sync       = false, 
 	};
 	
-	TIMER_TopSet(TIMER0, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
-	
 	// CC input to capture time sync packet
 	TIMER_InitCC_TypeDef timerCCInit = 
   {
@@ -55,7 +59,8 @@ void node_radio_task_entrypoint()
   };
   
   // enable CC2#2 input
-  TIMER0->ROUTE |= (TIMER_ROUTE_CC2PEN | TIMER_ROUTE_LOCATION_LOC2);
+	TIMER0->ROUTE |= (TIMER_ROUTE_CC2PEN | TIMER_ROUTE_LOCATION_LOC2);
+	TIMER1->ROUTE |= (TIMER_ROUTE_CC0PEN | TIMER_ROUTE_LOCATION_LOC4);
 	
 	timer_cb_table_t callback;
 	
@@ -101,11 +106,11 @@ void node_radio_task_entrypoint()
 	
 	callback.timer = TIMER0;
 	callback.flags = TIMER_IF_CC0;
-	callback.cb = node_enable_tx;
+	callback.cb = node_config_tx;
 	
 	TIMER_RegisterCallback(&callback);
 	
-	TIMER_CompareSet(TIMER0, 0, (NODE_ID * (2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH) * (48000000 / 1024));
+	TIMER_CompareSet(TIMER0, 0, (NODE_ID * (2*TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH)) * (48000000 / 1024));
 	TIMER_InitCC(TIMER0, 0, &timerCCInitComp);
 	
 	callback.timer = TIMER0;
@@ -114,7 +119,7 @@ void node_radio_task_entrypoint()
 	
 	TIMER_RegisterCallback(&callback);
 	
-	TIMER_CompareSet(TIMER0, 1, ((NODE_ID+1) * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) * (48000000 / 1024));
+	TIMER_CompareSet(TIMER0, 1, ((NODE_ID * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) + TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) * (48000000 / 1024));
 	TIMER_InitCC(TIMER0, 1, &timerCCInitComp);
 	
 	callback.timer = TIMER1;
@@ -126,6 +131,21 @@ void node_radio_task_entrypoint()
 	TIMER_CompareSet(TIMER1, 1, ((NODE_ID * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) + TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH - 0.0005) * (48000000 / 1024));
 	TIMER_InitCC(TIMER1, 1, &timerCCInitComp);
 	
+	TIMER_InitCC_TypeDef timerCCInitSend = 
+	{
+		.cufoa      = timerOutputActionNone,
+		.cofoa      = timerOutputActionClear,
+		.cmoa       = timerOutputActionSet,
+		.mode       = timerCCModeCompare,
+		.filter     = true,
+		.prsInput   = false,
+		.coist      = false,
+		.outInvert  = false,
+	};
+	
+	TIMER_InitCC(TIMER1, 0, &timerCCInitSend);
+	TIMER_CompareSet(TIMER1, 0, (NODE_ID * (2*TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) + TDMA_GUARD_PERIOD) * (48000000 / 1024));
+	
 	while(1);
 	
 }
@@ -133,6 +153,7 @@ void node_radio_task_entrypoint()
 void node_disable_autoRefil()
 {
 	
+	TRACE("DISABLE AUTO REFIL\n");
 	RADIO_SetAutoRefil(false);
 	
 }
@@ -140,16 +161,19 @@ void node_disable_autoRefil()
 void node_config_rx()
 {
 	
+	TRACE("CONFIG RX\n");
 	RADIO_Enable(OFF);
 	RADIO_SetMode(RX);
 	
 }
 
-void node_enable_tx()
+void node_config_tx()
 {
 	
+	TRACE("CONFIG TX\n");
 	RADIO_Enable(OFF);
 	RADIO_SetMode(TX);
+	RADIO_TxBufferFill();
 	RADIO_SetAutoRefil(true);
 	
 }
@@ -157,6 +181,7 @@ void node_enable_tx()
 void node_enable_sync()
 {
 	
+	TRACE("ENABLE RX\n");
 	RADIO_Enable(RX);
 	
 }
@@ -176,7 +201,7 @@ void node_sync_timers()
 		int32_t time = TIMER_CaptureGet(TIMER0, 2);
 		
 		// subtract known offset
-		time -= (TDMA_GUARD_PERIOD + (0.5*TDMA_SLOT_WIDTH)) * (48000000 / 1024);
+		time -= (TDMA_GUARD_PERIOD) * (48000000 / 1024);
 		
 		// if time is less than zero, add max value of timer (uint16_t)
 		if (time < 0)
@@ -188,13 +213,15 @@ void node_sync_timers()
 		// if counter has wrapped
 		if (diff < 0)
 		{
-			diff = (65535 - time) + TIMER_CounterGet(TIMER0);
+			diff = (TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)) - time) + TIMER_CounterGet(TIMER0);
 		}
 		
 		TIMER_CounterSet(TIMER0, diff);
 		TIMER_CounterSet(TIMER1, diff);
 		
 		syncd = true;
+		
+		TRACE("SYNC\n");
 		
 	}
 	
