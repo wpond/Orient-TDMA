@@ -12,6 +12,13 @@ timer_cb_table_t timer_cb_table[MAX_TIMER_CALLBACKS];
 void TIMER_Callbacks();
 
 /* functions */
+void TIMER0_IRQHandler()
+{
+	
+	TIMER_Callbacks(TIMER0, TIMER_IntGet(TIMER0));
+	
+}
+
 void TIMER1_IRQHandler()
 {
 	

@@ -81,7 +81,7 @@ void basestation_radio_task_entrypoint()
 	TIMER_RegisterCallback(&callback);
 	
 	TIMER_InitCC(TIMER1, 0, &timerCCInit0);
-	TIMER_CompareSet(TIMER1, 0, TDMA_GUARD_PERIOD * (48000000 / 1024));
+	TIMER_CompareSet(TIMER1, 0, (TDMA_GUARD_PERIOD + (0.5*TDMA_SLOT_WIDTH)) * (48000000 / 1024));
 	
 	TIMER_InitCC(TIMER1, 1, &timerCCInit1);
 	TIMER_CompareSet(TIMER1, 1, (TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) * (48000000 / 1024));
@@ -105,8 +105,6 @@ void basestation_prepare_pulse_rt()
 	pulse.header.sequence_number = 0x00;
 	RADIO_Send((uint8_t*)&pulse);
 	RADIO_TxBufferFill();
-	
-	LED_Toggle(RED);
 	
 }
 
