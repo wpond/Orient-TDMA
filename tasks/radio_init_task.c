@@ -57,20 +57,24 @@ void radio_interrupt_rt()
 	if (status & 0x20)
 	{
 		
+		char tmsg[255];
+		sprintf(tmsg, "%i: radio_interrupt_rt() : TX\n", TIMER_CounterGet(TIMER1));
+		TRACE(tmsg);
+		
 		if (auto_refil)
 		{
 			RADIO_TxBufferFill();
 		}
-		
-		char tmsg[255];
-		sprintf(tmsg, "%i: radio_interrupt_rt() : TX\n", TIMER_CounterGet(TIMER1));
-		TRACE(tmsg);
 		
 	}
 	
 	// rx
 	if (status & 0x40)
 	{
+		
+		char tmsg[255];
+		sprintf(tmsg, "%i: radio_interrupt_rt() : RX\n", TIMER_CounterGet(TIMER1));
+		TRACE(tmsg);
 		
 		// store all received packets
 		uint8_t payload[33];
@@ -88,7 +92,7 @@ void radio_interrupt_rt()
 			
 				if (payload[2] == 0xFF && payload[3] == 0x00)
 				{
-					SCHEDULER_RunRTTask(node_sync_timers);
+					SCHEDULER_RunRTTask(node_sync_timers_rt);
 				}
 				else
 				{
@@ -99,10 +103,6 @@ void radio_interrupt_rt()
 			
 			i++;
 		}
-		
-		char tmsg[255];
-		sprintf(tmsg, "%i: radio_interrupt_rt() : RX(%i)\n", TIMER_CounterGet(TIMER1), i);
-		TRACE(tmsg);
 		
 	}
 	
@@ -268,14 +268,18 @@ void RADIO_TxBufferFill()
 	
 	uint8_t payload[33];
 	
+	int i = 0;
 	while ((!(radio_readRegister(NRF_FIFO_STATUS) & 0x20)) && (QUEUE_Read(&txBuffer,&payload[1])))
 	{
 		
 		payload[0] = NRF_W_TX_PAYLOAD;
 		USART0_Transfer(payload,33,radio_cs);
+		i++;
 		
 	}
 	
-	TRACE("QUEUE REFILLED\n");
+	char tmsg[255];
+	sprintf(tmsg, "%i: RADIO_TxBufferFill(): fill tx buffer (total pushed: %i)\n", TIMER_CounterGet(TIMER0), i);
+	TRACE(tmsg);
 	
 }

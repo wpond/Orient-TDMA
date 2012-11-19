@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void node_sync_timers();
+void node_sync_timers_rt();
 
 #endif
