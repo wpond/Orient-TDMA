@@ -25,7 +25,6 @@ void basestation_radio_task_entrypoint()
 {
 	
 	// initialise
-	TIMER_Reset(TIMER0);
 	TIMER_Reset(TIMER1);
 	basestation_prepare_pulse_rt();
 	
@@ -47,22 +46,11 @@ void basestation_radio_task_entrypoint()
 	
 	TIMER_TopSet(TIMER1, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
 	
-	TIMER_InitCC_TypeDef timerCCInit0 = 
+	TIMER_InitCC_TypeDef timerCCInit = 
 	{
 		.cufoa      = timerOutputActionNone,
 		.cofoa      = timerOutputActionClear,
 		.cmoa       = timerOutputActionSet,
-		.mode       = timerCCModeCompare,
-		.filter     = true,
-		.prsInput   = false,
-		.coist      = false,
-		.outInvert  = false,
-	};
-	TIMER_InitCC_TypeDef timerCCInit1 = 
-	{
-		.cufoa      = timerOutputActionNone,
-		.cofoa      = timerOutputActionNone,
-		.cmoa       = timerOutputActionNone,
 		.mode       = timerCCModeCompare,
 		.filter     = true,
 		.prsInput   = false,
@@ -79,24 +67,19 @@ void basestation_radio_task_entrypoint()
 	callback.cb = basestation_prepare_pulse_rt;
 	
 	TIMER_RegisterCallback(&callback);
-	
+
 	callback.timer = TIMER1;
 	callback.flags = TIMER_IF_CC1;
 	callback.cb = basestation_receive_mode_rt;
-	
+
 	TIMER_RegisterCallback(&callback);
+
+	TIMER_CompareSet(TIMER1, 0, TDMA_GUARD_PERIOD * (48000000 / 1024));
+	TIMER_InitCC(TIMER1, 0, &timerCCInit);
 	
-	callback.timer = TIMER1;
-	callback.flags = TIMER_IF_CC0;
-	callback.cb = basestation_cc0;
-	
-	TIMER_RegisterCallback(&callback);
-	
-	TIMER_CompareSet(TIMER1, 0, (TDMA_GUARD_PERIOD) * (48000000 / 1024));
-	TIMER_InitCC(TIMER1, 0, &timerCCInit0);
-	
-	TIMER_InitCC(TIMER1, 1, &timerCCInit1);
+	timerCCInit.cmoa = timerOutputActionNone;
 	TIMER_CompareSet(TIMER1, 1, (TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) * (48000000 / 1024));
+	TIMER_InitCC(TIMER1, 1, &timerCCInit);
 	
 	TIMER_Init(TIMER1, &timerInit);
 	
@@ -118,7 +101,9 @@ void basestation_prepare_pulse_rt()
 	RADIO_Send((uint8_t*)&pulse);
 	RADIO_TxBufferFill();
 	
-	TRACE("RDY TO SEND\n");
+	char tmsg[255];
+	sprintf(tmsg, "%i: basestation_prepare_pulse_rt()\n", TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
 	
 }
 
@@ -129,6 +114,8 @@ void basestation_receive_mode_rt()
 	RADIO_SetMode(RX);
 	RADIO_Enable(RX);
 	
-	TRACE("RECVING\n");
+	char tmsg[255];
+	sprintf(tmsg, "%i: basestation_receive_mode_rt()\n", TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
 	
 }

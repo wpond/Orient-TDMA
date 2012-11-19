@@ -1,7 +1,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define BASESTATION
+//#define BASESTATION
 
 #ifdef BASESTATION
 	#define NODE_ID 0

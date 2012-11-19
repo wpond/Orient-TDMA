@@ -13,6 +13,8 @@
 #include "nRF24L01.h"
 #include "led.h"
 
+#include "node_radio_task.h"
+
 /* variables */
 uint8_t txBufferMem[RADIO_BUFFER_SIZE * 32],
 	rxBufferMem[RADIO_BUFFER_SIZE * 32];
@@ -60,6 +62,10 @@ void radio_interrupt_rt()
 			RADIO_TxBufferFill();
 		}
 		
+		char tmsg[255];
+		sprintf(tmsg, "%i: radio_interrupt_rt() : TX\n", TIMER_CounterGet(TIMER1));
+		TRACE(tmsg);
+		
 	}
 	
 	// rx
@@ -68,12 +74,35 @@ void radio_interrupt_rt()
 		
 		// store all received packets
 		uint8_t payload[33];
+		int i = 0;
 		while (!(radio_readRegister(NRF_FIFO_STATUS) & 0x01))
 		{
 			payload[0] = NRF_R_RX_PAYLOAD;
 			USART0_Transfer(payload,33,radio_cs);
-			QUEUE_Write(&rxBuffer, &payload[1]);
+			
+			#ifdef BASESTATION
+				
+				QUEUE_Write(&rxBuffer, &payload[1]);
+				
+			#else
+			
+				if (payload[2] == 0xFF && payload[3] == 0x00)
+				{
+					SCHEDULER_RunRTTask(node_sync_timers);
+				}
+				else
+				{
+					QUEUE_Write(&rxBuffer, &payload[1]);
+				}
+				
+			#endif
+			
+			i++;
 		}
+		
+		char tmsg[255];
+		sprintf(tmsg, "%i: radio_interrupt_rt() : RX(%i)\n", TIMER_CounterGet(TIMER1), i);
+		TRACE(tmsg);
 		
 	}
 	
@@ -130,6 +159,7 @@ void radio_init_task_entrypoint()
 	#ifdef BASESTATION
 		
 		SCHEDULER_TaskInit(&basestation_radio_task, basestation_radio_task_entrypoint);
+		SCHEDULER_TaskInit(&usb_relay_task, usb_relay_task_entrypoint);
 		
 	#else
 	
@@ -245,5 +275,7 @@ void RADIO_TxBufferFill()
 		USART0_Transfer(payload,33,radio_cs);
 		
 	}
+	
+	TRACE("QUEUE REFILLED\n");
 	
 }

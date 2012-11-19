@@ -104,6 +104,7 @@ system/timer.c \
 tasks/radio_init_task.c \
 tasks/basestation_radio_task.c \
 tasks/node_radio_task.c \
+tasks/usb_relay_task.c \
 main.c \
 led.c \
 scheduler.c 

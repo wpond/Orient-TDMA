@@ -1,3 +1,4 @@
+#include "node_radio_task.h"
 
 #include "system.h"
 #include "tasks.h"
@@ -8,14 +9,17 @@
 #include "packets.h"
 
 /* variables */
-bool syncd = false;
+bool sync_available = false;
+uint32_t sync_count = 0;
+int32_t sync_irq_time;
 
 /* prototypes */
-void node_sync_timers();
 void node_enable_sync();
 void node_config_tx();
 void node_config_rx();
 void node_disable_autoRefil();
+void node_enable_tx();
+void node_cc_time();
 
 /* functions */
 void node_radio_task_entrypoint()
@@ -23,9 +27,6 @@ void node_radio_task_entrypoint()
 	
 	TIMER_Reset(TIMER0);
 	TIMER_Reset(TIMER1);
-	
-	TIMER_TopSet(TIMER0, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
-	TIMER_TopSet(TIMER1, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
 	
 	// enable timer 0
 	TIMER_Init_TypeDef timerInit =
@@ -42,56 +43,73 @@ void node_radio_task_entrypoint()
 		.oneShot    = false, 
 		.sync       = false, 
 	};
-	
+
+	TIMER_TopSet(TIMER0, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
+	TIMER_TopSet(TIMER1, TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)));
+
 	// CC input to capture time sync packet
 	TIMER_InitCC_TypeDef timerCCInit = 
   {
-    .eventCtrl  = timerEventFalling,
-    .edge       = timerEdgeFalling,
-    .cufoa      = timerOutputActionNone,
-    .cofoa      = timerOutputActionNone,
-    .cmoa       = timerOutputActionNone,
-    .mode       = timerCCModeCapture,
-    .filter     = true,
-    .prsInput   = false,
-    .coist      = false,
-    .outInvert  = false,
+		.eventCtrl  = timerEventFalling,
+		.edge       = timerEdgeFalling,
+		.cufoa      = timerOutputActionNone,
+		.cofoa      = timerOutputActionNone,
+		.cmoa       = timerOutputActionNone,
+		.mode       = timerCCModeCapture,
+		.filter     = false,
+		.prsInput   = false,
+		.coist      = false,
+		.outInvert  = false,
   };
   
   // enable CC2#2 input
-	TIMER0->ROUTE |= (TIMER_ROUTE_CC2PEN | TIMER_ROUTE_LOCATION_LOC2);
-	TIMER1->ROUTE |= (TIMER_ROUTE_CC0PEN | TIMER_ROUTE_LOCATION_LOC4);
-	
+  TIMER0->ROUTE |= (TIMER_ROUTE_CC2PEN | TIMER_ROUTE_LOCATION_LOC2);
+
 	timer_cb_table_t callback;
-	
+
 	callback.timer = TIMER0;
 	callback.flags = TIMER_IF_CC2;
-	callback.cb = node_sync_timers;
-	
+	callback.cb = node_cc_time;
+
 	TIMER_RegisterCallback(&callback);
 	
 	TIMER_InitCC(TIMER0, 2, &timerCCInit);
-	
+
 	TIMER_Init(TIMER0, &timerInit);
 	TIMER_Init(TIMER1, &timerInit);
-	
+
 	// enable rx
 	RADIO_Enable(OFF);
 	RADIO_SetMode(RX);
 	RADIO_Enable(RX);
 	
-	while(!syncd);
+	sync_available = true;
 	
-	// finish configuration
+	while(sync_count < 1);
 	
-	// on overflow enable receive (receive for entire guard period also)
-	callback.timer = TIMER0;
-	callback.flags = TIMER_IF_OF;
-	callback.cb = node_enable_sync;
+	TIMER_InitCC_TypeDef timerCCInitTx = 
+	{
+		.cufoa      = timerOutputActionNone,
+		.cofoa      = timerOutputActionNone,
+		.cmoa       = timerOutputActionSet,
+		.mode       = timerCCModeCompare,
+		.filter     = true,
+		.prsInput   = false,
+		.coist      = false,
+		.outInvert  = false,
+	};
 	
+	TIMER1->ROUTE |= (TIMER_ROUTE_CC0PEN | TIMER_ROUTE_LOCATION_LOC4); 
+	
+	callback.timer = TIMER1;
+	callback.flags = TIMER_IF_CC0;
+	callback.cb = node_enable_tx;
+
 	TIMER_RegisterCallback(&callback);
 	
-	// change to tx
+	TIMER_CompareSet(TIMER1, 0, (NODE_ID * (TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) + TDMA_GUARD_PERIOD) * (48000000 / 1024));
+	TIMER_InitCC(TIMER1, 0, &timerCCInitTx);
+	
 	TIMER_InitCC_TypeDef timerCCInitComp = 
 	{
 		.cufoa      = timerOutputActionNone,
@@ -104,125 +122,174 @@ void node_radio_task_entrypoint()
 		.outInvert  = false,
 	};
 	
+	callback.timer = TIMER1;
+	callback.flags = TIMER_IF_CC2;
+	callback.cb = node_enable_sync;
+
+	TIMER_RegisterCallback(&callback);
+	
+	TIMER_CompareSet(TIMER1, 2, 100);
+	TIMER_InitCC(TIMER1, 2, &timerCCInitComp);
+	
 	callback.timer = TIMER0;
 	callback.flags = TIMER_IF_CC0;
 	callback.cb = node_config_tx;
-	
+
 	TIMER_RegisterCallback(&callback);
-	
-	TIMER_CompareSet(TIMER0, 0, (NODE_ID * (2*TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH)) * (48000000 / 1024));
+
+	TIMER_CompareSet(TIMER0, 0, (TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024));
 	TIMER_InitCC(TIMER0, 0, &timerCCInitComp);
-	
+
 	callback.timer = TIMER0;
 	callback.flags = TIMER_IF_CC1;
 	callback.cb = node_config_rx;
-	
+
 	TIMER_RegisterCallback(&callback);
-	
-	TIMER_CompareSet(TIMER0, 1, ((NODE_ID * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) + TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) * (48000000 / 1024));
+
+	TIMER_CompareSet(TIMER0, 1, ((NODE_ID+1) * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) * (48000000 / 1024) - 1);
 	TIMER_InitCC(TIMER0, 1, &timerCCInitComp);
-	
+
 	callback.timer = TIMER1;
 	callback.flags = TIMER_IF_CC1;
 	callback.cb = node_disable_autoRefil;
 	
 	TIMER_RegisterCallback(&callback);
 	
-	TIMER_CompareSet(TIMER1, 1, ((NODE_ID * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) + TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH - 0.0005) * (48000000 / 1024));
+	TIMER_CompareSet(TIMER1, 1, ((NODE_ID * ((2*TDMA_GUARD_PERIOD) + TDMA_SLOT_WIDTH)) + TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH- 0.005) * (48000000 / 1024));
 	TIMER_InitCC(TIMER1, 1, &timerCCInitComp);
 	
-	TIMER_InitCC_TypeDef timerCCInitSend = 
+	uint8_t p[32];
+	uint8_t j = 0;
+	int i;
+	while(1)
 	{
-		.cufoa      = timerOutputActionNone,
-		.cofoa      = timerOutputActionClear,
-		.cmoa       = timerOutputActionSet,
-		.mode       = timerCCModeCompare,
-		.filter     = true,
-		.prsInput   = false,
-		.coist      = false,
-		.outInvert  = false,
-	};
+		
+		memset(p,j++,32);
+		for (i = 0; i < 100000; i++);
+		if (RADIO_Send(p))
+			TRACE("QUEUE PACKET\n");
+		
+	}
 	
-	TIMER_InitCC(TIMER1, 0, &timerCCInitSend);
-	TIMER_CompareSet(TIMER1, 0, (NODE_ID * (2*TDMA_GUARD_PERIOD + TDMA_SLOT_WIDTH) + TDMA_GUARD_PERIOD) * (48000000 / 1024));
+}
+
+void node_enable_tx()
+{
 	
-	while(1);
+	char tmsg[255];
+	sprintf(tmsg, "%i: node_enable_tx()\n", TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
 	
 }
 
 void node_disable_autoRefil()
 {
-	
-	TRACE("DISABLE AUTO REFIL\n");
+
 	RADIO_SetAutoRefil(false);
+	
+	char tmsg[255];
+	sprintf(tmsg, "%i: node_disable_autoRefil()\n", TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
 	
 }
 
 void node_config_rx()
 {
 	
-	TRACE("CONFIG RX\n");
 	RADIO_Enable(OFF);
 	RADIO_SetMode(RX);
 	
+	char tmsg[255];
+	sprintf(tmsg, "%i: node_config_rx()\n", TIMER_CounterGet(TIMER0));
+	TRACE(tmsg);
+	
 }
 
-void node_config_tx()
+void node_config_tx() // possible bug here
 {
-	
-	TRACE("CONFIG TX\n");
+
 	RADIO_Enable(OFF);
 	RADIO_SetMode(TX);
-	RADIO_TxBufferFill();
 	RADIO_SetAutoRefil(true);
+	RADIO_TxBufferFill();
 	
+	char tmsg[255];
+	sprintf(tmsg, "%i: node_config_tx()\n", TIMER_CounterGet(TIMER0));
+	TRACE(tmsg);
+
 }
 
 void node_enable_sync()
 {
 	
-	TRACE("ENABLE RX\n");
+	sync_available = true;
+	
 	RADIO_Enable(RX);
+	
+	char tmsg[255];
+	sprintf(tmsg, "%i: node_enable_sync()\n", TIMER_CounterGet(TIMER0));
+	TRACE(tmsg);
 	
 }
 
 void node_sync_timers()
 {
 	
-	uint8_t packet[32];
+	// get packet IRQ time
+	int32_t t = TIMER_CounterGet(TIMER0), 
+		time = sync_irq_time;
 	
-	if (!RADIO_Recv(packet))
-		return;
+	char tmsg[255];
+	sprintf(tmsg, "%i: node_sync_timers() : sync_available: 0x%X;\n", t, sync_available);
+	TRACE(tmsg);
 	
-	if (packet[1] == 0xFF && packet[2] == 0x00)
+	if (!sync_available)
 	{
-		
-		// get packet IRQ time
-		int32_t time = TIMER_CaptureGet(TIMER0, 2);
-		
-		// subtract known offset
-		time -= (TDMA_GUARD_PERIOD) * (48000000 / 1024);
-		
-		// if time is less than zero, add max value of timer (uint16_t)
-		if (time < 0)
-			time += 65535;
-		
-		// add timer difference between now and input
-		int32_t diff = TIMER_CounterGet(TIMER0) - time;
-		
-		// if counter has wrapped
-		if (diff < 0)
-		{
-			diff = (TDMA_SLOT_COUNT * ((TDMA_SLOT_WIDTH + 2*TDMA_GUARD_PERIOD) * (48000000 / 1024)) - time) + TIMER_CounterGet(TIMER0);
-		}
-		
-		TIMER_CounterSet(TIMER0, diff);
-		TIMER_CounterSet(TIMER1, diff);
-		
-		syncd = true;
-		
-		TRACE("SYNC\n");
-		
+		return;
 	}
+	
+	int32_t remote_time = (TDMA_GUARD_PERIOD * (48000000 / 1024));
+	
+	int32_t time_since_recv = TIMER_CounterGet(TIMER0) - sync_irq_time;
+	if (time_since_recv < 0)
+	{
+		time_since_recv = (TIMER_TopGet(TIMER0) - sync_irq_time) + TIMER_CounterGet(TIMER0);
+	}
+	
+	remote_time += time_since_recv;
+	
+	if (remote_time < 0)
+		remote_time += TIMER_TopGet(TIMER0);
+	if (remote_time > TIMER_TopGet(TIMER0))
+		remote_time -= TIMER_TopGet(TIMER0);
+	
+	TIMER_CounterSet(TIMER0, remote_time);
+	TIMER_CounterSet(TIMER1, remote_time);
+	
+	sprintf(tmsg, "SYNC(%i) IRQ_TIME: %i; TIMER0: %i; REMOTE_TIMER: %i;\n", sync_count, sync_irq_time, t, remote_time);
+	TRACE(tmsg);
+	
+	sync_count++;
+	sync_available = false;
+	
+}
+
+void node_cc_time()
+{
+	
+	char tmsg[255];
+	sprintf(tmsg, "%i: NRF IRQ LOW\n", TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
+	
+	sync_irq_time = TIMER_CaptureGet(TIMER0,2);
+	
+}
+
+void node_set_sync_time()
+{
+	
+	char tmsg[255];
+	sprintf(tmsg, "%i: STORE SYNC TIME (%i)\n", TIMER_CounterGet(TIMER1), sync_irq_time);
+	TRACE(tmsg);
 	
 }

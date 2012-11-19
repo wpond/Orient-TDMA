@@ -8,7 +8,7 @@
 
 #include "efm32_timer.h"
 
-#define MAX_TIMER_CALLBACKS 8
+#define MAX_TIMER_CALLBACKS 16
 
 typedef struct
 {

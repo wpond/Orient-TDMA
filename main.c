@@ -21,20 +21,6 @@ void initClocks();
 void enableTimers();
 void enableInterrupts();
 
-task_t test;
-void test_ep()
-{
-	
-	while(1)
-	{
-		if (GPIO->P[3].DOUT & (1 << 6))
-			LED_On(RED);
-		else
-			LED_Off(RED);
-	}
-	
-}
-
 int main()
 {
 	
@@ -64,7 +50,6 @@ int main()
 	
 	// init tasks
 	SCHEDULER_TaskInit(&radio_init_task, radio_init_task_entrypoint);
-	SCHEDULER_TaskInit(&test, test_ep);
 	
 	// run
 	SCHEDULER_Run();
