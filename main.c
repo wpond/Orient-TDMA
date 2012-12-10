@@ -62,6 +62,21 @@ int main()
 	LED_Off(RED);
 	LED_On(GREEN);
 	
+	// radio test setup
+	RADIO_SetAutoOperation(true);
+	RADIO_SetMode(RADIO_TX);
+	
+	uint8_t p[32];
+	for (uint8_t i = 0; i < 255; i++)
+	{
+        memset(p,i,32);
+        while (!RADIO_Send(p));
+	}
+	
+	RADIO_SetMode(RADIO_OFF);
+	LED_On(RED);
+	LED_On(BLUE);
+	
 	while(1);
 	
 }
@@ -69,16 +84,25 @@ int main()
 void enableInterrupts()
 {
 	
-	NVIC_EnableIRQ(USART0_TX_IRQn);
-	NVIC_EnableIRQ(USART0_RX_IRQn);
-	
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-	
-	NVIC_EnableIRQ(TIMER0_IRQn);
-	NVIC_EnableIRQ(TIMER1_IRQn);
 	
 	TRACE("INTERRUPTS ENABLED\n");
 	
+}
+
+void GPIO_EVEN_IRQHandler()
+{
+    
+    TRACE("IRQ: ");
+    if (GPIO->IF & (1 << NRF_INT_PIN))
+    {
+        
+        TRACE("RADIO\n");
+        RADIO_IRQHandler();
+        GPIO->IFC = (1 << NRF_INT_PIN);
+        
+    }
+    
 }
 
 void initClocks()

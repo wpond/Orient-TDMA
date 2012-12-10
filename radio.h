@@ -25,9 +25,18 @@
 #define RADIO_QUEUE_SIZE 16
 #define RADIO_TRANSFER_QUEUE_SIZE 16
 
+typedef enum
+{
+    RADIO_OFF,
+    RADIO_TX,
+    RADIO_RX
+} RADIO_Mode;
+
 void RADIO_Init();
 bool RADIO_Send(uint8_t *packet);
 bool RADIO_Recv(uint8_t *packet);
-void RADIO_TriggerAutoOperation();
+bool RADIO_SetMode(RADIO_Mode mode);
+void RADIO_SetAutoOperation(bool enable);
+void RADIO_IRQHandler();
 
 #endif

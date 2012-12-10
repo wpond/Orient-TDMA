@@ -31,13 +31,6 @@ typedef struct
     RADIO_TransferType transferType;
 } RADIO_dmaTransfer;
 
-typedef enum
-{
-    RADIO_OFF,
-    RADIO_TX,
-    RADIO_RX
-} RADIO_Mode;
-
 /* prototypes */
 void RADIO_TransferComplete(unsigned int channel, bool primary, void *user);
 void RADIO_TransferTeardown(RADIO_dmaTransfer *transfer);
@@ -45,15 +38,22 @@ bool RADIO_TransferSetup();
 bool RADIO_Transfer(RADIO_dmaTransfer *transfer);
 void RADIO_WriteRegister(uint8_t reg, uint8_t val);
 void RADIO_ReadRegister(uint8_t reg, uint8_t *val);
-bool RADIO_SetMode(RADIO_Mode mode);
-void RADIO_SetAutoOperation(bool enable);
+bool RADIO_PacketSend(uint8_t offset);
+void RADIO_PacketSendComplete();
+bool RADIO_PacketRecv(uint8_t offset);
+void RADIO_PacketRecvComplete();
+void RADIO_TriggerAutoOperation();
 
 /* variables */
 static volatile bool activeTransfer = false;
-uint8_t txQueue[32 * RADIO_QUEUE_SIZE],
-    txQueuePosition = 0,
-    rxQueue[32 * RADIO_QUEUE_SIZE],
-    rxQueuePosition = 0;
+
+uint8_t txQueue[RADIO_QUEUE_SIZE][32],
+    txQueueReadPosition = RADIO_QUEUE_SIZE-1,
+    txQueueWritePosition = 0,
+    rxQueue[RADIO_QUEUE_SIZE][32],
+    rxQueueReadPosition = RADIO_QUEUE_SIZE-1,
+    rxQueueWritePosition = 0;
+
 DMA_CB_TypeDef radioCb = 
 {
     .cbFunc = RADIO_TransferComplete,
@@ -62,12 +62,15 @@ DMA_CB_TypeDef radioCb =
 RADIO_dmaTransfer transferQueue[RADIO_TRANSFER_QUEUE_SIZE];
 uint8_t transferQueueRead = RADIO_TRANSFER_QUEUE_SIZE-1,
     transferQueueWrite = 0;
-DMA_DESCRIPTOR_TypeDef dmaTxBlock[2], dmaRxBlock[2];
-uint8_t dmaScratch;
+DMA_DESCRIPTOR_TypeDef dmaTxBlock[2], 
+    dmaRxBlock[2];
+uint8_t radioScratch;
+
 RADIO_Mode currentMode = RADIO_OFF;
 bool autoOperation = false,
     activeAutoOperation = false;
-uint8_t pendingAutoOperations = 0;
+uint8_t pendingAutoOperations = 0,
+    last_fifo_status;
 
 /* functions */
 void RADIO_Init()
@@ -115,14 +118,13 @@ void RADIO_Init()
 	uint8_t status;
 	RADIO_ReadRegister(NRF_STATUS,&status);
 	
+	RADIO_SetMode(RADIO_OFF);
+	RADIO_SetAutoOperation(false);
+	
 	if ((status & 0x0F) == 0x0E)
 	{
         TRACE("RADIO OK\n");
-        LED_On(BLUE);
 	}
-	
-	RADIO_SetMode(RADIO_OFF);
-	RADIO_SetAutoOperation(true);
 	
 }
 
@@ -160,6 +162,12 @@ void RADIO_SetAutoOperation(bool enable)
     autoOperation = enable;
 }
 
+void RADIO_IRQHandler()
+{
+    RADIO_WriteRegister(NRF_STATUS,0x70);
+    RADIO_TriggerAutoOperation();
+}
+
 void RADIO_TriggerAutoOperation()
 {
     
@@ -171,13 +179,13 @@ void RADIO_TriggerAutoOperation()
     
     transfer.ctrl = NRF_FIFO_STATUS | NRF_R_REGISTER;
     transfer.len = 1;
-    transfer.transferScratch = NRF_NOP;
-    transfer.src = &transfer.transferScratch;
-    transfer.dest = &transfer.transferScratch;
+    transfer.src = &radioScratch;
+    transfer.dest = &last_fifo_status;
     transfer.completePtr = NULL;
     transfer.transferType = RADIO_TRANSFER_FIFO_STATUS;
     
-    RADIO_Transfer(&transfer);
+    if (RADIO_Transfer(&transfer))
+        activeAutoOperation = true;
     
 }
 
@@ -190,7 +198,7 @@ void RADIO_WriteRegister(uint8_t reg, uint8_t val)
     transfer.len = 1;
     transfer.transferScratch = val;
     transfer.src = &transfer.transferScratch;
-    transfer.dest = &dmaScratch;
+    transfer.dest = &radioScratch;
     transfer.completePtr = NULL;
     transfer.transferType = RADIO_TRANSFER_MANUAL;
     
@@ -206,8 +214,7 @@ void RADIO_ReadRegister(uint8_t reg, uint8_t *val)
     
     transfer.ctrl = reg | NRF_R_REGISTER;
     transfer.len = 1;
-    transfer.transferScratch = NRF_NOP;
-    transfer.src = &transfer.transferScratch;
+    transfer.src = &radioScratch;
     transfer.dest = &transfer.transferScratch;
     transfer.completePtr = &complete;
     transfer.transferType = RADIO_TRANSFER_MANUAL;
@@ -246,8 +253,12 @@ bool RADIO_TransferSetup()
     transferQueueRead = (transferQueueRead + 1) % RADIO_TRANSFER_QUEUE_SIZE;
     RADIO_dmaTransfer *transfer = &transferQueue[transferQueueRead];
     
-    *transfer->completePtr = false;
+    if (transfer->completePtr != NULL)
+        *transfer->completePtr = false;
     radioCb.userPtr = transfer;
+    
+    NRF_CSN_lo;
+    activeTransfer = true;
     
     // tx
     chnlCfg.highPri   = false;
@@ -270,6 +281,11 @@ bool RADIO_TransferSetup()
     DMA_CfgDescrScatterGather(dmaTxBlock, 0, &cfg);
     
     // tx data
+    if (transfer->src == &radioScratch)
+    {
+        cfg.srcInc     = dmaDataIncNone;
+        radioScratch = NRF_NOP;
+    }
     cfg.src        = (void *) transfer->src;       
     cfg.dst        = (void *) &USART0->TXDATA;
     cfg.nMinus1 = transfer->len - 1;
@@ -291,24 +307,27 @@ bool RADIO_TransferSetup()
     
     // rx ctrl
     cfg.src        = (void *) &USART0->RXDATA;       
-    cfg.dst        = (void *) &dmaScratch;
+    cfg.dst        = (void *) &radioScratch;
     cfg.nMinus1    = 0;
     DMA_CfgDescrScatterGather(dmaRxBlock, 0, &cfg);
     
+    if (transfer->dest == &radioScratch)
+    {
+        cfg.dstInc     = dmaDataIncNone;
+    }
     cfg.src        = (void *) &USART0->RXDATA;       
     cfg.dst        = (void *) transfer->dest;
     cfg.nMinus1 = transfer->len - 1;
     DMA_CfgDescrScatterGather(dmaRxBlock, 1, &cfg);
     
-    NRF_CSN_lo;
-    activeTransfer = true;
+    DMA_ActivateScatterGather(DMA_CHANNEL_RRX,
+                        false,
+                        dmaRxBlock,
+                        2);
+    
     DMA_ActivateScatterGather(DMA_CHANNEL_RTX,
                             false,
                             dmaTxBlock,
-                            2);
-    DMA_ActivateScatterGather(DMA_CHANNEL_RRX,
-                            false,
-                            dmaRxBlock,
                             2);
     
     return true;
@@ -320,6 +339,7 @@ void RADIO_TransferTeardown(RADIO_dmaTransfer *transfer)
     
     // transfer complete, set csn high
     NRF_CSN_hi;
+    activeTransfer = false;
     
     if (transfer->transferType != RADIO_TRANSFER_MANUAL && activeAutoOperation)
     {
@@ -337,7 +357,8 @@ void RADIO_TransferTeardown(RADIO_dmaTransfer *transfer)
         case RADIO_TRANSFER_FIFO_STATUS:
             {
                 
-                uint8_t status = transfer->transferScratch;
+                uint8_t status = last_fifo_status;
+                pendingAutoOperations = 0;
                 
                 switch (currentMode)
                 {
@@ -345,29 +366,42 @@ void RADIO_TransferTeardown(RADIO_dmaTransfer *transfer)
                     if (status & 0x10)
                     {
                         // send 3 packets
-                        pendingAutoOperations = 3;
+                        for (int i = 0; i < 3; i++)
+                            if (RADIO_PacketSend(i))
+                                pendingAutoOperations++;
+                            else
+                                break;
                     }
                     else if (!(status & 0x20))
                     {
                         // send 1 packet
-                        pendingAutoOperations = 1;
+                        if (RADIO_PacketSend(0))
+                            pendingAutoOperations++;
                     }
                     else
                     {
                         activeAutoOperation = false;
                         return;
                     }
+                    
+                    NRF_CE_lo; // <- REMOVE
+                    
                     break;
                 case RADIO_RX:
                     if (status & 0x02)
                     {
                         // recv 3 packets
-                        pendingAutoOperations = 3;
+                        for (int i = 0; i < 3; i++)
+                            if (RADIO_PacketRecv(i))
+                                pendingAutoOperations++;
+                            else
+                                break;
                     }
                     else if (!(status & 0x01))
                     {
                         // recv 1 packet
-                        pendingAutoOperations = 1;
+                        if (RADIO_PacketRecv(0))
+                            pendingAutoOperations++;
                     }
                     else
                     {
@@ -379,17 +413,26 @@ void RADIO_TransferTeardown(RADIO_dmaTransfer *transfer)
                     activeAutoOperation = false;
                     return;
                 }
-            
+                
+                if (pendingAutoOperations == 0)
+                {
+                    activeAutoOperation = false;
+                    return;
+                }
+                
             }
             break;
         case RADIO_TRANSFER_TX:
             
             // increment send pointer
+            RADIO_PacketSendComplete();
+            NRF_CE_hi; // <- REMOVE
             
             pendingAutoOperations--;
             
-            if (pendingAutoOperations == 0)
+            if (pendingAutoOperations <= 0)
             {
+                activeAutoOperation = false;
                 RADIO_TriggerAutoOperation();
             }
             
@@ -397,11 +440,13 @@ void RADIO_TransferTeardown(RADIO_dmaTransfer *transfer)
         case RADIO_TRANSFER_RX:
             
             // increment recv pointer
+            RADIO_PacketRecvComplete();
             
             pendingAutoOperations--;
             
-            if (pendingAutoOperations == 0)
+            if (pendingAutoOperations <= 0)
             {
+                activeAutoOperation = false;
                 RADIO_TriggerAutoOperation();
             }
             
@@ -437,7 +482,6 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
         break;
     case DMA_CHANNEL_RRX:
         // rx complete
-        activeTransfer = false;
         RADIO_TransferTeardown((RADIO_dmaTransfer*)transfer);
         RADIO_TransferSetup();
         break;
@@ -445,12 +489,86 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
     
 }
 
+bool RADIO_PacketSend(uint8_t offset)
+{
+    
+    uint8_t readPosition = (txQueueReadPosition + offset) % RADIO_QUEUE_SIZE;
+    
+    if ((readPosition + 1) % RADIO_QUEUE_SIZE == txQueueWritePosition)
+        return false;
+    
+    RADIO_dmaTransfer transfer;
+    
+    transfer.ctrl = NRF_W_TX_PAYLOAD;
+    transfer.len = 32;
+    transfer.src = txQueue[readPosition];
+    transfer.dest = &radioScratch;
+    transfer.completePtr = NULL;
+    transfer.transferType = RADIO_TRANSFER_TX;
+    
+    return RADIO_Transfer(&transfer);
+    
+}
+
+void RADIO_PacketSendComplete()
+{
+    txQueueReadPosition = (txQueueReadPosition + 1) % RADIO_QUEUE_SIZE;
+}
+
+bool RADIO_PacketRecv(uint8_t offset)
+{
+    
+    uint8_t writePosition = (txQueueWritePosition + offset) % RADIO_QUEUE_SIZE;
+    
+    if (writePosition == txQueueReadPosition)
+        return false;
+    
+    RADIO_dmaTransfer transfer;
+    
+    transfer.ctrl = NRF_R_RX_PAYLOAD;
+    transfer.len = 32;
+    transfer.src = &radioScratch;
+    transfer.dest = txQueue[writePosition];
+    transfer.completePtr = NULL;
+    transfer.transferType = RADIO_TRANSFER_RX;
+    
+    return RADIO_Transfer(&transfer);
+    
+}
+
+void RADIO_PacketRecvComplete()
+{
+    rxQueueWritePosition = (rxQueueWritePosition + 1) % RADIO_QUEUE_SIZE;
+}
+
 bool RADIO_Send(uint8_t *packet)
 {
-    return false;
+    
+    if (txQueueWritePosition == txQueueReadPosition)
+        return false;
+    
+    memcpy(txQueue[txQueueWritePosition],packet,32);
+    
+    txQueueWritePosition = (txQueueWritePosition + 1) % RADIO_QUEUE_SIZE;
+    
+    RADIO_TriggerAutoOperation();
+    
+    return true;
+    
 }
 
 bool RADIO_Recv(uint8_t *packet)
 {
-    return false;
+    
+    if ((rxQueueReadPosition + 1) % RADIO_QUEUE_SIZE == rxQueueWritePosition)
+        return false;
+    
+    rxQueueReadPosition = (rxQueueReadPosition + 1) % RADIO_QUEUE_SIZE;
+    
+    memcpy(packet,rxQueue[rxQueueReadPosition],32);
+    
+    RADIO_TriggerAutoOperation();
+    
+    return true;
+    
 }
