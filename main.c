@@ -122,7 +122,7 @@ void InitClocks()
 void EnableInterrupts()
 {
 	
-	
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	
 }
 
@@ -152,12 +152,67 @@ int main()
     // init radio
     RADIO_Init();
     
+    // init usb
+    USB_Init();
+    
     // enable interrupts 
     EnableInterrupts();
 	
 	// show startup LEDs
 	StartupLEDs();
 	
+	#define TEST1
+	
+	uint8_t packet[32];
+	char tmsg[255];
+	
+	#ifdef TEST1
+		RADIO_SetMode(RADIO_TX);
+		int i = 0;
+		while(1)
+		{
+			memset(packet,i++,32);
+			while (!RADIO_Send(packet));
+			LED_Toggle(RED);
+			if (i % 10000 == 0)
+			{
+				sprintf(tmsg,"time = %i\n", RTC_CounterGet());
+				TRACE(tmsg);
+			}
+		}
+	#else
+		RADIO_SetMode(RADIO_RX);
+		uint8_t i = 0;
+		while(1)
+		{
+			if (RADIO_Recv(packet))
+			{
+				LED_Toggle(GREEN);
+				if (i != packet[0])
+				{
+					sprintf(tmsg,"missed packet [%i,%i]\n", i, packet[0]);
+					TRACE(tmsg);
+					i = packet[0];
+				}
+				i++;
+			}
+		}
+	#endif
+	
 	while (1);
+	
+}
+
+void GPIO_EVEN_IRQHandler()
+{
+	
+	if (GPIO_IntGet() & (1 << NRF_INT_PIN))
+	{
+		
+		RADIO_IRQHandler();
+		
+		GPIO_IntClear((1 << NRF_INT_PIN));
+		
+	}
 	
 }

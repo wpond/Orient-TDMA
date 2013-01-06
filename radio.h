@@ -23,6 +23,22 @@
 	#define NRF_RXEN_lo GPIO_PinOutClear(NRF_RXEN_PORT, NRF_RXEN_PIN)
 	#define NRF_RXEN_hi GPIO_PinOutSet(NRF_RXEN_PORT, NRF_RXEN_PIN)
 	
+	#define RADIO_TRANSFER_QUEUE_SIZE 8
+	#define RADIO_SEND_QUEUE_SIZE 16
+	#define RADIO_RECV_QUEUE_SIZE 16
+	
+	typedef enum
+	{
+		RADIO_OFF,
+		RADIO_TX,
+		RADIO_RX
+	}
+	RADIO_Mode;
+	
 	void RADIO_Init();
+	bool RADIO_Send(uint8_t packet[32]);
+	bool RADIO_Recv(uint8_t packet[32]);
+	void RADIO_SetMode(RADIO_Mode mode);
+	void RADIO_IRQHandler();
 	
 #endif
