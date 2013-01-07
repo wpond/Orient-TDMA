@@ -124,6 +124,9 @@ void EnableInterrupts()
 	
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	
+	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(TIMER1_IRQn);
+	
 	NVIC_SetPriority(USB_IRQn, 0);
 	NVIC_SetPriority(DMA_IRQn, 1);
 	

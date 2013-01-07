@@ -13,40 +13,7 @@
 #include "dma.h"
 #include "led.h"
 #include "queue.h"
-
-typedef struct
-{
-	uint8_t ctrl, *src, *dst;
-	uint16_t len;
-	bool *complete,
-		systemCall;
-}
-RADIO_DmaTransfer;
-
-/* prototypes */
-void RADIO_QueueTransfer(RADIO_DmaTransfer *transfer);
-
-void RADIO_TransferInit();
-void RADIO_TransferSetup(RADIO_DmaTransfer *transfer);
-void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer);
-void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer);
-
-void RADIO_PacketUploadInit();
-bool RADIO_PacketUploadSetup(RADIO_DmaTransfer *transfer);
-void RADIO_PacketUploadComplete();
-
-void RADIO_PacketDownloadInit();
-bool RADIO_PacketDownloadSetup(RADIO_DmaTransfer *transfer);
-void RADIO_PacketDownloadComplete();
-
-void RADIO_FifoCheckSetup();
-void RADIO_FifoCheckComplete();
-
-void RADIO_ReadRegisterMultiple(uint8_t reg, uint8_t *val, uint8_t len);
-void RADIO_WriteRegisterMultiple(uint8_t reg, uint8_t *val, uint8_t len);
-uint8_t RADIO_ReadRegister(uint8_t reg);
-void RADIO_WriteRegister(uint8_t reg, uint8_t val);
-void RADIO_Flush(RADIO_Mode mode);
+#include "config.h"
 
 /* variables */
 uint8_t NRF_CLEAR_IRQ = 0x70;
@@ -115,7 +82,7 @@ void RADIO_Init()
 	RADIO_WriteRegister(NRF_EN_RXADDR, 0x3F);
 	RADIO_WriteRegister(NRF_SETUP_AW, 0x03);
 	RADIO_WriteRegister(NRF_SETUP_RETR, 0x00);
-	RADIO_WriteRegister(NRF_RF_CH, 2);
+	RADIO_WriteRegister(NRF_RF_CH, NODE_CHANNEL);
 	RADIO_WriteRegister(NRF_RF_SETUP, 0x07);
 	
 	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P0,addr,5);
@@ -673,6 +640,18 @@ void RADIO_FifoCheckComplete()
 
 void RADIO_IRQHandler()
 {
+	
+	switch (currentMode)
+	{
+	case RADIO_TX:
+		RADIO_PacketUploadInit();
+		break;
+	case RADIO_RX:
+		RADIO_PacketDownloadInit();
+		break;
+	default:
+		break;
+	}
 	
 	RADIO_DmaTransfer transfer;
 	

@@ -1,15 +1,24 @@
 #ifndef __CONFIG_H__
-#define __CONFIG_H__
+	
+	#define __CONFIG_H__
+	
+	#define BASESTATION
+	
+	#ifdef BASESTATION
+		#define NODE_ID 0
+	#else
+		#define NODE_ID 1
+	#endif
 
-#include <string.h>
+	#define NODE_CHANNEL 2
 
-#include "usb.h"
+	#include <string.h>
 
-static void inline TRACE(char* msg)
-{
-    USB_Transmit((uint8_t*)msg,strlen(msg));
-}
+	#include "usb.h"
 
-#define NODE_ID 1
+	static void inline TRACE(char* msg)
+	{
+		USB_Transmit((uint8_t*)msg,strlen(msg));
+	}
 
 #endif

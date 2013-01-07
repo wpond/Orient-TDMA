@@ -27,6 +27,16 @@
 	#define RADIO_SEND_QUEUE_SIZE 128
 	#define RADIO_RECV_QUEUE_SIZE 128
 	
+	/* structs */
+	typedef struct
+	{
+		uint8_t ctrl, *src, *dst;
+		uint16_t len;
+		bool *complete,
+			systemCall;
+	}
+	RADIO_DmaTransfer;
+	
 	typedef enum
 	{
 		RADIO_OFF,
@@ -41,5 +51,30 @@
 	void RADIO_SetMode(RADIO_Mode mode);
 	void RADIO_EnableSystemCalls(bool enable);
 	void RADIO_IRQHandler();
+	
+	/* system functions */
+	void RADIO_QueueTransfer(RADIO_DmaTransfer *transfer);
+	
+	void RADIO_TransferInit();
+	void RADIO_TransferSetup(RADIO_DmaTransfer *transfer);
+	void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer);
+	void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer);
+
+	void RADIO_PacketUploadInit();
+	bool RADIO_PacketUploadSetup(RADIO_DmaTransfer *transfer);
+	void RADIO_PacketUploadComplete();
+	
+	void RADIO_PacketDownloadInit();
+	bool RADIO_PacketDownloadSetup(RADIO_DmaTransfer *transfer);
+	void RADIO_PacketDownloadComplete();
+	
+	void RADIO_FifoCheckSetup();
+	void RADIO_FifoCheckComplete();
+	
+	void RADIO_ReadRegisterMultiple(uint8_t reg, uint8_t *val, uint8_t len);
+	void RADIO_WriteRegisterMultiple(uint8_t reg, uint8_t *val, uint8_t len);
+	uint8_t RADIO_ReadRegister(uint8_t reg);
+	void RADIO_WriteRegister(uint8_t reg, uint8_t val);
+	void RADIO_Flush(RADIO_Mode mode);
 	
 #endif

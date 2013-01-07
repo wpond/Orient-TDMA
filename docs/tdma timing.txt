@@ -1,0 +1,52 @@
+MASTER
+	t=0 (TIM1_OF)
+		disable sys calls
+		config tx
+		queue timing packet
+		enable timer CC
+		queue packets
+	
+	t=guard period (TIM1_CC0)
+		enable tx (CC)
+		enable sys calls
+		call check fifo
+		disable timer CC
+	
+	t=slot period - tx protection (TIM1_CC1)
+		disable sys calls
+	
+	t=slot period (TIM1_CC2)
+		config rx
+		enable sys calls
+	
+SLAVE
+	t=0 (TIM1_OF)
+		enable system calls
+		enable timer CC
+		enable rx
+
+	t=~guard period (TIM0_CC2)
+		capture timing packet
+			[first time] enable IRQs
+		disable timer CC
+
+	t=slot period (TIM0_CC0)
+		disble rx
+
+	t=slot period * slot id + 1 (TIM0_CC1)
+		disable system calls
+		config tx
+		enable timer CC
+		queue packets
+
+	t=slot period * slot id + guard period (TIM1_CC0)
+		enable tx (CC)
+		disable timer CC
+		enable sys calls
+		call check fifo
+
+	t=slot period * (slot id + 1) - tx protection (TIM1_CC1)
+		disable sys calls
+
+	t=slot period * (slot id + 1) - 1 (TIM1_CC2)
+		radio off

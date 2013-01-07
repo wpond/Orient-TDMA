@@ -98,7 +98,8 @@ led.c \
 main.c \
 usb.c \
 radio.c \
-queue.c 
+queue.c \
+tdma_scheduler.c
 
 S_SRC +=  \
 CMSIS/CM3/DeviceSupport/EnergyMicro/EFM32/startup/cs3/startup_efm32gg.s
