@@ -5,8 +5,8 @@
     #include "efm32.h"
     #include "efm32_dma.h"
 
-    #define DMA_CHANNEL_RTX 0
-    #define DMA_CHANNEL_RRX 1
+    #define DMA_CHANNEL_RTX 6
+    #define DMA_CHANNEL_RRX 7
 
     /* DMA control block, must be aligned according to number of DMA channels. */
     #if (DMA_CHAN_COUNT > 16) 

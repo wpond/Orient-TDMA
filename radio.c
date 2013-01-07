@@ -72,7 +72,8 @@ queue_t transferQueue,
 
 RADIO_Mode currentMode = RADIO_OFF;
 
-bool systemCallActive = false;
+bool systemCallActive = false,
+	systemCallsEnabled = false;
 uint8_t fifoStatus = 0x21; // TX FULL & RX EMPTY
 
 /* functions */
@@ -99,7 +100,7 @@ void RADIO_Init()
 	
 	usartInit.msbf = true;
 	usartInit.clockMode = usartClockMode0;
-	usartInit.baudrate = 7000000;
+	usartInit.baudrate = 8000000;
 	USART_InitSync(USART0, &usartInit);
 	USART0->ROUTE |=	USART_ROUTE_TXPEN | 
 						USART_ROUTE_RXPEN | 
@@ -107,14 +108,28 @@ void RADIO_Init()
 						USART_ROUTE_LOCATION_LOC2;
 	
 	// configure radio
+	uint8_t addr[5];
+	memset(addr,0xE7,5);
+	
 	RADIO_WriteRegister(NRF_EN_AA, 0x00);
 	RADIO_WriteRegister(NRF_EN_RXADDR, 0x3F);
 	RADIO_WriteRegister(NRF_SETUP_AW, 0x03);
 	RADIO_WriteRegister(NRF_SETUP_RETR, 0x00);
 	RADIO_WriteRegister(NRF_RF_CH, 2);
 	RADIO_WriteRegister(NRF_RF_SETUP, 0x07);
-
+	
+	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P0,addr,5);
 	RADIO_WriteRegister(NRF_RX_PW_P0, 32);
+	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P1,addr,5);
+	RADIO_WriteRegister(NRF_RX_PW_P1, 32);
+	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P2,addr,5);
+	RADIO_WriteRegister(NRF_RX_PW_P2, 32);
+	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P3,addr,5);
+	RADIO_WriteRegister(NRF_RX_PW_P3, 32);
+	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P4,addr,5);
+	RADIO_WriteRegister(NRF_RX_PW_P4, 32);
+	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P5,addr,5);
+	RADIO_WriteRegister(NRF_RX_PW_P5, 32);
 	
 	RADIO_WriteRegister(NRF_DYNPD, 0x00);
 	RADIO_WriteRegister(NRF_FEATURE, 0x00);
@@ -136,27 +151,22 @@ void RADIO_Init()
 void RADIO_SetMode(RADIO_Mode mode)
 {
 	
+	NRF_CE_lo;
+	NRF_RXEN_lo;
+	
+	RADIO_Flush(RADIO_TX);
+	RADIO_Flush(RADIO_RX);
+	
 	switch (mode)
 	{
 	case RADIO_OFF:
-		NRF_CE_lo;
-		NRF_RXEN_lo;
 		RADIO_WriteRegister(NRF_CONFIG, 0x0C);
-		RADIO_Flush(RADIO_TX);
-		RADIO_Flush(RADIO_RX);
 		break;
 	case RADIO_TX:
-		NRF_CE_lo;
-		NRF_RXEN_lo;
-		RADIO_Flush(RADIO_TX);
-		RADIO_Flush(RADIO_RX);
 		RADIO_WriteRegister(NRF_CONFIG, 0x0E);
+		RADIO_FifoCheckSetup();
 		break;
 	case RADIO_RX:
-		NRF_CE_lo;
-		NRF_RXEN_lo;
-		RADIO_Flush(RADIO_TX);
-		RADIO_Flush(RADIO_RX);
 		RADIO_WriteRegister(NRF_CONFIG, 0x0F);
 		NRF_CE_hi;
 		NRF_RXEN_hi;
@@ -629,7 +639,7 @@ void RADIO_PacketDownloadComplete()
 void RADIO_FifoCheckSetup()
 {
 	
-	if (systemCallActive)
+	if (systemCallActive || !systemCallsEnabled)
 		return;
 	
 	RADIO_DmaTransfer transfer;
@@ -677,4 +687,9 @@ void RADIO_IRQHandler()
 	
 	RADIO_FifoCheckSetup();
 	
+}
+
+void RADIO_EnableSystemCalls(bool enable)
+{
+	systemCallsEnabled = enable;
 }

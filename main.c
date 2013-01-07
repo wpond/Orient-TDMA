@@ -124,6 +124,9 @@ void EnableInterrupts()
 	
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	
+	NVIC_SetPriority(USB_IRQn, 0);
+	NVIC_SetPriority(DMA_IRQn, 1);
+	
 }
 
 int main()
@@ -161,40 +164,60 @@ int main()
 	// show startup LEDs
 	StartupLEDs();
 	
-	#define TEST1
+	//#define SENDER
 	
 	uint8_t packet[32];
 	char tmsg[255];
 	
-	#ifdef TEST1
+	RADIO_EnableSystemCalls(true);
+	
+	#ifdef SENDER
 		RADIO_SetMode(RADIO_TX);
-		int i = 0;
+		uint32_t i = 0;
+		int j;
 		while(1)
 		{
-			memset(packet,i++,32);
+			i++;
+			memcpy(&packet[0],&i,sizeof(uint32_t));
 			while (!RADIO_Send(packet));
-			LED_Toggle(RED);
-			if (i % 10000 == 0)
+			if (i % 1000 == 0)
 			{
 				sprintf(tmsg,"time = %i\n", RTC_CounterGet());
 				TRACE(tmsg);
+				LED_Toggle(RED);
 			}
 		}
 	#else
 		RADIO_SetMode(RADIO_RX);
-		uint8_t i = 0;
+		uint32_t i = 0, tmp;
+		uint16_t miss_count = 0;
+		uint32_t recv_count = 0;
+		LED_On(BLUE);
 		while(1)
 		{
 			if (RADIO_Recv(packet))
 			{
-				LED_Toggle(GREEN);
-				if (i != packet[0])
+				memcpy(&tmp,&packet[0],sizeof(uint32_t));
+				//sprintf(tmsg,"%i\n", tmp);
+				//TRACE(tmsg);
+				recv_count++;
+				if (i != tmp)
 				{
-					sprintf(tmsg,"missed packet [%i,%i]\n", i, packet[0]);
-					TRACE(tmsg);
-					i = packet[0];
+					sprintf(tmsg,"missed packet [%i,%i]\n", i, tmp);
+					//TRACE(tmsg);
+					LED_Toggle(BLUE);
+					miss_count += tmp - i;
+					i = tmp;
 				}
 				i++;
+				if (recv_count % 1000 == 0)
+				{
+					sprintf(tmsg,"time = %i, recv count = %i, miss count = %i\n", RTC_CounterGet(), recv_count, miss_count);
+					TRACE(tmsg);
+					recv_count = 0;
+					miss_count = 0;
+					LED_Toggle(GREEN);
+				}
 			}
 		}
 	#endif

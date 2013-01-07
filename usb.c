@@ -129,16 +129,17 @@ void USB_Init(void)
   //CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
 
   USB->CTRL |= USB_CTRL_VREGOSEN;
-
-  USBD_Init(&initstruct);
+	
   usbOnline = false;
+  USBD_Init(&initstruct);
+  
   /*
    * When using a debugger it is practical to uncomment the following three
    * lines to force host to re-enumerate the device.
    */
-  //USBD_Disconnect();
-  //USBTIMER_DelayMs(1000);
-  //USBD_Connect();
+  USBD_Disconnect();
+  USBTIMER_DelayMs(1000);
+  USBD_Connect();
 	
     while(!usbOnline);
     
@@ -189,6 +190,7 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
   {
     usbActive = false;
   }
+  usbActive = false;
   
   return USB_STATUS_OK;
 }
@@ -199,11 +201,12 @@ bool USB_Transmit(uint8_t *buf, int len)
     if (!usbOnline)
         return false;
     
-    while (usbActive);
-    
+    if (usbActive)
+		return false;
+		
+    usbActive = true;
     USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
-	usbActive = true;
-
+	
     return true;
 }
 
