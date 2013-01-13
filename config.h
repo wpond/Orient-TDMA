@@ -10,7 +10,7 @@
 		#define NODE_ID 1
 	#endif
 
-	#define NODE_CHANNEL 2
+	#define NODE_CHANNEL 102
 
 	#include <string.h>
 

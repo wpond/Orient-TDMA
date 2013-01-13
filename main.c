@@ -17,6 +17,7 @@
 #include "dma.h"
 #include "led.h"
 #include "radio.h"
+#include "tdma_scheduler.h"
 
 /* variables */
 
@@ -26,6 +27,20 @@ void HandleInterrupt();
 void StartupLEDs();
 void EnableInterrupts();
 void wait(uint32_t ms);
+
+/* interrupts */
+void GPIO_EVEN_IRQHandler()
+{
+	
+	if (GPIO_IntGet() & (1 << NRF_INT_PIN))
+	{
+		RADIO_IRQHandler();
+		
+		GPIO_IntClear((1 << NRF_INT_PIN));
+		
+	}
+	
+}
 
 /* functions */
 void wait(uint32_t ms)
@@ -130,6 +145,9 @@ void EnableInterrupts()
 	NVIC_SetPriority(USB_IRQn, 0);
 	NVIC_SetPriority(DMA_IRQn, 1);
 	
+	NVIC_SetPriority(TIMER0_IRQn, 2);
+	NVIC_SetPriority(TIMER1_IRQn, 2);
+	
 }
 
 int main()
@@ -172,73 +190,83 @@ int main()
 	uint8_t packet[32];
 	char tmsg[255];
 	
-	RADIO_EnableSystemCalls(true);
+	RADIO_EnableSystemCalls(false);
+	RADIO_SetMode(RADIO_OFF);
 	
 	#ifdef SENDER
-		RADIO_SetMode(RADIO_TX);
-		uint32_t i = 0;
-		int j;
+		
+		TDMA_Config tdmaConfig;
+		
+		tdmaConfig.master = true;
+		tdmaConfig.channel = 102;
+		tdmaConfig.slot = 0;
+		tdmaConfig.slotCount = 40;
+		tdmaConfig.guardPeriod = 234;
+		tdmaConfig.transmitPeriod = 937;
+		tdmaConfig.protectionPeriod = 117;
+		
+		TDMA_Init(&tdmaConfig);
+		
+		TDMA_Enable(true);
+		
+		uint8_t i = 0;
 		while(1)
 		{
-			i++;
-			memcpy(&packet[0],&i,sizeof(uint32_t));
-			while (!RADIO_Send(packet));
-			if (i % 1000 == 0)
+			
+			int k;
+			for (k = 0; k < 3; k++)
 			{
-				sprintf(tmsg,"time = %i\n", RTC_CounterGet());
+				sprintf(tmsg, "packet queued [%i]\n", i);
+				memset(packet,i++,32);
 				TRACE(tmsg);
-				LED_Toggle(RED);
+				RADIO_Send(packet);
 			}
+			wait(60);
+			
 		}
+		
 	#else
-		RADIO_SetMode(RADIO_RX);
-		uint32_t i = 0, tmp;
-		uint16_t miss_count = 0;
-		uint32_t recv_count = 0;
-		LED_On(BLUE);
+		
+		TDMA_Config tdmaConfig;
+	
+		tdmaConfig.master = false;
+		tdmaConfig.channel = 102;
+		tdmaConfig.slot = 1;
+		tdmaConfig.slotCount = 40;
+		tdmaConfig.guardPeriod = 234;
+		tdmaConfig.transmitPeriod = 937;
+		tdmaConfig.protectionPeriod = 117;
+		
+		TDMA_Init(&tdmaConfig);
+		
+		TDMA_Enable(true);
+		
+		//RADIO_EnableSystemCalls(true);
+		//RADIO_SetMode(RADIO_RX);
+		
+		TRACE("READY\n");
+		
 		while(1)
 		{
 			if (RADIO_Recv(packet))
 			{
-				memcpy(&tmp,&packet[0],sizeof(uint32_t));
-				//sprintf(tmsg,"%i\n", tmp);
-				//TRACE(tmsg);
-				recv_count++;
-				if (i != tmp)
-				{
-					sprintf(tmsg,"missed packet [%i,%i]\n", i, tmp);
-					//TRACE(tmsg);
-					LED_Toggle(BLUE);
-					miss_count += tmp - i;
-					i = tmp;
-				}
-				i++;
-				if (recv_count % 1000 == 0)
-				{
-					sprintf(tmsg,"time = %i, recv count = %i, miss count = %i\n", RTC_CounterGet(), recv_count, miss_count);
-					TRACE(tmsg);
-					recv_count = 0;
-					miss_count = 0;
-					LED_Toggle(GREEN);
-				}
+				//TRACE("Packet received\n\n");
+				USB_Transmit(packet,1);
+				//TRACE("\n\n");
 			}
 		}
+		
 	#endif
 	
 	while (1);
-	
-}
-
-void GPIO_EVEN_IRQHandler()
-{
-	
-	if (GPIO_IntGet() & (1 << NRF_INT_PIN))
+	/*
 	{
-		
-		RADIO_IRQHandler();
-		
-		GPIO_IntClear((1 << NRF_INT_PIN));
-		
+		int i;
+		for (i = 0; i < 10000; i++);
+		char tmsg[256];
+		sprintf(tmsg, "%i\n", TIMER_CounterGet(TIMER1));
+		TRACE(tmsg);
 	}
+	*/
 	
 }

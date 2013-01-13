@@ -118,7 +118,16 @@ const uint8_t  *usbRxBuffer[  2 ] = { usbRxBuffer0, usbRxBuffer1 };
 int            usbRxIndex, usbBytesReceived;
 
 static bool           usbRxActive, dmaTxActive;
-static bool           usbOnline, usbActive;
+static volatile bool           usbOnline, usbActive;
+
+#define USB_BUFFER_SIZE 1024
+#define USB_SEND_BUFFER_SIZE 256
+
+uint8_t usbMemory[USB_BUFFER_SIZE],
+	usbSendBuffer[USB_SEND_BUFFER_SIZE];
+uint16_t usbStart = 0,
+	usbLen = 0,
+	transferring = 0;
 
 /**************************************************************************//**
  * @brief main - the entrypoint after reset.
@@ -126,24 +135,24 @@ static bool           usbOnline, usbActive;
 void USB_Init(void)
 {
 
-  //CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+	//CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
 
-  USB->CTRL |= USB_CTRL_VREGOSEN;
+	USB->CTRL |= USB_CTRL_VREGOSEN;
+
+	usbOnline = false;
+	USBD_Init(&initstruct);
+
+	/*
+	* When using a debugger it is practical to uncomment the following three
+	* lines to force host to re-enumerate the device.
+	*/
+	USBD_Disconnect();
+	USBTIMER_DelayMs(1000);
+	USBD_Connect();
 	
-  usbOnline = false;
-  USBD_Init(&initstruct);
-  
-  /*
-   * When using a debugger it is practical to uncomment the following three
-   * lines to force host to re-enumerate the device.
-   */
-  USBD_Disconnect();
-  USBTIMER_DelayMs(1000);
-  USBD_Connect();
-	
-    while(!usbOnline);
-    
-    TRACE("USB OK\n");
+	while(!usbOnline);
+
+	TRACE("USB OK\n");
     
 }
 
@@ -179,20 +188,95 @@ static int UsbDataReceived(USB_Status_TypeDef status,
   return USB_STATUS_OK;
 }
 
+static void USB_Send();
+
+static void USB_Queue(uint8_t *data, uint16_t len)
+{
+	
+	uint8_t *pos = data;
+	
+	while (len > 0)
+	{
+		
+		while (usbLen >= USB_BUFFER_SIZE);
+		
+		INT_Disable();
+		uint16_t usbEnd = (usbStart + usbLen) % USB_BUFFER_SIZE;
+		
+		if (usbStart <= usbEnd)
+		{
+			uint16_t toWrite = (USB_BUFFER_SIZE - usbEnd > len) ? len : USB_BUFFER_SIZE - usbEnd;
+			memcpy((void*)&usbMemory[usbEnd], (void*)pos, toWrite);
+			pos += toWrite;
+			len -= toWrite;
+			usbLen = (usbLen + toWrite) % USB_BUFFER_SIZE;
+		}
+		else
+		{
+			uint16_t toWrite = (USB_BUFFER_SIZE - usbLen > len) ? len : USB_BUFFER_SIZE - usbLen;
+			memcpy((void*)&usbMemory[usbEnd], (void*)pos, toWrite);
+			pos += toWrite;
+			len -= toWrite;
+			usbLen = (usbLen + toWrite) % USB_BUFFER_SIZE;
+		}
+		INT_Enable();
+		
+	}
+	
+	USB_Send();
+	
+}
+
 static int USB_TransmitComplete(USB_Status_TypeDef status,
                               uint32_t xferred,
                               uint32_t remaining)
 {
   (void) xferred;              /* Unused parameter */
   (void) remaining;            /* Unused parameter */
+	
+	INT_Disable();
+	
+	if (status == USB_STATUS_OK)
+	{
+		usbActive = false;
 
-  if (status == USB_STATUS_OK)
-  {
-    usbActive = false;
-  }
-  usbActive = false;
-  
-  return USB_STATUS_OK;
+		usbStart = (usbStart + transferring) % USB_BUFFER_SIZE;
+		usbLen -= transferring;
+		transferring = 0;
+
+		USB_Send();
+	}
+	
+	INT_Enable();
+	
+	return USB_STATUS_OK;
+}
+
+static void USB_Send()
+{
+	
+	INT_Disable();
+	
+	if (!usbActive && usbLen > 0)
+	{
+	
+		transferring = (usbLen < USB_BUFFER_SIZE - usbStart) ? usbLen : USB_BUFFER_SIZE - usbStart;
+		
+		if (transferring > USB_SEND_BUFFER_SIZE)
+			transferring = USB_SEND_BUFFER_SIZE;
+		
+		memcpy(usbSendBuffer, &usbMemory[usbStart], transferring);
+		
+		if (transferring > 0)
+		{
+			usbActive = true;
+			USBD_Write(EP_DATA_IN, usbSendBuffer, transferring, USB_TransmitComplete);
+		}
+		
+	}
+	
+	INT_Enable();
+	
 }
 
 bool USB_Transmit(uint8_t *buf, int len)
@@ -201,11 +285,20 @@ bool USB_Transmit(uint8_t *buf, int len)
     if (!usbOnline)
         return false;
     
+    INT_Disable();
+    
     if (usbActive)
-		return false;
-		
-    usbActive = true;
-    USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
+	{
+		USB_Queue(buf,len);
+	}
+	else
+	{	
+		usbActive = true;
+		transferring = 0;
+		USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
+	}
+	
+	INT_Enable();
 	
     return true;
 }

@@ -21,5 +21,7 @@
 	
 	void TDMA_Init(TDMA_Config *_config);
 	void TDMA_Enable(bool enable);
+	bool TDMA_IsEnabled();
+	bool TDMA_IsTimingPacket(uint8_t packet[32]);
 	
 #endif

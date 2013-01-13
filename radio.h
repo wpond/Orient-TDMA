@@ -77,4 +77,6 @@
 	void RADIO_WriteRegister(uint8_t reg, uint8_t val);
 	void RADIO_Flush(RADIO_Mode mode);
 	
+	RADIO_Mode currentMode;
+	
 #endif

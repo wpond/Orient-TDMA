@@ -5,8 +5,10 @@
 #include <string.h>
 
 #include "efm32_dma.h"
+#include "efm32_int.h"
 #include "efm32_gpio.h"
 #include "efm32_usart.h"
+#include "efm32_timer.h"
 
 #include "nRF24L01.h"
 
@@ -16,7 +18,10 @@
 #include "config.h"
 
 /* variables */
-uint8_t NRF_CLEAR_IRQ = 0x70;
+uint8_t NRF_CLEAR_IRQ = 0x70,
+	RADIO_MODE_OFF = 0x0C,
+	RADIO_MODE_RX = 0x0F,
+	RADIO_MODE_TX = 0x0E;
 
 DMA_CB_TypeDef radioCb = 
 {
@@ -37,8 +42,6 @@ queue_t transferQueue,
 	rxQueue,
 	txQueue;
 
-RADIO_Mode currentMode = RADIO_OFF;
-
 bool systemCallActive = false,
 	systemCallsEnabled = false;
 uint8_t fifoStatus = 0x21; // TX FULL & RX EMPTY
@@ -46,6 +49,8 @@ uint8_t fifoStatus = 0x21; // TX FULL & RX EMPTY
 /* functions */
 void RADIO_Init()
 {
+	
+	currentMode = RADIO_OFF;
 	
 	// configure queues
 	QUEUE_Init(&transferQueue, (uint8_t*)transferQueueMemory, sizeof(RADIO_DmaTransfer), RADIO_TRANSFER_QUEUE_SIZE);
@@ -67,7 +72,7 @@ void RADIO_Init()
 	
 	usartInit.msbf = true;
 	usartInit.clockMode = usartClockMode0;
-	usartInit.baudrate = 8000000;
+	usartInit.baudrate = 6000000;
 	USART_InitSync(USART0, &usartInit);
 	USART0->ROUTE |=	USART_ROUTE_TXPEN | 
 						USART_ROUTE_RXPEN | 
@@ -121,20 +126,24 @@ void RADIO_SetMode(RADIO_Mode mode)
 	NRF_CE_lo;
 	NRF_RXEN_lo;
 	
-	RADIO_Flush(RADIO_TX);
-	RADIO_Flush(RADIO_RX);
+	RADIO_DmaTransfer transfer;
+	
+	transfer.ctrl = NRF_CONFIG;
 	
 	switch (mode)
 	{
 	case RADIO_OFF:
-		RADIO_WriteRegister(NRF_CONFIG, 0x0C);
+		transfer.src = &RADIO_MODE_OFF;
 		break;
 	case RADIO_TX:
-		RADIO_WriteRegister(NRF_CONFIG, 0x0E);
-		RADIO_FifoCheckSetup();
+		RADIO_Flush(RADIO_TX);
+		RADIO_Flush(RADIO_RX);
+		transfer.src = &RADIO_MODE_TX;
 		break;
 	case RADIO_RX:
-		RADIO_WriteRegister(NRF_CONFIG, 0x0F);
+		RADIO_Flush(RADIO_TX);
+		RADIO_Flush(RADIO_RX);
+		transfer.src = &RADIO_MODE_RX;
 		NRF_CE_hi;
 		NRF_RXEN_hi;
 		break;
@@ -142,7 +151,19 @@ void RADIO_SetMode(RADIO_Mode mode)
 		return;
 	}
 	
+	transfer.len = 1;
+	transfer.dst = NULL;
+	transfer.complete = NULL;
+	transfer.systemCall = false;
+	
+	RADIO_QueueTransfer(&transfer);
+	
 	currentMode = mode;
+	
+	if (mode == RADIO_TX)
+	{
+		RADIO_FifoCheckSetup();
+	}
 	
 }
 
@@ -186,12 +207,36 @@ bool RADIO_Send(uint8_t packet[32])
 
 bool RADIO_Recv(uint8_t packet[32])
 {
-	
-	bool ret = QUEUE_Dequeue(&rxQueue, packet);
+	/*
+	// check for lower level packets
+	bool lowLevelPacket;
+	do
+	{
+		
+		lowLevelPacket = false;
+		
+		uint8_t *packetPeek = QUEUE_Peek(&rxQueue, false);
+		
+		if (packetPeek == NULL)
+			return false;
+		
+		if (TDMA_IsEnabled() && TDMA_IsTimingPacket(packetPeek))
+			lowLevelPacket = true;
+		
+		if (lowLevelPacket)
+			QUEUE_Peek(&rxQueue, true);
+		
+	}
+	while (lowLevelPacket);
+	*/
+	if (QUEUE_Dequeue(&rxQueue, packet))
+	{
+		RADIO_FifoCheckSetup();
+		return true;
+	}
 	
 	RADIO_FifoCheckSetup();
-	
-	return ret;
+	return false;
 	
 }
 
@@ -286,6 +331,8 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 	if (transferActive)
 		return;
 	
+	transferActive = true;
+	
 	if (transfer->systemCall)
 	{
 		switch (transfer->ctrl)
@@ -294,6 +341,7 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 			
 			if (!RADIO_PacketDownloadSetup(transfer))
 			{
+				transferActive = false;
 				RADIO_TransferInit();
 				return;
 			}
@@ -303,6 +351,7 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 			
 			if (!RADIO_PacketUploadSetup(transfer))
 			{
+				transferActive = false;
 				RADIO_TransferInit();
 				return;
 			}
@@ -313,6 +362,8 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 		}
 	}
 	
+	NRF_CSN_lo;
+	
 	DMA_CfgChannel_TypeDef	chnlCfg;
 	DMA_CfgDescrSGAlt_TypeDef cfg;
 	uint8_t scatter_count = 1;
@@ -322,8 +373,6 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 	
 	radioCb.userPtr = transfer;
 	
-	NRF_CSN_lo;
-	transferActive = true;
 	
 	// tx
 	chnlCfg.highPri   = false;
@@ -395,6 +444,7 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 		scatter_count = 2;
 	}
 	
+	INT_Disable();
 	DMA_ActivateScatterGather(DMA_CHANNEL_RRX,
 						false,
 						dmaRxBlock,
@@ -404,6 +454,7 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 							false,
 							dmaTxBlock,
 							scatter_count);
+	INT_Enable();
 	
 }
 
@@ -420,6 +471,7 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
 		break;
 	case DMA_CHANNEL_RRX:
 		// rx complete
+		NRF_CSN_hi;
 		RADIO_TransferTeardown((RADIO_DmaTransfer*)transfer);
 		break;
 	}
@@ -429,8 +481,6 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
 void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer)
 {
 	
-	NRF_CSN_hi;
-	
 	if (transfer->complete != NULL)
 	{
 		*transfer->complete = true;
@@ -438,7 +488,6 @@ void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer)
 	
 	if (transfer->systemCall)
 	{
-		systemCallActive = true;
 		
 		switch (transfer->ctrl)
 		{
@@ -459,12 +508,14 @@ void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer)
 								RADIO_PacketUploadInit();
 								RADIO_PacketUploadInit();
 								RADIO_PacketUploadInit();
+								systemCallActive = true;
 								break;
 							case 0x20:
 								systemCallActive = false;
 								break;
 							default:
 								RADIO_PacketUploadInit();
+								systemCallActive = true;
 								break;
 						}
 					
@@ -486,12 +537,14 @@ void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer)
 								RADIO_PacketDownloadInit();
 								RADIO_PacketDownloadInit();
 								RADIO_PacketDownloadInit();
+								systemCallActive = true;
 								break;
 							case 0x01:
 								systemCallActive = false;
 								break;
 							default:
 								RADIO_PacketDownloadInit();
+								systemCallActive = true;
 								break;
 						}
 					
@@ -564,6 +617,9 @@ bool RADIO_PacketUploadSetup(RADIO_DmaTransfer *transfer)
 void RADIO_PacketUploadComplete()
 {
 	
+	char tmsg[255];
+	sprintf(tmsg, "%i: packet uploaded\n", TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
 	QUEUE_Peek(&txQueue, true);
 	
 }
@@ -606,7 +662,7 @@ void RADIO_PacketDownloadComplete()
 void RADIO_FifoCheckSetup()
 {
 	
-	if (systemCallActive || !systemCallsEnabled)
+	if (systemCallActive || !systemCallsEnabled || currentMode == RADIO_OFF)
 		return;
 	
 	RADIO_DmaTransfer transfer;
@@ -636,11 +692,13 @@ void RADIO_FifoCheckComplete()
 		NRF_CE_hi;
 	}
 	
+	systemCallActive = false;
+	
 }
 
 void RADIO_IRQHandler()
 {
-	
+	/*
 	switch (currentMode)
 	{
 	case RADIO_TX:
@@ -652,7 +710,7 @@ void RADIO_IRQHandler()
 	default:
 		break;
 	}
-	
+	*/
 	RADIO_DmaTransfer transfer;
 	
 	transfer.ctrl = NRF_W_REGISTER | NRF_STATUS;
