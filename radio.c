@@ -16,6 +16,7 @@
 #include "led.h"
 #include "queue.h"
 #include "config.h"
+#include "tdma_scheduler.h"
 
 /* variables */
 uint8_t NRF_CLEAR_IRQ = 0x70,
@@ -42,8 +43,7 @@ queue_t transferQueue,
 	rxQueue,
 	txQueue;
 
-bool systemCallActive = false,
-	systemCallsEnabled = false;
+bool systemCallsEnabled = false;
 uint8_t fifoStatus = 0x21; // TX FULL & RX EMPTY
 
 /* functions */
@@ -51,6 +51,7 @@ void RADIO_Init()
 {
 	
 	currentMode = RADIO_OFF;
+	systemCallActive = false;
 	
 	// configure queues
 	QUEUE_Init(&transferQueue, (uint8_t*)transferQueueMemory, sizeof(RADIO_DmaTransfer), RADIO_TRANSFER_QUEUE_SIZE);
@@ -72,7 +73,7 @@ void RADIO_Init()
 	
 	usartInit.msbf = true;
 	usartInit.clockMode = usartClockMode0;
-	usartInit.baudrate = 6000000;
+	usartInit.baudrate = 8000000;
 	USART_InitSync(USART0, &usartInit);
 	USART0->ROUTE |=	USART_ROUTE_TXPEN | 
 						USART_ROUTE_RXPEN | 
@@ -128,7 +129,7 @@ void RADIO_SetMode(RADIO_Mode mode)
 	
 	RADIO_DmaTransfer transfer;
 	
-	transfer.ctrl = NRF_CONFIG;
+	transfer.ctrl = NRF_CONFIG | NRF_W_REGISTER;
 	
 	switch (mode)
 	{
@@ -136,13 +137,9 @@ void RADIO_SetMode(RADIO_Mode mode)
 		transfer.src = &RADIO_MODE_OFF;
 		break;
 	case RADIO_TX:
-		RADIO_Flush(RADIO_TX);
-		RADIO_Flush(RADIO_RX);
 		transfer.src = &RADIO_MODE_TX;
 		break;
 	case RADIO_RX:
-		RADIO_Flush(RADIO_TX);
-		RADIO_Flush(RADIO_RX);
 		transfer.src = &RADIO_MODE_RX;
 		NRF_CE_hi;
 		NRF_RXEN_hi;
@@ -156,6 +153,10 @@ void RADIO_SetMode(RADIO_Mode mode)
 	transfer.complete = NULL;
 	transfer.systemCall = false;
 	
+	QUEUE_Empty(&transferQueue);
+	
+	RADIO_Flush(RADIO_TX);
+	RADIO_Flush(RADIO_RX);
 	RADIO_QueueTransfer(&transfer);
 	
 	currentMode = mode;
@@ -207,7 +208,9 @@ bool RADIO_Send(uint8_t packet[32])
 
 bool RADIO_Recv(uint8_t packet[32])
 {
-	/*
+	
+	RADIO_FifoCheckSetup();
+	
 	// check for lower level packets
 	bool lowLevelPacket;
 	do
@@ -218,7 +221,9 @@ bool RADIO_Recv(uint8_t packet[32])
 		uint8_t *packetPeek = QUEUE_Peek(&rxQueue, false);
 		
 		if (packetPeek == NULL)
+		{
 			return false;
+		}
 		
 		if (TDMA_IsEnabled() && TDMA_IsTimingPacket(packetPeek))
 			lowLevelPacket = true;
@@ -228,15 +233,11 @@ bool RADIO_Recv(uint8_t packet[32])
 		
 	}
 	while (lowLevelPacket);
-	*/
-	if (QUEUE_Dequeue(&rxQueue, packet))
-	{
-		RADIO_FifoCheckSetup();
-		return true;
-	}
 	
+	QUEUE_Dequeue(&rxQueue, packet);
 	RADIO_FifoCheckSetup();
-	return false;
+	
+	return true;
 	
 }
 
@@ -362,8 +363,6 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 		}
 	}
 	
-	NRF_CSN_lo;
-	
 	DMA_CfgChannel_TypeDef	chnlCfg;
 	DMA_CfgDescrSGAlt_TypeDef cfg;
 	uint8_t scatter_count = 1;
@@ -445,6 +444,9 @@ void RADIO_TransferSetup(RADIO_DmaTransfer *transfer)
 	}
 	
 	INT_Disable();
+	
+	NRF_CSN_lo;
+	
 	DMA_ActivateScatterGather(DMA_CHANNEL_RRX,
 						false,
 						dmaRxBlock,
@@ -472,6 +474,8 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
 	case DMA_CHANNEL_RRX:
 		// rx complete
 		NRF_CSN_hi;
+		int i;
+		for (i = 0; i < 2000; i++);
 		RADIO_TransferTeardown((RADIO_DmaTransfer*)transfer);
 		break;
 	}
@@ -495,77 +499,88 @@ void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer)
 			
 			RADIO_FifoCheckComplete();
 			
-			switch (currentMode)
+			if (systemCallsEnabled)
 			{
-				case RADIO_TX:
-					
-					if (!QUEUE_IsEmpty(&txQueue))
-					{
-					
-						switch (fifoStatus & 0xF0)
-						{
-							case 0x10:
-								RADIO_PacketUploadInit();
-								RADIO_PacketUploadInit();
-								RADIO_PacketUploadInit();
-								systemCallActive = true;
-								break;
-							case 0x20:
-								systemCallActive = false;
-								break;
-							default:
-								RADIO_PacketUploadInit();
-								systemCallActive = true;
-								break;
-						}
-					
-					}
-					else
-					{
-						systemCallActive = false;
-					}
-					
-					break;
-				case RADIO_RX:
-					
-					if (!QUEUE_IsFull(&rxQueue))
-					{
-					
-						switch (fifoStatus & 0x0F)
-						{
-							case 0x02:
-								RADIO_PacketDownloadInit();
-								RADIO_PacketDownloadInit();
-								RADIO_PacketDownloadInit();
-								systemCallActive = true;
-								break;
-							case 0x01:
-								systemCallActive = false;
-								break;
-							default:
-								RADIO_PacketDownloadInit();
-								systemCallActive = true;
-								break;
-						}
-					
-					}
-					else
-					{
-						systemCallActive = false;
-					}
-					
-					break;
-				default:
-					systemCallActive = false;
-					break;
-			}
 			
-			if (systemCallActive)
+				switch (currentMode)
+				{
+					case RADIO_TX:
+						
+						if (!QUEUE_IsEmpty(&txQueue))
+						{
+						
+							switch (fifoStatus & 0xF0)
+							{
+								case 0x10:
+									RADIO_PacketUploadInit();
+									//RADIO_PacketUploadInit();
+									//RADIO_PacketUploadInit();
+									systemCallActive = true;
+									break;
+								case 0x20:
+									systemCallActive = false;
+									break;
+								default:
+									RADIO_PacketUploadInit();
+									systemCallActive = true;
+									break;
+							}
+						
+						}
+						else
+						{
+							systemCallActive = false;
+						}
+						
+						break;
+					case RADIO_RX:
+						
+						if (!QUEUE_IsFull(&rxQueue))
+						{
+						
+							switch (fifoStatus & 0x0F)
+							{
+								case 0x02:
+									RADIO_PacketDownloadInit();
+									RADIO_PacketDownloadInit();
+									RADIO_PacketDownloadInit();
+									RADIO_ClearIRQs();
+									systemCallActive = true;
+									break;
+								case 0x01:
+									systemCallActive = false;
+									break;
+								default:
+									RADIO_PacketDownloadInit();
+									RADIO_ClearIRQs();
+									systemCallActive = true;
+									break;
+							}
+						
+						}
+						else
+						{
+							systemCallActive = false;
+						}
+						
+						break;
+					default:
+						systemCallActive = false;
+						break;
+				}
+				
+				if (systemCallActive)
+				{
+					// force queue a fifo check
+					systemCallActive = false;
+					RADIO_FifoCheckSetup();
+					systemCallActive = true;
+				}
+			
+			}
+			else
 			{
-				// force queue a fifo check
 				systemCallActive = false;
-				RADIO_FifoCheckSetup();
-				systemCallActive = true;
 			}
 			
 			break;
@@ -617,10 +632,11 @@ bool RADIO_PacketUploadSetup(RADIO_DmaTransfer *transfer)
 void RADIO_PacketUploadComplete()
 {
 	
+	uint8_t *p = QUEUE_Peek(&txQueue, true);
+	
 	char tmsg[255];
-	sprintf(tmsg, "%i: packet uploaded\n", TIMER_CounterGet(TIMER1));
+	sprintf(tmsg, "%i: packet uploaded [0x%X]\n", TIMER_CounterGet(TIMER1),*p);
 	TRACE(tmsg);
-	QUEUE_Peek(&txQueue, true);
 	
 }
 
@@ -655,7 +671,10 @@ bool RADIO_PacketDownloadSetup(RADIO_DmaTransfer *transfer)
 void RADIO_PacketDownloadComplete()
 {
 	
-	QUEUE_Next(&rxQueue, true);
+	uint8_t *p = QUEUE_Next(&rxQueue, true);
+	char tmsg[255];
+	sprintf(tmsg,"%i: packet downloaded [0x%X]\n", TIMER_CounterGet(TIMER1), *p);
+	TRACE(tmsg);
 	
 }
 
@@ -673,6 +692,10 @@ void RADIO_FifoCheckSetup()
 	transfer.dst = &fifoStatus;
 	transfer.complete = NULL;
 	transfer.systemCall = true;
+	
+	char tmsg[255];
+	sprintf(tmsg,"%i: Fifo check\n",TIMER_CounterGet(TIMER1));
+	//TRACE(tmsg);
 	
 	systemCallActive = true;
 	RADIO_QueueTransfer(&transfer);
@@ -698,6 +721,7 @@ void RADIO_FifoCheckComplete()
 
 void RADIO_IRQHandler()
 {
+	
 	/*
 	switch (currentMode)
 	{
@@ -711,6 +735,16 @@ void RADIO_IRQHandler()
 		break;
 	}
 	*/
+	
+	TRACE("RADIO IRQ HANDLER\n");
+	
+	RADIO_FifoCheckSetup();
+	RADIO_ClearIRQs();
+	
+}
+
+void RADIO_ClearIRQs()
+{
 	RADIO_DmaTransfer transfer;
 	
 	transfer.ctrl = NRF_W_REGISTER | NRF_STATUS;
@@ -721,12 +755,14 @@ void RADIO_IRQHandler()
 	transfer.systemCall = false;
 	
 	RADIO_QueueTransfer(&transfer);
-	
-	RADIO_FifoCheckSetup();
-	
 }
 
 void RADIO_EnableSystemCalls(bool enable)
 {
 	systemCallsEnabled = enable;
+	
+	if (enable)
+	{
+		RADIO_FifoCheckSetup();
+	}
 }

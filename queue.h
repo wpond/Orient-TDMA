@@ -23,5 +23,6 @@
 	uint8_t* QUEUE_Next(queue_t *queue, bool complete);
 	bool QUEUE_IsEmpty(queue_t *queue);
 	bool QUEUE_IsFull(queue_t *queue);
+	void QUEUE_Empty(queue_t *queue);
 	
 #endif

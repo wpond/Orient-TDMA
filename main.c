@@ -32,11 +32,14 @@ void wait(uint32_t ms);
 void GPIO_EVEN_IRQHandler()
 {
 	
-	if (GPIO_IntGet() & (1 << NRF_INT_PIN))
+	while (GPIO_IntGet() & (1 << NRF_INT_PIN))
 	{
-		RADIO_IRQHandler();
 		
 		GPIO_IntClear((1 << NRF_INT_PIN));
+		
+		TRACE("GPIO EVEN IRQ\n");
+		
+		RADIO_IRQHandler();
 		
 	}
 	
@@ -127,11 +130,17 @@ void InitClocks()
 	
 	// enable radio usart
 	CMU_ClockEnable(cmuClock_USART0, true);
-
+	
+	// enable dma clock
+	CMU_ClockEnable(cmuClock_DMA, true);
+	DMA_Reset();
+	
 	// enable timers 
 	CMU_ClockEnable(cmuClock_TIMER0, true);
 	CMU_ClockEnable(cmuClock_TIMER1, true);
-
+	TIMER_Reset(TIMER0);
+	TIMER_Reset(TIMER1);
+	
 }
 
 void EnableInterrupts()
@@ -142,11 +151,13 @@ void EnableInterrupts()
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
 	
-	NVIC_SetPriority(USB_IRQn, 0);
-	NVIC_SetPriority(DMA_IRQn, 1);
+	NVIC_SetPriority(USB_IRQn, 3);
+	NVIC_SetPriority(DMA_IRQn, 2);
 	
-	NVIC_SetPriority(TIMER0_IRQn, 2);
-	NVIC_SetPriority(TIMER1_IRQn, 2);
+	NVIC_SetPriority(TIMER0_IRQn, 0);
+	NVIC_SetPriority(TIMER1_IRQn, 1);
+	
+	NVIC_SetPriority(GPIO_EVEN_IRQn, 0);
 	
 }
 
@@ -195,6 +206,19 @@ int main()
 	
 	#ifdef SENDER
 		
+		
+		/*
+		tdmaConfig.master = true;
+		tdmaConfig.channel = 102;
+		tdmaConfig.slot = 0;
+		tdmaConfig.slotCount = 3;
+		tdmaConfig.guardPeriod = 4000;
+		tdmaConfig.transmitPeriod = 8000;
+		tdmaConfig.protectionPeriod = 4000;
+		*/
+		
+		uint8_t i = 0;
+		
 		TDMA_Config tdmaConfig;
 		
 		tdmaConfig.master = true;
@@ -206,26 +230,34 @@ int main()
 		tdmaConfig.protectionPeriod = 117;
 		
 		TDMA_Init(&tdmaConfig);
-		
 		TDMA_Enable(true);
 		
-		uint8_t i = 0;
+		//RADIO_EnableSystemCalls(true);
+		//RADIO_SetMode(RADIO_TX);
+		
 		while(1)
 		{
+			
 			
 			int k;
 			for (k = 0; k < 3; k++)
 			{
-				sprintf(tmsg, "packet queued [%i]\n", i);
+				sprintf(tmsg, "packet queued [0x%X]\n", i);
 				memset(packet,i++,32);
-				TRACE(tmsg);
+				//TRACE(tmsg);
 				RADIO_Send(packet);
 			}
-			wait(60);
+			wait(200);
+			while(RADIO_Recv(packet))
+			{
+				sprintf(tmsg, "%i: packet recvd [0x%X]\n", TIMER_CounterGet(TIMER1), packet[0]);
+				TRACE(tmsg);
+			}
 			
 		}
 		
 	#else
+		
 		
 		TDMA_Config tdmaConfig;
 	
@@ -253,20 +285,13 @@ int main()
 				//TRACE("Packet received\n\n");
 				USB_Transmit(packet,1);
 				//TRACE("\n\n");
+				RADIO_Send(packet);
 			}
+			TDMA_CheckSync();
 		}
 		
 	#endif
 	
 	while (1);
-	/*
-	{
-		int i;
-		for (i = 0; i < 10000; i++);
-		char tmsg[256];
-		sprintf(tmsg, "%i\n", TIMER_CounterGet(TIMER1));
-		TRACE(tmsg);
-	}
-	*/
 	
 }

@@ -88,3 +88,12 @@ bool QUEUE_IsFull(queue_t *queue)
 {
 	return queue->count == queue->item_count;
 }
+
+void QUEUE_Empty(queue_t *queue)
+{
+	
+	queue->start = 0;
+	queue->end = 0;
+	queue->count = 0;
+	
+}

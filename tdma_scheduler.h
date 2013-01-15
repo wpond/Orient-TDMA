@@ -23,5 +23,6 @@
 	void TDMA_Enable(bool enable);
 	bool TDMA_IsEnabled();
 	bool TDMA_IsTimingPacket(uint8_t packet[32]);
+	void TDMA_CheckSync();
 	
 #endif

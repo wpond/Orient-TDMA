@@ -23,7 +23,7 @@
 	#define NRF_RXEN_lo GPIO_PinOutClear(NRF_RXEN_PORT, NRF_RXEN_PIN)
 	#define NRF_RXEN_hi GPIO_PinOutSet(NRF_RXEN_PORT, NRF_RXEN_PIN)
 	
-	#define RADIO_TRANSFER_QUEUE_SIZE 8
+	#define RADIO_TRANSFER_QUEUE_SIZE 64
 	#define RADIO_SEND_QUEUE_SIZE 128
 	#define RADIO_RECV_QUEUE_SIZE 128
 	
@@ -53,6 +53,8 @@
 	void RADIO_IRQHandler();
 	
 	/* system functions */
+	void RADIO_ClearIRQs();
+	
 	void RADIO_QueueTransfer(RADIO_DmaTransfer *transfer);
 	
 	void RADIO_TransferInit();
@@ -78,5 +80,6 @@
 	void RADIO_Flush(RADIO_Mode mode);
 	
 	RADIO_Mode currentMode;
+	bool systemCallActive;
 	
 #endif

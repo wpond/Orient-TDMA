@@ -22,13 +22,11 @@ MASTER
 SLAVE
 	t=0 (TIM1_OF)
 		enable system calls
-		enable timer CC
 		enable rx
 
 	t=~guard period (TIM0_CC2)
 		capture timing packet
 			[first time] enable IRQs
-		disable timer CC
 
 	t=slot period (TIM0_CC0)
 		disble rx
