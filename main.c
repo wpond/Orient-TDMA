@@ -245,9 +245,10 @@ int main()
 				sprintf(tmsg, "packet queued [0x%X]\n", i);
 				memset(packet,i++,32);
 				//TRACE(tmsg);
-				RADIO_Send(packet);
+				if (!RADIO_Send(packet))
+					TRACE(" << BUFFER OVERFLOW >>\n");
 			}
-			wait(200);
+			wait(150);
 			while(RADIO_Recv(packet))
 			{
 				sprintf(tmsg, "%i: packet recvd [0x%X]\n", TIMER_CounterGet(TIMER1), packet[0]);

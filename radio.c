@@ -475,7 +475,7 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
 		// rx complete
 		NRF_CSN_hi;
 		int i;
-		for (i = 0; i < 2000; i++);
+		for (i = 0; i < 500; i++);
 		RADIO_TransferTeardown((RADIO_DmaTransfer*)transfer);
 		break;
 	}
@@ -542,8 +542,8 @@ void RADIO_TransferTeardown(RADIO_DmaTransfer *transfer)
 							{
 								case 0x02:
 									RADIO_PacketDownloadInit();
-									RADIO_PacketDownloadInit();
-									RADIO_PacketDownloadInit();
+									//RADIO_PacketDownloadInit();
+									//RADIO_PacketDownloadInit();
 									RADIO_ClearIRQs();
 									systemCallActive = true;
 									break;
