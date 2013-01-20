@@ -1,0 +1,49 @@
+MASTER
+	t=0 (TIM1_OF)
+		disable auto transmit
+		config tx
+		queue timing packet
+		enable timer CC
+	
+	t=guard period (TIM1_CC0)
+		enable tx (CC)
+		enable auto transmit
+		disable timer CC
+	
+	t=slot period - tx protection (TIM1_CC1)
+		disable auto transmit
+	
+	t=slot period (TIM1_CC2)
+		enable rx
+	
+SLAVE
+	t=0 (TIM1_OF)
+		enable rx
+		enable time sync
+
+	t=~guard period (TIM0_CC2)
+		capture timing packet
+			disable time sync
+			time sync
+			[first time] enable IRQs
+
+	[if not slot == 1]
+	t=slot period (TIM0_CC0)
+		radio off
+
+	t=slot period * slot id (TIM0_CC1)
+		disable auto transmit
+		config tx
+		enable timer CC
+		queue packet
+
+	t=slot period * slot id + guard period (TIM1_CC0)
+		enable tx (CC)
+		disable timer CC
+		enable auto transmit
+
+	t=slot period * (slot id + 1) - tx protection (TIM1_CC1)
+		disable auto transmit
+
+	t=slot period * (slot id + 1) - 1 (TIM1_CC2)
+		radio off

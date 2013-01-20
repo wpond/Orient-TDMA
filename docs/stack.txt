@@ -1,0 +1,39 @@
+application layer
+	
+	calls data layer with buffer, blocks until completely dispatched to transport layer
+
+transport layer
+		
+	PACKETS
+		data
+	
+	HEADERS	
+		status byte (congestion / more timeslots requested / sd card in use)
+		frame id
+		segment id
+		segment fill
+		data[26 bytes]
+
+mac layer
+	
+	PACKETS
+		tdma
+			timing packets
+			slot allocation
+		availability
+			hello packet
+	
+	HEADERS
+		to address (1 byte / broadcast 255 / basestation 0)
+		type
+	
+	TYPES
+		00		TIMING PACKET
+		01		SLOT ALLOCATION
+		02		HELLO
+		03		DATA
+	
+physical layer
+	
+	controlled by mac layer
+	sends and receives packets when instructed
