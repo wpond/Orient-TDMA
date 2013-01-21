@@ -6,20 +6,25 @@ transport layer
 		
 	PACKETS
 		data
+		ack
 	
 	HEADERS	
-		status byte (congestion / more timeslots requested / sd card in use)
-		frame id
-		segment id
-		segment fill
-		data[26 bytes]
+		ack
+			frame id
+			// segment id ?
+		data
+			status byte (congestion / more timeslots requested / sd card in use)
+			frame id
+			segment id
+			segment fill
+			data[26 bytes]
 
 mac layer
 	
 	PACKETS
 		tdma
 			timing packets
-				all zeros
+				[0, ..., 0]
 			config settings
 			slot allocation
 			ack [config / slot]
@@ -28,7 +33,7 @@ mac layer
 			hello packet
 				challenge/response byte
 				set to 0xFF for challenge (this way we can challenge specific nodes)
-				periodic broadcast
+				periodic broadcast [10 seconds?]
 	
 	HEADERS
 		to address (1 byte / broadcast 0xFF / basestation 0)
@@ -39,9 +44,12 @@ mac layer
 		0x01		TDMA CONFIG
 		0x02		SLOT ALLOCATION
 		0x03		HELLO
-		0x04		DATA
+		0x04		TRANSPORT LAYER [data]
+		0x05		TRANSPORT LAYER [ack]
 		
-		0xFF		BASESTATION CONTROL MESSAGE
+		0x05-0xFD	UNRESERVED
+		
+		0xFE-0xFF	BASESTATION MODE SET
 
 physical layer
 	
