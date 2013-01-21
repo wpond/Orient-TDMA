@@ -19,20 +19,30 @@ mac layer
 	PACKETS
 		tdma
 			timing packets
+				all zeros
+			config settings
 			slot allocation
+			ack [config / slot]
+				sequence number
 		availability
 			hello packet
+				challenge/response byte
+				set to 0xFF for challenge (this way we can challenge specific nodes)
+				periodic broadcast
 	
 	HEADERS
-		to address (1 byte / broadcast 255 / basestation 0)
+		to address (1 byte / broadcast 0xFF / basestation 0)
 		type
 	
 	TYPES
-		00		TIMING PACKET
-		01		SLOT ALLOCATION
-		02		HELLO
-		03		DATA
-	
+		0x00		TIMING PACKET
+		0x01		TDMA CONFIG
+		0x02		SLOT ALLOCATION
+		0x03		HELLO
+		0x04		DATA
+		
+		0xFF		BASESTATION CONTROL MESSAGE
+
 physical layer
 	
 	controlled by mac layer
