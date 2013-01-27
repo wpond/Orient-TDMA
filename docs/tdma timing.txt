@@ -4,6 +4,7 @@ MASTER
 		config tx
 		queue timing packet
 		enable timer CC
+		reload physical buffer
 	
 	t=guard period (TIM1_CC0)
 		enable tx (CC)
@@ -35,6 +36,7 @@ SLAVE
 		disable auto transmit
 		config tx
 		enable timer CC
+		reload physical buffer
 		queue packet
 
 	t=slot period * slot id + guard period (TIM1_CC0)

@@ -20,7 +20,9 @@
 	
 	void TDMA_Init();
 	void TDMA_Enable(bool enable);
+	void TDMA_CheckSync();
 	
 	bool TDMA_IsTimingPacket(uint8_t packet[32]);
+	void TDMA_TimingPacketReceived();
 	
 #endif

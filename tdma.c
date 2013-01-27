@@ -6,6 +6,7 @@
 
 #include "efm32_dma.h"
 #include "efm32_int.h"
+#include "efm32_gpio.h"
 #include "efm32_timer.h"
 
 #include "nRF24L01.h"
@@ -13,6 +14,7 @@
 #include "config.h"
 #include "dma.h"
 #include "radio.h"
+#include "transport.h"
 
 /* prototypes */
 void TDMA_QueuePacket();
@@ -25,6 +27,8 @@ void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transf
 /* variables */
 TDMA_Config config;
 bool syncTimers = false;
+
+bool timingPacketReceived = false;
 
 uint8_t timingPacket[33],
 	txPacket[33],
@@ -119,7 +123,7 @@ void TIMER0_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER0 CC2\n",TIMER_CounterGet(TIMER0));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 		
 		RADIO_IRQHandler();
 	}
@@ -131,7 +135,7 @@ void TIMER0_IRQHandler()
 		RADIO_SetMode(RADIO_OFF);
 		
 		sprintf(tmsg,"%i: TIMER0 CC0\n",TIMER_CounterGet(TIMER0));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC1)
@@ -150,10 +154,13 @@ void TIMER0_IRQHandler()
 		RADIO_EnableAutoTransmit(false);
 		RADIO_SetMode(RADIO_TX);
 		TDMA_EnableTxCC(true);
+		
+		TRANSPORT_Reload();
+		
 		TDMA_QueuePacket();
 		
 		sprintf(tmsg,"%i: TIMER0 CC1\n",TIMER_CounterGet(TIMER0));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 	}
 	
 }
@@ -172,6 +179,7 @@ void TIMER1_IRQHandler()
 			RADIO_SetMode(RADIO_TX);
 			TDMA_QueueTimingPacket();
 			TDMA_EnableTxCC(true);
+			TRANSPORT_Reload();
 		}
 		else
 		{
@@ -180,7 +188,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 OF\n",TIMER_CounterGet(TIMER1));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC0)
@@ -201,7 +209,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 CC0\n",TIMER_CounterGet(TIMER1));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC1)
@@ -220,7 +228,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 CC1\n",TIMER_CounterGet(TIMER1));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC2)
@@ -239,7 +247,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 CC2\n",TIMER_CounterGet(TIMER1));
-		//TRACE(tmsg);
+		TRACE(tmsg);
 	}
 	
 	TIMER_IntClear(TIMER1,flags);
@@ -252,8 +260,10 @@ void TDMA_Init(TDMA_Config *_config)
 	
 	memcpy((void*)&config,(void*)_config,sizeof(TDMA_Config));
 	
-	memset((void*)&timingPacket,0,33);
+	memset((void*)timingPacket,0,33);
 	timingPacket[0] = NRF_W_TX_PAYLOAD;
+	timingPacket[1] = 0xFF;
+	timingPacket[2] = 0x00;
 	
 }
 
@@ -324,23 +334,20 @@ void TDMA_Enable(bool enable)
 	TIMER_IntEnable(TIMER0,TIMER_IF_CC2);
 	INT_Enable();
 	
+	timingPacketReceived = false;
 	timersSyncd = false;
 	RADIO_SetMode(RADIO_RX);
 	
 	while (true)
 	{
-		if (RADIO_Recv(packet))
+		RADIO_Recv(packet);
+		if (timingPacketReceived)
 		{
 			uint32_t time = TIMER_CounterGet(TIMER0) - TDMA_INITIAL_SYNC_OFFSET;
-			// same function as IsTimingPacket
-			if (memcmp((void*)packet,(void*)&timingPacket[1],32) == 0)
-			{
-				//TRACE("TIMING PACKET FOUND\n");
-				if (time < 0)
-					time += TIMER_TopGet(TIMER0);
-				TDMA_SyncTimers(time);
-				break;
-			}
+			if (time < 0)
+				time += TIMER_TopGet(TIMER0);
+			TDMA_SyncTimers(time);
+			break;
 		}
 	}
 	
@@ -396,16 +403,18 @@ void TDMA_SyncTimers(uint32_t time)
 
 	char tmsg[255];
 	sprintf(tmsg, "Time sync'd to: %i\n", time);
-	//TRACE(tmsg);
+	TRACE(tmsg);
 	
 }
 
 void TDMA_QueuePacket()
 {
 	
-	RADIO_SendDequeue(&txPacket[1]);
-	txPacket[0] = NRF_W_TX_PAYLOAD;
-	TDMA_RadioTransfer(txPacket);
+	if (RADIO_SendDequeue(&txPacket[1]))
+	{
+		txPacket[0] = NRF_W_TX_PAYLOAD;
+		TDMA_RadioTransfer(txPacket);
+	}
 	
 }
 
@@ -418,6 +427,18 @@ void TDMA_QueueTimingPacket()
 
 void TDMA_RadioTransfer(uint8_t data[33])
 {
+	
+	while (true)
+	{
+		INT_Disable();
+		if (!transferActive)
+		{
+			transferActive = true;
+			break;
+		}
+		INT_Enable();
+	}
+	INT_Enable();
 	
 	DMA_CfgChannel_TypeDef  rxChnlCfg;
 	DMA_CfgDescr_TypeDef    rxDescrCfg;
@@ -479,6 +500,7 @@ void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transf
 		break;
 	case DMA_CHANNEL_TDMA_RX:
 		NRF_CSN_hi;
+		transferActive = false;
 		break;
 	}
 	
@@ -486,9 +508,6 @@ void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transf
 
 bool TDMA_IsTimingPacket(uint8_t packet[32])
 {
-	
-	if (!timersSyncd)
-		return false;
 	
 	return memcmp((void*)packet,(void*)&timingPacket[1],32) == 0;
 	
@@ -513,8 +532,13 @@ void TDMA_CheckSync()
 	
 	if (syncMissCount > 3)
 	{
-		//TRACE("OUT OF SYNC\n");
+		TRACE("OUT OF SYNC\n");
 		TDMA_Enable(true);
 	}
 	
+}
+
+void TDMA_TimingPacketReceived()
+{
+	timingPacketReceived = true;
 }

@@ -13,9 +13,13 @@ transport layer
 			frame id
 			// segment id ?
 		data
-			status byte (congestion / more timeslots requested / sd card in use)
+			flags byte (congestion / more timeslots requested / sd card in use)
+				BUFFER_FULL			0x00
+				SLOT REQUEST		0x01
+				SD CARD IN USE		0x02
+				SEGMENT END			0x04
 			frame id
-			segment id
+			segment id (counting up from 1)
 			segment fill
 			data[26 bytes]
 
@@ -34,6 +38,7 @@ mac layer
 				challenge/response byte
 				set to 0xFF for challenge (this way we can challenge specific nodes)
 				periodic broadcast [10 seconds?]
+				challenge only nodes with no data
 	
 	HEADERS
 		to address (1 byte / broadcast 0xFF / basestation 0)
@@ -41,9 +46,9 @@ mac layer
 	
 	TYPES
 		0x00		TIMING PACKET
-		0x01		TDMA CONFIG
-		0x02		SLOT ALLOCATION
-		0x03		HELLO
+		0x01		HELLO
+		0x02		TDMA CONFIG
+		0x03		SLOT ALLOCATION
 		0x04		TRANSPORT LAYER [data]
 		0x05		TRANSPORT LAYER [ack]
 		

@@ -28,8 +28,10 @@
 	#define RADIO_USART USART0
 	#define RADIO_USART_LOCATION USART_ROUTE_LOCATION_LOC2
 	
-	#define RADIO_SEND_QUEUE_SIZE 128
-	#define RADIO_RECV_QUEUE_SIZE 128
+	#define RADIO_SEND_QUEUE_SIZE 32
+	#define RADIO_RECV_QUEUE_SIZE 40
+	
+	#define BROADCAST_ID 0xFF
 	
 	typedef enum
 	{
@@ -41,6 +43,7 @@
 	
 	queue_t rxQueue,
 		txQueue;
+	bool transferActive;
 	
 	void RADIO_Init();
 	void RADIO_SetMode(RADIO_Mode mode);

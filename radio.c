@@ -18,6 +18,8 @@
 #include "dma.h"
 #include "queue.h"
 #include "config.h"
+#include "packets.h"
+#include "tdma.h"
 
 /* prototypes */
 void RADIO_WriteRegister(uint8_t reg, uint8_t val);
@@ -31,9 +33,10 @@ bool RADIO_PacketUpload(uint8_t packet[32]);
 
 void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer);
 
+bool RADIO_QueueHelloResponse(PACKET_Raw *incomingPacket);
+
 /* variables */
-bool transferActive = false,
-	transmitActive = false,
+bool transmitActive = false,
 	autoTransmitActive = false;
 
 uint8_t rxQueueMemory[RADIO_RECV_QUEUE_SIZE * 32],
@@ -223,7 +226,9 @@ void RADIO_ReadRegisterMultiple(uint8_t reg, uint8_t *data, uint8_t len)
 
 void RADIO_Init()
 {
-
+	
+	transferActive = false;
+	
 	// configure queues
 	QUEUE_Init(&rxQueue, (uint8_t*)rxQueueMemory, 32, RADIO_RECV_QUEUE_SIZE);
 	QUEUE_Init(&txQueue, (uint8_t*)txQueueMemory, 32, RADIO_SEND_QUEUE_SIZE);
@@ -385,8 +390,7 @@ bool RADIO_SendDequeue(uint8_t packet[32])
 bool RADIO_Recv(uint8_t packet[32])
 {
 	
-	uint8_t *tmp;
-	bool lowLevel;
+	PACKET_Raw *incoming;
 	
 	while (1)
 	{
@@ -394,24 +398,44 @@ bool RADIO_Recv(uint8_t packet[32])
 		if (QUEUE_IsEmpty(&rxQueue))
 			return false;
 		
-		lowLevel = false;
-		tmp = QUEUE_Peek(&rxQueue,false);
+		incoming = (PACKET_Raw*)(QUEUE_Peek(&rxQueue,false));
 		
-		if (TDMA_IsTimingPacket(tmp))
+		if (incoming->addr == NODE_ID || incoming->addr == BROADCAST_ID)
 		{
-			lowLevel = true;
-		}
+			
+			char tmsg[255];
+			sprintf(tmsg,"MSG RECVD [addr=0x%X; type=0x%X]\n",incoming->addr,incoming->type);
+			TRACE(tmsg);
+			
+			switch (incoming->type)
+			{
+			case PACKET_TDMA_TIMING:
+				TDMA_TimingPacketReceived();
+				break;
+				
+			case PACKET_HELLO:
+				RADIO_QueueHelloResponse(incoming);
+				break;
+				
+			case PACKET_TDMA_CONFIG:
+				break;
+				
+			case PACKET_TDMA_SLOT:
+				break;
+				
+			case PACKET_TRANSPORT_DATA:
+			case PACKET_TRANSPORT_ACK:
+				return QUEUE_Dequeue(&rxQueue, packet);
+				break;
+				
+			}
 		
-		if (!lowLevel)
-		{
-			break;
 		}
 		
 		QUEUE_Peek(&rxQueue,true);
 		
 	}
 	
-	return QUEUE_Dequeue(&rxQueue, packet);
 }
 
 bool RADIO_PacketDownload(uint8_t packet[32])
@@ -612,6 +636,7 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer)
 			{
 				RADIO_PacketDownload((uint8_t*)QUEUE_Next(&rxQueue,false));
 			}
+			
 			break;
 		}
 		
@@ -668,4 +693,23 @@ void RADIO_EnableAutoTransmit(bool enable)
 	{
 		RADIO_PacketUpload((uint8_t*)QUEUE_Peek(&txQueue,false));
 	}
+}
+
+bool RADIO_QueueHelloResponse(PACKET_Raw *incomingPacket)
+{
+	
+	PACKET_PayloadHello *hello = (PACKET_PayloadHello*)incomingPacket->payload;
+	
+	char tmsg[255];
+	sprintf(tmsg,"Challenge/Response: 0x%X\n",hello->challengeResponse);
+	TRACE(tmsg);
+	
+	if (hello->challengeResponse != HELLO_CHALLENGE)
+		return true;
+	
+	incomingPacket->addr = 0;
+	hello->challengeResponse = NODE_ID;
+	
+	return RADIO_Send((uint8_t*)incomingPacket);
+	
 }

@@ -18,6 +18,7 @@
 #include "led.h"
 #include "radio.h"
 #include "tdma.h"
+#include "packets.h"
 
 /* variables */
 
@@ -194,7 +195,7 @@ int main()
 	// show startup LEDs
 	StartupLEDs();
 	
-	//#define SENDER
+	#define SENDER
 	
 	TDMA_Config tdmaConfig;
 	
@@ -205,6 +206,7 @@ int main()
 		tdmaConfig.master = false;
 		tdmaConfig.slot = 1;
 	#endif
+	// tdmaConfig.slot = NODE_ID;
 	tdmaConfig.slotCount = 40;
 	tdmaConfig.guardPeriod = 234;
 	tdmaConfig.transmitPeriod = 937;
@@ -217,19 +219,23 @@ int main()
 		
 		TRACE("BASESTATION\n");
 		
-		uint8_t i,
-			packet[32];
 		while (1)
 		{
 			
-			packet[0] = i;
-			if (RADIO_Send(packet))
-				i++;
-			while (RADIO_Recv(packet))
-			{
-				USB_Transmit(packet,1);
-			}
-			//wait(100);
+			PACKET_Raw hello;
+		
+			hello.addr = 0xFF;
+			hello.type = PACKET_HELLO;
+			
+			PACKET_PayloadHello *helloPayload = (PACKET_PayloadHello*)hello.payload;
+			
+			helloPayload->challengeResponse = HELLO_CHALLENGE;
+			
+			RADIO_Send((uint8_t*)&hello);
+			wait(1000);
+			RADIO_Recv((uint8_t*)&hello);
+						
+			wait(2000);
 			
 		}
 		
@@ -242,11 +248,7 @@ int main()
 		while (1)
 		{
 			
-			if (RADIO_Recv(packet))
-			{
-				RADIO_Send(packet);
-				USB_Transmit(packet,1);
-			}
+			RADIO_Recv(packet);
 			TDMA_CheckSync();
 			
 		}
