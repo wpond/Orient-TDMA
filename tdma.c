@@ -21,7 +21,6 @@ void TDMA_QueuePacket();
 void TDMA_QueueTimingPacket();
 void TDMA_EnableTxCC(bool enable);
 void TDMA_SyncTimers(uint32_t time);
-void TDMA_RadioTransfer(uint8_t data[33]);
 void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transfer);
 
 /* variables */
@@ -487,7 +486,7 @@ void TDMA_RadioTransfer(uint8_t data[33])
                     false,
                     (void *)&(USART0->TXDATA),
                     (void*)data,
-                    32); 
+                    32);
 	
 }
 

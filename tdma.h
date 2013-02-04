@@ -24,5 +24,6 @@
 	
 	bool TDMA_IsTimingPacket(uint8_t packet[32]);
 	void TDMA_TimingPacketReceived();
+	void TDMA_RadioTransfer(uint8_t data[33]);
 	
 #endif

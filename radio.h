@@ -43,7 +43,9 @@
 	
 	queue_t rxQueue,
 		txQueue;
-	bool transferActive;
+	bool transferActive,
+		transmitActive;
+	uint32_t lastPacketReceived;
 	
 	void RADIO_Init();
 	void RADIO_SetMode(RADIO_Mode mode);

@@ -20,6 +20,7 @@
 	bool QUEUE_Queue(queue_t *queue, uint8_t *item);
 	bool QUEUE_Dequeue(queue_t *queue, uint8_t *item);
 	uint8_t* QUEUE_Peek(queue_t *queue, bool complete);
+	uint8_t* QUEUE_Get(queue_t *queue, uint8_t offset);
 	uint8_t* QUEUE_Next(queue_t *queue, bool complete);
 	bool QUEUE_IsEmpty(queue_t *queue);
 	bool QUEUE_IsFull(queue_t *queue);

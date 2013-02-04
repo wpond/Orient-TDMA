@@ -36,8 +36,7 @@ void RADIO_TransferComplete(unsigned int channel, bool primary, void *transfer);
 bool RADIO_QueueHelloResponse(PACKET_Raw *incomingPacket);
 
 /* variables */
-bool transmitActive = false,
-	autoTransmitActive = false;
+bool autoTransmitActive = false;
 
 uint8_t rxQueueMemory[RADIO_RECV_QUEUE_SIZE * 32],
 	txQueueMemory[RADIO_SEND_QUEUE_SIZE * 32];
@@ -227,6 +226,7 @@ void RADIO_ReadRegisterMultiple(uint8_t reg, uint8_t *data, uint8_t len)
 void RADIO_Init()
 {
 	
+	transmitActive = false;
 	transferActive = false;
 	
 	// configure queues
@@ -670,6 +670,7 @@ void RADIO_IRQHandler()
 		{
 			if (!(fifoStatus & 0x01))
 			{
+				lastPacketReceived = RTC_CounterGet();
 				RADIO_PacketDownload((uint8_t*)QUEUE_Next(&rxQueue,false));
 			}
 		}

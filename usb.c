@@ -33,6 +33,7 @@
 #include "efm32_usb.h"
 #include "efm32_usart.h"
 
+#include "queue.h"
 #include "usb.h"
 #include "config.h"
 
@@ -120,7 +121,12 @@ int            usbRxIndex, usbBytesReceived;
 static bool           usbRxActive, dmaTxActive;
 static volatile bool           usbOnline, usbActive;
 
-#define USB_BUFFER_SIZE 1024
+// motivation for 1280 buffer size
+// 32 (packet size) * 40 (absolute base case number of packets)
+// as on the base station all of these will need to be queued to 
+//		be sent back - this should ensure no waiting when  
+//		handling this
+#define USB_BUFFER_SIZE 1280
 #define USB_SEND_BUFFER_SIZE 256
 
 uint8_t usbMemory[USB_BUFFER_SIZE],
@@ -128,13 +134,19 @@ uint8_t usbMemory[USB_BUFFER_SIZE],
 uint16_t usbStart = 0,
 	usbLen = 0,
 	transferring = 0;
+queue_t usbQueue;
+uint8_t usbRecvMem[USB_RECV_SIZE * 32],
+	usbRecvPacket[32],
+	usbRecvPacketPos = 0;
 
 /**************************************************************************//**
  * @brief main - the entrypoint after reset.
  *****************************************************************************/
 void USB_Init(void)
 {
-
+	
+	QUEUE_Init(&usbQueue,usbRecvMem,32,USB_RECV_SIZE);
+	
 	//CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
 
 	USB->CTRL |= USB_CTRL_VREGOSEN;
@@ -176,7 +188,12 @@ static int UsbDataReceived(USB_Status_TypeDef status,
   {
     for (int i = 0; i < xferred; i++) {
         // handle msg
-    	//usbMessage[usbMessageLen++] = usbRxBuffer[ usbRxIndex ][i];
+    	usbRecvPacket[usbRecvPacketPos++] = usbRxBuffer[ usbRxIndex ][i];
+    	if (usbRecvPacketPos == 32)
+    	{
+			QUEUE_Queue(&usbQueue,(void*)usbRecvPacket);
+			usbRecvPacketPos = 0;
+    	}
     }
     
     usbRxIndex ^= 1;
@@ -186,6 +203,11 @@ static int UsbDataReceived(USB_Status_TypeDef status,
                 USB_RX_BUF_SIZ, UsbDataReceived);
   }
   return USB_STATUS_OK;
+}
+
+bool USB_Recv(uint8_t packet[32])
+{
+	return QUEUE_Dequeue(&usbQueue,packet);
 }
 
 static void USB_Send();

@@ -19,6 +19,7 @@
 #include "radio.h"
 #include "tdma.h"
 #include "packets.h"
+#include "aloha.h"
 
 /* variables */
 
@@ -195,8 +196,46 @@ int main()
 	// show startup LEDs
 	StartupLEDs();
 	
-	#define SENDER
+	ALOHA_Enable();
 	
+	#ifdef BASESTATION
+		
+		TRACE("BASESTATION\n");
+		uint8_t packet[32];
+		
+		while (1)
+		{
+			
+			if (USB_Recv(packet))
+			{
+				RADIO_Send(packet);
+			}
+			
+			if (RADIO_Recv(packet))
+			{
+				USB_Transmit(packet,32);
+			}
+			
+		}
+		
+	#else
+		
+		TRACE("NODE\n");
+		
+		uint8_t packet[32];
+		
+		while (1)
+		{
+			
+			RADIO_Recv(packet);
+			ALOHA_Send();
+			
+		}
+		
+	#endif
+	
+	
+	/*
 	TDMA_Config tdmaConfig;
 	
 	#ifdef SENDER
@@ -254,4 +293,6 @@ int main()
 		}
 		
 	#endif
+	*/
+	
 }

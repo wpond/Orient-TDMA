@@ -61,6 +61,20 @@ uint8_t* QUEUE_Peek(queue_t *queue, bool complete)
 	
 }
 
+uint8_t* QUEUE_Get(queue_t *queue, uint8_t offset)
+{
+	
+	if (offset > queue->count || QUEUE_IsEmpty(queue))
+		return NULL;
+	
+	uint8_t pos = (queue->start + offset) % queue->item_count;
+	
+	uint8_t* item = &queue->queue[pos * queue->item_size];
+	
+	return item;
+	
+}
+
 uint8_t* QUEUE_Next(queue_t *queue, bool complete)
 {
 	

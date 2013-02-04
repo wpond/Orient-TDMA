@@ -20,5 +20,7 @@
 	{
 		USB_Transmit((uint8_t*)msg,strlen(msg));
 	}
+	
+	void wait(uint32_t ms);
 
 #endif
