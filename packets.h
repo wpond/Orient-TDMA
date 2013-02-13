@@ -9,9 +9,11 @@
 		PACKET_TDMA_TIMING = 0x00,
 		PACKET_HELLO = 0x01,
 		PACKET_TDMA_CONFIG = 0x02,
-		PACKET_TDMA_SLOT = 0x03,
-		PACKET_TRANSPORT_DATA = 0x04,
-		PACKET_TRANSPORT_ACK = 0x05,
+		PACKET_TDMA_ENABLE = 0x03,
+		PACKET_TDMA_SLOT = 0x04,
+		PACKET_TDMA_ACK = 0x05,
+		PACKET_TRANSPORT_DATA = 0x06,
+		PACKET_TRANSPORT_ACK = 0x07,
 	}
 	PACKET_Type;
 	
@@ -62,5 +64,12 @@
 		
 	}
 	PACKET_TransportAck;
+	
+	typedef struct
+	{
+		uint8_t seqNum;
+		uint8_t payload[28];
+	}
+	PACKET_TDMA;
 	
 #endif

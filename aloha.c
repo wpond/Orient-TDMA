@@ -1,5 +1,6 @@
 #include "aloha.h"
 
+#include "efm32_gpio.h"
 #include "efm32_rtc.h"
 
 #include "nRF24L01.h"
@@ -9,14 +10,25 @@
 #include "queue.h"
 #include "tdma.h"
 
-void ALOHA_Enable()
+/* variables */
+bool alohaEnabled = false;
+
+/* functions */
+void ALOHA_Enable(bool enable)
 {
 	
-	// enable auto operation
-	RADIO_EnableAutoTransmit(true);
+	if (enable)
+	{
+		
+		// enable auto operation
+		RADIO_EnableAutoTransmit(true);
+		
+		// radio to recv mode
+		RADIO_SetMode(RADIO_RX);
+		
+	}
 	
-	// radio to recv mode
-	RADIO_SetMode(RADIO_RX);
+	alohaEnabled = enable;
 	
 }
 
@@ -27,7 +39,10 @@ bool ALOHA_Send()
 		return true;
 	
 	// wait until suitable time to send
-	uint32_t lastRecv;
+	uint32_t lastRecv = lastPacketReceived;
+	
+	// check last time received - if long enough, don't bother waiting
+	
 	do
 	{
 		lastRecv = lastPacketReceived;
@@ -56,4 +71,9 @@ bool ALOHA_Send()
 	
 	return true;
 	
+}
+
+bool ALOHA_IsEnabled()
+{
+	return alohaEnabled;
 }

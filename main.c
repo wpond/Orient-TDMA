@@ -196,19 +196,31 @@ int main()
 	// show startup LEDs
 	StartupLEDs();
 	
-	ALOHA_Enable();
+	ALOHA_Enable(true);
 	
 	#ifdef BASESTATION
 		
-		TRACE("BASESTATION\n");
+		TRACE("BASESTATION");
+		
 		uint8_t packet[32];
+		PACKET_Raw *rawPacket = (PACKET_Raw*)packet;
 		
 		while (1)
 		{
 			
 			if (USB_Recv(packet))
 			{
-				RADIO_Send(packet);
+				// intercept messages for basestation node
+				if (rawPacket->addr == NODE_ID)
+				{
+					TRACE("Incoming packet:\n");
+					TRACESTRUCT(rawPacket,32);
+					RADIO_HandleIncomingPacket(rawPacket);
+				}
+				else
+				{
+					RADIO_Send(packet);
+				}
 			}
 			
 			if (RADIO_Recv(packet))
@@ -227,8 +239,10 @@ int main()
 		while (1)
 		{
 			
-			RADIO_Recv(packet);
-			ALOHA_Send();
+			if (RADIO_Recv(packet))
+				RADIO_Send(packet);
+			
+			TDMA_CheckSync();
 			
 		}
 		

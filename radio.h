@@ -6,6 +6,7 @@
 	#include <stdbool.h>
 	
 	#include "queue.h"
+	#include "packets.h"
 	
 	#define NRF_CE_PORT 3
 	#define NRF_CE_PIN 6
@@ -52,8 +53,11 @@
 	bool RADIO_Send(uint8_t packet[32]);
 	bool RADIO_Recv(uint8_t packet[32]);
 	bool RADIO_SendDequeue(uint8_t packet[32]);
+	void RADIO_SetChannel(uint8_t channel);
 	
 	void RADIO_IRQHandler();
 	void RADIO_EnableAutoTransmit(bool enable);
+	
+	bool RADIO_HandleIncomingPacket(PACKET_Raw *packet);
 	
 #endif

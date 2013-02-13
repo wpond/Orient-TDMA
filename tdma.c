@@ -13,6 +13,7 @@
 
 #include "config.h"
 #include "dma.h"
+#include "aloha.h"
 #include "radio.h"
 #include "transport.h"
 
@@ -22,6 +23,7 @@ void TDMA_QueueTimingPacket();
 void TDMA_EnableTxCC(bool enable);
 void TDMA_SyncTimers(uint32_t time);
 void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transfer);
+void TDMA_SendAck(PACKET_Raw *packet);
 
 /* variables */
 TDMA_Config config;
@@ -274,13 +276,16 @@ void TDMA_Enable(bool enable)
 	
 	if (!enable)
 	{
+		RADIO_SetChannel(NODE_CHANNEL);
 		NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+		TRACE("TDMA DISABLE\n");
 		return;
 	}
 	
 	NVIC_DisableIRQ(GPIO_EVEN_IRQn);
 	
 	RADIO_SetMode(RADIO_OFF);
+	RADIO_SetChannel(config.channel);
 	RADIO_EnableAutoTransmit(false);
 	
 	uint32_t top = config.slotCount * (config.guardPeriod + config.transmitPeriod);
@@ -540,4 +545,74 @@ void TDMA_CheckSync()
 void TDMA_TimingPacketReceived()
 {
 	timingPacketReceived = true;
+}
+
+void TDMA_SendAck(PACKET_Raw *packet)
+{
+	#ifndef BASESTATION
+		PACKET_TDMA *packetTDMA = (PACKET_TDMA*)packet->payload;
+		
+		PACKET_Raw ack;
+		ack.addr = BASESTATION_ID;
+		ack.type = PACKET_TDMA_ACK;
+		PACKET_TDMA *ackTDMA = (PACKET_TDMA*)ack.payload;
+		ackTDMA->seqNum = packetTDMA->seqNum;
+		
+		RADIO_Send((uint8_t*)&ack);
+	#endif
+}
+
+bool TDMA_PacketConfigure(PACKET_Raw *packet)
+{
+	
+	TDMA_SendAck(packet);
+	
+	PACKET_TDMA *packetTDMA = (PACKET_TDMA*)packet->payload;
+	
+	TDMA_Config *c = (TDMA_Config*)packetTDMA->payload;
+	
+	TDMA_Init(c);
+	
+	TRACE("RECVD TDMA CONFIGURATION:\n");
+	TRACESTRUCT((void*)c,sizeof(TDMA_Config));
+	
+	if (packetTDMA->payload[sizeof(TDMA_Config)])
+	{
+		ALOHA_Enable(false);
+		return true;
+	}
+	else
+	{
+		TDMA_Enable(false);
+		ALOHA_Enable(true);
+		return false;
+	}
+	
+}
+
+bool TDMA_PacketEnable(PACKET_Raw *packet)
+{
+	
+	TDMA_SendAck(packet);
+	
+	PACKET_TDMA *packetTDMA = (PACKET_TDMA*)packet->payload;
+	
+	if (packetTDMA->payload[1])
+	{
+		ALOHA_Enable(false);
+		return true;
+	}
+	else
+	{
+		TDMA_Enable(false);
+		ALOHA_Enable(true);
+		return false;
+	}
+	
+}
+
+void TDMA_PacketSlotAllocation(PACKET_Raw *packet)
+{
+	TDMA_SendAck(packet);
+	// pass on this for now
 }

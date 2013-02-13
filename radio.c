@@ -20,6 +20,7 @@
 #include "config.h"
 #include "packets.h"
 #include "tdma.h"
+#include "aloha.h"
 
 /* prototypes */
 void RADIO_WriteRegister(uint8_t reg, uint8_t val);
@@ -376,10 +377,28 @@ bool RADIO_Send(uint8_t packet[32])
 		{
 			RADIO_PacketUpload((uint8_t*)QUEUE_Peek(&txQueue,false));
 		}
+		
+		if (ALOHA_IsEnabled())
+		{
+			ALOHA_Send();
+		}
+		
 		return true;
 	}
 	return false;
 	
+}
+
+void RADIO_SetChannel(uint8_t ch)
+{
+	uint8_t mode = currentMode;
+	RADIO_SetMode(RADIO_OFF);
+	RADIO_WriteRegister(NRF_RF_CH,ch);
+	RADIO_SetMode(mode);
+	
+	char tmsg[255];
+	sprintf(tmsg,"Changed to channel %i\n", ch);
+	TRACE(tmsg);
 }
 
 bool RADIO_SendDequeue(uint8_t packet[32])
@@ -390,52 +409,74 @@ bool RADIO_SendDequeue(uint8_t packet[32])
 bool RADIO_Recv(uint8_t packet[32])
 {
 	
-	PACKET_Raw *incoming;
-	
 	while (1)
 	{
 		
 		if (QUEUE_IsEmpty(&rxQueue))
 			return false;
 		
-		incoming = (PACKET_Raw*)(QUEUE_Peek(&rxQueue,false));
+		if (!RADIO_HandleIncomingPacket((PACKET_Raw*)QUEUE_Peek(&rxQueue,false)))
+			return QUEUE_Dequeue(&rxQueue, packet);
 		
-		if (incoming->addr == NODE_ID || incoming->addr == BROADCAST_ID)
-		{
-			
-			char tmsg[255];
-			sprintf(tmsg,"MSG RECVD [addr=0x%X; type=0x%X]\n",incoming->addr,incoming->type);
-			TRACE(tmsg);
-			
-			switch (incoming->type)
-			{
-			case PACKET_TDMA_TIMING:
-				TDMA_TimingPacketReceived();
-				break;
-				
-			case PACKET_HELLO:
-				RADIO_QueueHelloResponse(incoming);
-				break;
-				
-			case PACKET_TDMA_CONFIG:
-				break;
-				
-			case PACKET_TDMA_SLOT:
-				break;
-				
-			case PACKET_TRANSPORT_DATA:
-			case PACKET_TRANSPORT_ACK:
-				return QUEUE_Dequeue(&rxQueue, packet);
-				break;
-				
-			}
-		
-		}
+		// all packets are passed back to the PC
+		#ifdef BASESTATION
+			return QUEUE_Dequeue(&rxQueue, packet);
+		#endif
 		
 		QUEUE_Peek(&rxQueue,true);
 		
 	}
 	
+}
+
+bool RADIO_HandleIncomingPacket(PACKET_Raw *packet)
+{
+	if (packet->addr == NODE_ID || packet->addr == BROADCAST_ID)
+	{
+		
+		char tmsg[255];
+		sprintf(tmsg,"MSG RECVD [addr=0x%X; type=0x%X]\n",packet->addr,packet->type);
+		TRACE(tmsg);
+		
+		switch (packet->type)
+		{
+		case PACKET_TDMA_TIMING:
+			TDMA_TimingPacketReceived();
+			return true;
+			
+		case PACKET_HELLO:
+			RADIO_QueueHelloResponse(packet);
+			return true;
+			
+		case PACKET_TDMA_CONFIG:
+			if (TDMA_PacketConfigure(packet))
+			{
+				QUEUE_Empty(&rxQueue);
+				TDMA_Enable(true);
+			}
+			return true;
+			
+		case PACKET_TDMA_ENABLE:
+			if (TDMA_PacketEnable(packet))
+			{
+				QUEUE_Empty(&rxQueue);
+				TDMA_Enable(true);
+			}
+			return true;
+		
+		case PACKET_TDMA_SLOT:
+			TDMA_PacketSlotAllocation(packet);
+			return true;
+		
+		default:
+			return false;
+		}
+	
+	}
+	else
+	{
+		return true;
+	}
 }
 
 bool RADIO_PacketDownload(uint8_t packet[32])
@@ -664,6 +705,7 @@ void RADIO_IRQHandler()
 		{
 			transmitActive = false;
 		}
+		TRACE("PACKET SENT\n");
 		break;
 	case 0x40:
 		if (!QUEUE_IsFull(&rxQueue))
@@ -708,7 +750,7 @@ bool RADIO_QueueHelloResponse(PACKET_Raw *incomingPacket)
 	if (hello->challengeResponse != HELLO_CHALLENGE)
 		return true;
 	
-	incomingPacket->addr = 0;
+	incomingPacket->addr = BASESTATION_ID;
 	hello->challengeResponse = NODE_ID;
 	
 	return RADIO_Send((uint8_t*)incomingPacket);
