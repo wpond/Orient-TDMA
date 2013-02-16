@@ -19,7 +19,7 @@ class Basestation:
 		}
 		
 		try:
-			self.orient.connectionmanager.configureCapture([1],tdmaconfig)
+			self.orient.connectionmanager.enableCaptureMode([1],tdmaconfig)
 			time.sleep(5)
 			self.orient.recvPacket()
 		except KeyboardInterrupt:

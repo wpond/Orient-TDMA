@@ -125,5 +125,8 @@ class OrientSerial:
 			self.connectedNodes = []
 		elif id in self.connectedNodes:
 			self.connectedNodes.remove(id)
-		packet = struct.pack("BBBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",id,self.PACKET_TYPES["HELLO"],0xFF)
+		packet = struct.pack("BBBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			id,
+			self.PACKET_TYPES["HELLO"],
+			0xFF)
 		self.send(packet)

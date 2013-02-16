@@ -20,7 +20,7 @@ class ConnectionManager:
 	def ackReceived(self,packet):
 		(self.lastAck,) = struct.unpack("xxBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
 	
-	def configureCapture(self,ids,config):
+	def enableCaptureMode(self,ids,config):
 		if config["slotCount"] < len(ids):
 			return False
 		slot = 0
@@ -38,13 +38,19 @@ class ConnectionManager:
 				config["transmitPeriod"],
 				config["protectionPeriod"],
 				True)
-			self.orient.send(configPacket)
-			time.sleep(1)
-			self.orient.sendHello()
-			time.sleep(1)
-			if id in self.orient.connectedNodes:
-				print "node didn't change"
-		
+			
+			while not id in self.orient.connectedNodes:
+				self.orient.sendHello()
+				time.sleep(TIMEOUT)
+				self.orient.recvPacket()
+			
+			while id in self.orient.connectedNodes:
+				self.orient.send(configPacket)
+				time.sleep(TIMEOUT)
+				self.orient.sendHello()
+				time.sleep(TIMEOUT)
+				self.orient.recvPacket()
+			
 		# finally move basestation to tdma mode
 		configPacket = struct.pack("=BBBBBBBIIIBxxxxxxxxxxxx",
 				self.orient.BASESTATION_ID,
@@ -60,52 +66,12 @@ class ConnectionManager:
 				True)
 		self.orient.send(configPacket)
 		
-		for j in range(5):
-			for i in range(30):
+		# send a load of messages to get all nodes working correctly?
+		for i in range(3):
+			for j in range(30):
 				self.orient.sendHello()
-			time.sleep(1.1)
-		
-		return True
-		
-	def enableCaptureMode(self,ids,config):
-		if config["slotCount"] < len(ids):
-			return False
-		slot = 0
-		for id in ids:
-			slot += 1
-			configPacket = struct.pack("=BBBBBBBIIIBxxxxxxxxxxx",
-				id,
-				self.orient.PACKET_TYPES["TDMA_CONFIG"],
-				self.nextSequenceNumber(),
-				False,
-				config["channel"],
-				slot,
-				config["slotCount"],
-				config["guardPeriod"],
-				config["transmitPeriod"],
-				config["protectionPeriod"],
-				True)
-			self.orient.send(configPacket)
-			time.sleep(TIMEOUT)
-			self.orient.sendHello()
-			time.sleep(TIMEOUT)
-			if id in self.orient.connectedNodes:
-				print "node didn't change"
-		
-		# finally move basestation to tdma mode
-		configPacket = struct.pack("=BBBBBBBIIIBxxxxxxxxxxx",
-				self.orient.BASESTATION_ID,
-				self.orient.PACKET_TYPES["TDMA_CONFIG"],
-				self.nextSequenceNumber(),
-				True,
-				config["channel"],
-				0,
-				config["slotCount"],
-				config["guardPeriod"],
-				config["transmitPeriod"],
-				config["protectionPeriod"],
-				True)
-		self.orient.send(configPacket)
+			time.sleep(1)
+			self.orient.recvPacket()
 		
 		return True
 	
@@ -121,7 +87,10 @@ class ConnectionManager:
 		self.orient.recvPacket()
 		print self.orient.connectedNodes
 		
+		i = 0
 		while self.orient.connectedNodes:
+			self.orient.send(packet)
+			time.sleep(1)
 			self.orient.sendHello() # get node list
 			time.sleep(1)
 			self.orient.recvPacket()

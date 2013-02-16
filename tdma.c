@@ -395,7 +395,7 @@ void TDMA_SyncTimers(uint32_t time)
 {
 	
 	INT_Disable();
-	time = TIMER_CounterGet(TIMER0) - (time - config.guardPeriod);
+	time = TIMER_CounterGet(TIMER0) - (time - (config.guardPeriod + 14));
 
 	while (time < 0)
 		time += TIMER_TopGet(TIMER0); 
