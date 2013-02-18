@@ -5,6 +5,9 @@ import threading
 import struct
 import connectionmanager
 import debugger
+import eventmanager
+import transport
+import sys
 
 class OrientSerial:
 	
@@ -20,10 +23,11 @@ class OrientSerial:
 		"TDMA_ACK": 0x05,
 		"TRANSPORT_DATA": 0x06,
 		"TRANSPORT_ACK": 0x07,
+		"EVENT": 0x08,
 		"BASESTATION_DEBUG": 0xFF,
 	}
 	
-	connectedNodes = []
+	connectedNodes = set()
 	
 	class OrientSender(threading.Thread):
 		
@@ -56,15 +60,19 @@ class OrientSerial:
 			self.conn = conn
 		
 		def run(self):
+			packet = ""
 			while self.running:
 				try:
-					packet = self.conn.read(32)
+					c = self.conn.read(1)
+					if c == "":
+						continue
+					packet += c
+					if len(packet) >= 32:
+						self.queue.put(packet)
+						(addr,type) = struct.unpack("BBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
+						packet = ""
 				except:
 					continue
-				if not packet == "":
-					if not len(packet) == 32:
-						print("PACKET LENGTH ERROR [%d]" % len(packet))
-					self.queue.put(packet)
 		
 		def recv(self):
 			try:
@@ -76,6 +84,37 @@ class OrientSerial:
 		def stop(self):
 			self.running = False
 	
+	class PacketHandler(threading.Thread):
+	
+		def __init__(self,queue,parent):
+			threading.Thread.__init__(self)
+			self.queue = queue
+			self.parent = parent
+			self.running = True
+		
+		def run(self):
+			while (self.running):
+				try:
+					packet = self.queue.get(False)
+				except Queue.Empty:
+					continue
+				(addr,type) = struct.unpack("BBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
+				if type == self.parent.PACKET_TYPES["HELLO"]:
+					(id,) = struct.unpack("xxBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
+					if not id in self.parent.connectedNodes:
+						self.parent.connectedNodes.add(id)
+				elif type == self.parent.PACKET_TYPES["TDMA_ACK"]:
+					self.parent.connectionmanager.ackReceived(packet)
+				elif type == self.parent.PACKET_TYPES["EVENT"]:
+					self.parent.eventmanager.handle(packet)
+				elif type == self.parent.PACKET_TYPES["TRANSPORT_DATA"]:
+					self.parent.transport.recv(packet)
+				elif type == self.parent.PACKET_TYPES["BASESTATION_DEBUG"]:
+					self.parent.debugger.send(packet)
+		
+		def stop(self):
+			self.running = False
+		
 	def __init__(self,port):
 		self.port = port
 		self.serial = serial.Serial(port=port,timeout=1)
@@ -83,9 +122,13 @@ class OrientSerial:
 		self.recvr = OrientSerial.OrientReceiver(self.serial)
 		self.connectionmanager = connectionmanager.ConnectionManager(self)
 		self.debugger = debugger.Debugger()
+		self.handler = OrientSerial.PacketHandler(self.recvr.queue,self)
+		self.eventmanager = eventmanager.EventManager(self)
+		self.transport = transport.Transport(self)
 		
 		self.sender.start()
 		self.recvr.start()
+		self.handler.start()
 	
 	def send(self,packet):
 		if not len(packet) == 32:
@@ -93,36 +136,20 @@ class OrientSerial:
 			return
 		self.sender.send(packet)
 	
-	def recv(self):
-		return self.recvr.recv()
-	
-	def recvPacket(self):
-		while True:
-			packet = self.recv()
-			if packet == None:
-				return
-			(addr,type) = struct.unpack("BBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
-			if type == self.PACKET_TYPES["HELLO"]:
-				(id,) = struct.unpack("xxBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
-				if not id in self.connectedNodes:
-					self.connectedNodes.append(id)
-			elif type == self.PACKET_TYPES["TDMA_ACK"]:
-				self.connectionmanager.ackReceived(packet)
-			elif type == self.PACKET_TYPES["BASESTATION_DEBUG"]:
-				self.debugger.send(packet)
-	
 	def stop(self):
 		self.sender.stop()
 		self.recvr.stop()
+		self.handler.stop()
 		
 		self.sender.join()
 		self.recvr.join()
+		self.handler.join()
 		
 		self.serial.close()
 	
 	def sendHello(self,id=BROADCAST_ID):
 		if id == self.BROADCAST_ID:
-			self.connectedNodes = []
+			self.connectedNodes = set()
 		elif id in self.connectedNodes:
 			self.connectedNodes.remove(id)
 		packet = struct.pack("BBBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",

@@ -258,16 +258,13 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
 	
 	INT_Disable();
 	
-	if (status == USB_STATUS_OK)
-	{
-		usbActive = false;
+	usbActive = false;
 
-		usbStart = (usbStart + transferring) % USB_BUFFER_SIZE;
-		usbLen -= transferring;
-		transferring = 0;
+	usbStart = (usbStart + transferring) % USB_BUFFER_SIZE;
+	usbLen -= transferring;
+	transferring = 0;
 
-		USB_Send();
-	}
+	USB_Send();
 	
 	INT_Enable();
 	
@@ -307,21 +304,24 @@ bool USB_Transmit(uint8_t *buf, int len)
     if (!usbOnline)
         return false;
     
-    INT_Disable();
-    
     if (usbActive)
 	{
 		USB_Queue(buf,len);
 	}
 	else
 	{	
+		INT_Disable();
 		usbActive = true;
 		transferring = 0;
 		USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
+		INT_Enable();
 	}
 	
-	INT_Enable();
-	
+	/*
+	while (usbActive);
+	usbActive = true;
+	USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
+	*/
     return true;
 }
 

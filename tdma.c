@@ -24,6 +24,7 @@ void TDMA_EnableTxCC(bool enable);
 void TDMA_SyncTimers(uint32_t time);
 void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transfer);
 void TDMA_SendAck(PACKET_Raw *packet);
+void TDMA_SendSlotEvent();
 
 /* variables */
 TDMA_Config config;
@@ -39,6 +40,7 @@ DMA_CB_TypeDef cb;
 
 bool timersSyncd = false;
 volatile uint16_t syncMissCount = 0;
+uint8_t txCount = 0;
 
 TIMER_Init_TypeDef timerInit =
 {
@@ -109,13 +111,15 @@ TIMER_InitCC_TypeDef timerCCIrq =
 void TIMER0_IRQHandler()
 {
 	
+	//INT_Disable();
 	uint32_t flags = TIMER_IntGet(TIMER0);
-	TIMER_IntClear(TIMER0,flags);
 	char tmsg[255];
 	
 	if (flags & TIMER_IF_CC2)
 	{
+		
 		uint32_t time = TIMER_CaptureGet(TIMER0,2);
+		
 		
 		if (!config.master && syncTimers)
 		{
@@ -123,20 +127,21 @@ void TIMER0_IRQHandler()
 			TDMA_SyncTimers(time);
 		}
 		
-		sprintf(tmsg,"%i: TIMER0 CC2\n",TIMER_CounterGet(TIMER0));
+		sprintf(tmsg,"%i: TIMER0 CC2 (RADIO IRQ)\n",TIMER_CounterGet(TIMER0));
 		TRACE(tmsg);
-		
 		RADIO_IRQHandler();
+		txCount++;
 	}
 	
-	
+	TIMER_IntClear(TIMER0,flags);
+	//INT_Enable();
 	
 	if (flags & TIMER_IF_CC0)
 	{
 		RADIO_SetMode(RADIO_OFF);
 		
 		sprintf(tmsg,"%i: TIMER0 CC0\n",TIMER_CounterGet(TIMER0));
-		TRACE(tmsg);
+		//TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC1)
@@ -156,12 +161,12 @@ void TIMER0_IRQHandler()
 		RADIO_SetMode(RADIO_TX);
 		TDMA_EnableTxCC(true);
 		
-		TRANSPORT_Reload();
+		//TRANSPORT_ReloadReady();
 		
 		TDMA_QueuePacket();
 		
 		sprintf(tmsg,"%i: TIMER0 CC1\n",TIMER_CounterGet(TIMER0));
-		TRACE(tmsg);
+		//TRACE(tmsg);
 	}
 	
 }
@@ -176,20 +181,25 @@ void TIMER1_IRQHandler()
 	{
 		if (config.master)
 		{
+			TDMA_SendSlotEvent();
 			RADIO_EnableAutoTransmit(false);
 			RADIO_SetMode(RADIO_TX);
 			TDMA_QueueTimingPacket();
 			TDMA_EnableTxCC(true);
-			TRANSPORT_Reload();
+			TRANSPORT_Reset();
+			//TRANSPORT_ReloadReady();
 		}
 		else
 		{
+			TRANSPORT_Reset();
 			RADIO_SetMode(RADIO_RX);
 			syncTimers = true;
 		}
 		
-		sprintf(tmsg,"%i: TIMER1 OF\n",TIMER_CounterGet(TIMER1));
+		sprintf(tmsg,"%i: TX count = %i\n",TIMER_CounterGet(TIMER1),txCount);
 		TRACE(tmsg);
+		
+		txCount = 0;
 	}
 	
 	if (flags & TIMER_IF_CC0)
@@ -210,7 +220,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 CC0\n",TIMER_CounterGet(TIMER1));
-		TRACE(tmsg);
+		//TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC1)
@@ -229,7 +239,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 CC1\n",TIMER_CounterGet(TIMER1));
-		TRACE(tmsg);
+		//TRACE(tmsg);
 	}
 	
 	if (flags & TIMER_IF_CC2)
@@ -248,7 +258,7 @@ void TIMER1_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER1 CC2\n",TIMER_CounterGet(TIMER1));
-		TRACE(tmsg);
+		//TRACE(tmsg);
 	}
 	
 	TIMER_IntClear(TIMER1,flags);
@@ -278,7 +288,7 @@ void TDMA_Enable(bool enable)
 	{
 		RADIO_SetChannel(NODE_CHANNEL);
 		NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-		TRACE("TDMA DISABLE\n");
+		//TRACE("TDMA DISABLE\n");
 		return;
 	}
 	
@@ -407,7 +417,7 @@ void TDMA_SyncTimers(uint32_t time)
 
 	char tmsg[255];
 	sprintf(tmsg, "Time sync'd to: %i\n", time);
-	TRACE(tmsg);
+	//TRACE(tmsg);
 	
 }
 
@@ -536,7 +546,7 @@ void TDMA_CheckSync()
 	
 	if (syncMissCount > 3)
 	{
-		TRACE("OUT OF SYNC\n");
+		//TRACE("OUT OF SYNC\n");
 		TDMA_Enable(true);
 	}
 	
@@ -573,8 +583,8 @@ bool TDMA_PacketConfigure(PACKET_Raw *packet)
 	
 	TDMA_Init(c);
 	
-	TRACE("RECVD TDMA CONFIGURATION:\n");
-	TRACESTRUCT((void*)c,sizeof(TDMA_Config));
+	//TRACE("RECVD TDMA CONFIGURATION:\n");
+	//TRACESTRUCT((void*)c,sizeof(TDMA_Config));
 	
 	if (packetTDMA->payload[sizeof(TDMA_Config)])
 	{
@@ -615,4 +625,14 @@ void TDMA_PacketSlotAllocation(PACKET_Raw *packet)
 {
 	TDMA_SendAck(packet);
 	// pass on this for now
+}
+
+void TDMA_SendSlotEvent()
+{
+	PACKET_Raw pRaw;
+	pRaw.addr = 0x00;
+	pRaw.type = PACKET_EVENT;
+	pRaw.payload[0] = 0xFF;
+	pRaw.payload[1] = 0x00;
+	USB_Transmit((uint8_t*)&pRaw,32);
 }

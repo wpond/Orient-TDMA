@@ -20,6 +20,8 @@
 #include "tdma.h"
 #include "packets.h"
 #include "aloha.h"
+#include "transport.h"
+#include "eventmanager.h"
 
 /* variables */
 
@@ -151,10 +153,10 @@ void EnableInterrupts()
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
 	
-	NVIC_SetPriority(USB_IRQn, 0);
-	NVIC_SetPriority(DMA_IRQn, 1);
+	NVIC_SetPriority(USB_IRQn, 4);
+	NVIC_SetPriority(DMA_IRQn, 0);
 	
-	NVIC_SetPriority(TIMER0_IRQn, 2);
+	NVIC_SetPriority(TIMER0_IRQn, 1);
 	NVIC_SetPriority(TIMER1_IRQn, 2);
 	
 	NVIC_SetPriority(GPIO_EVEN_IRQn, 3);
@@ -196,6 +198,10 @@ int main()
 	// show startup LEDs
 	StartupLEDs();
 	
+	// init event manager
+	EVENT_Init();
+	
+	// enable aloha
 	ALOHA_Enable(true);
 	
 	#ifdef BASESTATION
@@ -219,12 +225,20 @@ int main()
 				}
 				else
 				{
+					char tmsg[255];
+					sprintf(tmsg,"%i: forwarding [%i] on RADIO\n",TIMER_CounterGet(TIMER1),packet[1]);
+					TRACE(tmsg);
+					
 					RADIO_Send(packet);
 				}
 			}
 			
 			if (RADIO_Recv(packet))
 			{
+				char tmsg[255];
+				sprintf(tmsg,"%i: forwarding [%i] on USB\n",TIMER_CounterGet(TIMER1),packet[1]);
+				TRACE(tmsg);
+				
 				USB_Transmit(packet,32);
 			}
 			
@@ -232,15 +246,64 @@ int main()
 		
 	#else
 		
+		// init transport layer
+		TRANSPORT_Init();
+		
 		TRACE("NODE\n");
 		
 		uint8_t packet[32];
 		
+		// data generation
+		bool generateData = false;
+		int i = 0;
+		
 		while (1)
 		{
 			
-			if (RADIO_Recv(packet))
-				RADIO_Send(packet);
+			RADIO_Recv(packet);
+			TRANSPORT_Reload();
+			
+			if (EVENT_Count() > 0)
+			{
+				uint8_t e = EVENT_Next();
+				switch (e)
+				{
+				
+				case EVENT_START_DATA:
+					TRACE("Received event: start data\n");
+					generateData = true;
+					break;
+				
+				case EVENT_STOP_DATA:
+					TRACE("Received event: stop data\n");
+					generateData = false;
+					break;
+				
+				case EVENT_TRANSPORT_RELOAD:
+					TRACE("Sending data..\n");
+					TRANSPORT_Reset();
+					TRANSPORT_ReloadReady();
+					break;
+				
+				default:
+				{
+					char tmsg[255];
+					sprintf(tmsg,"EVENT RECVD [%2.2X]\n",e);
+					TRACE(tmsg);
+					break;
+				}
+				
+				}
+			}
+			
+			if (i++ % 100000 == 1 && generateData)
+			{
+				uint8_t data[80], i;
+				for (i = 0; i < 80; i++)
+					data[i] = i;
+				if (!TRANSPORT_Send(data,80))
+					TRACE("Unable to send data with transport layer\n");
+			}
 			
 			TDMA_CheckSync();
 			

@@ -21,6 +21,8 @@
 #include "packets.h"
 #include "tdma.h"
 #include "aloha.h"
+#include "transport.h"
+#include "eventmanager.h"
 
 /* prototypes */
 void RADIO_WriteRegister(uint8_t reg, uint8_t val);
@@ -265,7 +267,7 @@ void RADIO_Init()
 	RADIO_WriteRegister(NRF_SETUP_AW, 0x03);
 	RADIO_WriteRegister(NRF_SETUP_RETR, 0x00);
 	RADIO_WriteRegister(NRF_RF_CH, NODE_CHANNEL);
-	RADIO_WriteRegister(NRF_RF_SETUP, 0x0F);
+	RADIO_WriteRegister(NRF_RF_SETUP, 0x0F); // 1mbps (was at 2)
 	
 	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P0,addr,5);
 	RADIO_WriteRegister(NRF_RX_PW_P0, 32);
@@ -468,6 +470,23 @@ bool RADIO_HandleIncomingPacket(PACKET_Raw *packet)
 			TDMA_PacketSlotAllocation(packet);
 			return true;
 		
+		case PACKET_EVENT:
+		{
+			uint8_t i;
+			for (i = 0; i < 30; i++)
+			{
+				if (packet->payload[i] == 0)
+					break;
+				EVENT_Set(packet->payload[i]);
+			}
+			return true;
+		}
+		
+		case PACKET_TRANSPORT_ACK:
+		case PACKET_TRANSPORT_DATA:
+			TRANSPORT_Recv(packet);
+			return true;
+		
 		default:
 			return false;
 		}
@@ -624,6 +643,10 @@ bool RADIO_PacketUpload(uint8_t packet[32])
 	cfg.nMinus1 = 31;
 	DMA_CfgDescrScatterGather(dmaRxBlock, 1, &cfg);
 	
+	//schar tmsg[255];
+	//sprintf(tmsg,"%i: Sending [%2.2X]\n",TIMER_CounterGet(TIMER1),packet[1]);
+	//TRACE(tmsg);
+	
 	INT_Disable();
 	
 	NRF_CSN_lo;
@@ -694,6 +717,8 @@ void RADIO_IRQHandler()
 	uint8_t fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
 	switch(status & 0xF0)
 	{
+	case 0x10:
+		break;
 	case 0x20:
 		NRF_CE_lo;
 		if (autoTransmitActive && (fifoStatus & 0x10) && !QUEUE_IsEmpty(&txQueue))
@@ -705,7 +730,7 @@ void RADIO_IRQHandler()
 		{
 			transmitActive = false;
 		}
-		TRACE("PACKET SENT\n");
+		//TRACE("PACKET SENT\n");
 		break;
 	case 0x40:
 		if (!QUEUE_IsFull(&rxQueue))
@@ -716,8 +741,6 @@ void RADIO_IRQHandler()
 				RADIO_PacketDownload((uint8_t*)QUEUE_Next(&rxQueue,false));
 			}
 		}
-		break;
-	case 0x10:
 		break;
 	}
 	
@@ -732,7 +755,8 @@ void RADIO_EnableAutoTransmit(bool enable)
 	if (autoTransmitActive && 
 			!transmitActive &&
 			currentMode == RADIO_TX && 
-			!QUEUE_IsEmpty(&txQueue))
+			!QUEUE_IsEmpty(&txQueue) &&
+			(RADIO_ReadRegister(NRF_FIFO_STATUS) & 0x10))
 	{
 		RADIO_PacketUpload((uint8_t*)QUEUE_Peek(&txQueue,false));
 	}

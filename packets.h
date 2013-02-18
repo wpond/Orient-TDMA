@@ -14,6 +14,7 @@
 		PACKET_TDMA_ACK = 0x05,
 		PACKET_TRANSPORT_DATA = 0x06,
 		PACKET_TRANSPORT_ACK = 0x07,
+		PACKET_EVENT = 0x08,
 	}
 	PACKET_Type;
 	
@@ -41,19 +42,20 @@
 	typedef struct
 	{
 		
+		uint8_t senderId;
 		uint8_t frameId;
 		uint8_t segmentId;
 		uint8_t segmentFill;
 		uint8_t flags;
-		uint8_t data[26];
+		uint8_t data[25];
 		
 	}
 	PACKET_TransportData;
 	
-	#define TRANSPORT_FLAG_BUFFER_FULL 0x00
-	#define TRANSPORT_FLAG_SLOT_REQUEST 0x01
-	#define TRANSPORT_FLAG_SD_IN_USE 0x02
-	#define TRANSPORT_FLAG_SEGMENT_END 0x04
+	#define TRANSPORT_FLAG_SEGMENT_END 0x01
+	#define TRANSPORT_FLAG_BUFFER_FULL 0x02
+	#define TRANSPORT_FLAG_SD_IN_USE 0x04
+	#define TRANSPORT_FLAG_SLOT_REQUEST 0x08
 	
 	typedef struct
 	{

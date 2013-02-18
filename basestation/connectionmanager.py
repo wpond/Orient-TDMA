@@ -7,6 +7,11 @@ TIMEOUT = 0.025
 
 class ConnectionManager:
 	
+	EVENTS = {
+		"DATA_START": 1,
+		"DATA_STOP": 2
+	}
+	
 	sequenceNumber = 0
 	lastAck = 0
 	
@@ -23,6 +28,7 @@ class ConnectionManager:
 	def enableCaptureMode(self,ids,config):
 		if config["slotCount"] < len(ids):
 			return False
+		
 		slot = 0
 		for id in ids:
 			slot += 1
@@ -39,17 +45,13 @@ class ConnectionManager:
 				config["protectionPeriod"],
 				True)
 			
-			while not id in self.orient.connectedNodes:
-				self.orient.sendHello()
-				time.sleep(TIMEOUT)
-				self.orient.recvPacket()
-			
-			while id in self.orient.connectedNodes:
+			for i in xrange(10):
 				self.orient.send(configPacket)
-				time.sleep(TIMEOUT)
+				time.sleep(0.5)
 				self.orient.sendHello()
-				time.sleep(TIMEOUT)
-				self.orient.recvPacket()
+				time.sleep(0.5)
+				if not id in self.orient.connectedNodes:
+					break
 			
 		# finally move basestation to tdma mode
 		configPacket = struct.pack("=BBBBBBBIIIBxxxxxxxxxxxx",
@@ -66,13 +68,6 @@ class ConnectionManager:
 				True)
 		self.orient.send(configPacket)
 		
-		# send a load of messages to get all nodes working correctly?
-		for i in range(3):
-			for j in range(30):
-				self.orient.sendHello()
-			time.sleep(1)
-			self.orient.recvPacket()
-		
 		return True
 	
 	def disableCaptureMode(self):
@@ -82,19 +77,13 @@ class ConnectionManager:
 			self.nextSequenceNumber(),
 			False)
 		
-		self.orient.sendHello() # get node list
-		time.sleep(1)
-		self.orient.recvPacket()
-		print self.orient.connectedNodes
-		
-		i = 0
-		while self.orient.connectedNodes:
+		for i in xrange(10):
 			self.orient.send(packet)
-			time.sleep(1)
+			time.sleep(2)
 			self.orient.sendHello() # get node list
-			time.sleep(1)
-			self.orient.recvPacket()
-			print self.orient.connectedNodes
+			time.sleep(2)
+			if not self.orient.connectedNodes:
+				break
 		
 		# finally move basestation to aloha mode
 		packet = struct.pack("BBBBxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -103,3 +92,27 @@ class ConnectionManager:
 			self.nextSequenceNumber(),
 			False)
 		self.orient.send(packet)
+		
+		return True
+	
+	def sendEvent(self,events,id):
+		headers = struct.pack("BB",
+			id,
+			self.orient.PACKET_TYPES["EVENT"])
+		
+		remainder = 30
+		packet = headers
+		for e in events:
+			packet += struct.pack("B",
+				e)
+			remainder -= 1
+			if remainder == 0:
+				self.orient.send(packet)
+				packet = headers
+				remainder = 30
+		if remainder < 30:
+			packet += struct.pack("B" + str(remainder-1) + "x",
+				0) # null terminating
+			self.orient.send(packet)
+		
+		return True
