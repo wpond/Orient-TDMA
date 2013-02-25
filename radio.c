@@ -101,6 +101,8 @@ void RADIO_WriteRegister(uint8_t reg, uint8_t val)
 uint8_t RADIO_ReadRegister(uint8_t reg)
 {
 	
+	(void) scratch;
+	
 	while (true)
 	{
 		INT_Disable();
@@ -354,6 +356,7 @@ void RADIO_Flush(RADIO_Mode mode)
 	}
 	
 	uint8_t scratch;
+	(void) scratch;
 	
 	// wait for usart buffers to become clear
 	while (!(RADIO_USART->STATUS & USART_STATUS_TXBL));
@@ -467,7 +470,7 @@ bool RADIO_HandleIncomingPacket(PACKET_Raw *packet)
 			return true;
 		
 		case PACKET_TDMA_SLOT:
-			TDMA_PacketSlotAllocation(packet);
+			//TDMA_PacketSlotAllocation(packet);
 			return true;
 		
 		case PACKET_EVENT:
@@ -586,6 +589,20 @@ bool RADIO_PacketUpload(uint8_t packet[32])
 	if (transferActive)
 		return false;
 	
+	if (packet[1] == PACKET_TRANSPORT_ACK)
+	{
+		PACKET_Raw pRaw;
+		pRaw.addr = 0x00;
+		pRaw.type = PACKET_EVENT;
+		pRaw.payload[0] = 0xFE;
+		pRaw.payload[1] = 0x00;
+		USB_Transmit((uint8_t*)&pRaw,32);
+		
+		char tmsg[255];
+		sprintf(tmsg,"%i: sending ACK packet [%i %i]\n\n",(int)TIMER_CounterGet(TIMER1),(int)packet[0],(int)packet[1]);
+		TRACE(tmsg);
+	}
+	
 	transferActive = true;
 	transmitActive = true;
 	
@@ -642,10 +659,6 @@ bool RADIO_PacketUpload(uint8_t packet[32])
 	cfg.dst		= (void *) &scratch;
 	cfg.nMinus1 = 31;
 	DMA_CfgDescrScatterGather(dmaRxBlock, 1, &cfg);
-	
-	//schar tmsg[255];
-	//sprintf(tmsg,"%i: Sending [%2.2X]\n",TIMER_CounterGet(TIMER1),packet[1]);
-	//TRACE(tmsg);
 	
 	INT_Disable();
 	

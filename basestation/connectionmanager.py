@@ -22,9 +22,6 @@ class ConnectionManager:
 		self.sequenceNumber = (self.sequenceNumber + 1) % 16
 		return self.sequenceNumber
 	
-	def ackReceived(self,packet):
-		(self.lastAck,) = struct.unpack("xxBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",packet)
-	
 	def enableCaptureMode(self,ids,config):
 		if config["slotCount"] < len(ids):
 			return False

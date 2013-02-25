@@ -21,6 +21,15 @@
 	}
 	TDMA_Config;
 	
+	typedef struct
+	{
+		bool enabled;
+		uint8_t slot;
+		uint8_t len;
+		uint8_t lease;
+	}
+	TDMA_SecondSlot;
+	
 	void TDMA_Init();
 	void TDMA_Enable(bool enable);
 	void TDMA_CheckSync();
@@ -31,6 +40,6 @@
 	
 	bool TDMA_PacketConfigure(PACKET_Raw *packet);
 	bool TDMA_PacketEnable(PACKET_Raw *packet);
-	void TDMA_PacketSlotAllocation(PACKET_Raw *packet);
+	void TDMA_ConfigureSecondSlot(TDMA_SecondSlot *slot);
 	
 #endif

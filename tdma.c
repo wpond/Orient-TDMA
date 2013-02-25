@@ -25,9 +25,11 @@ void TDMA_SyncTimers(uint32_t time);
 void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transfer);
 void TDMA_SendAck(PACKET_Raw *packet);
 void TDMA_SendSlotEvent();
+void TDMA_EnableSecondSlot(bool enable);
 
 /* variables */
 TDMA_Config config;
+TDMA_SecondSlot secondSlot;
 bool syncTimers = false;
 
 bool timingPacketReceived = false;
@@ -127,7 +129,7 @@ void TIMER0_IRQHandler()
 			TDMA_SyncTimers(time);
 		}
 		
-		sprintf(tmsg,"%i: TIMER0 CC2 (RADIO IRQ)\n",TIMER_CounterGet(TIMER0));
+		sprintf(tmsg,"%i: TIMER0 CC2 (RADIO IRQ)\n",(int)TIMER_CounterGet(TIMER0));
 		TRACE(tmsg);
 		RADIO_IRQHandler();
 		txCount++;
@@ -140,7 +142,7 @@ void TIMER0_IRQHandler()
 	{
 		RADIO_SetMode(RADIO_OFF);
 		
-		sprintf(tmsg,"%i: TIMER0 CC0\n",TIMER_CounterGet(TIMER0));
+		sprintf(tmsg,"%i: TIMER0 CC0\n",(int)TIMER_CounterGet(TIMER0));
 		//TRACE(tmsg);
 	}
 	
@@ -160,12 +162,9 @@ void TIMER0_IRQHandler()
 		RADIO_EnableAutoTransmit(false);
 		RADIO_SetMode(RADIO_TX);
 		TDMA_EnableTxCC(true);
-		
-		//TRANSPORT_ReloadReady();
-		
 		TDMA_QueuePacket();
 		
-		sprintf(tmsg,"%i: TIMER0 CC1\n",TIMER_CounterGet(TIMER0));
+		sprintf(tmsg,"%i: TIMER0 CC1\n",(int)TIMER_CounterGet(TIMER0));
 		//TRACE(tmsg);
 	}
 	
@@ -196,7 +195,7 @@ void TIMER1_IRQHandler()
 			syncTimers = true;
 		}
 		
-		sprintf(tmsg,"%i: TX count = %i\n",TIMER_CounterGet(TIMER1),txCount);
+		sprintf(tmsg,"%i: TX count = %i\n",(int)TIMER_CounterGet(TIMER1),txCount);
 		TRACE(tmsg);
 		
 		txCount = 0;
@@ -219,7 +218,7 @@ void TIMER1_IRQHandler()
 			
 		}
 		
-		sprintf(tmsg,"%i: TIMER1 CC0\n",TIMER_CounterGet(TIMER1));
+		sprintf(tmsg,"%i: TIMER1 CC0\n",(int)TIMER_CounterGet(TIMER1));
 		//TRACE(tmsg);
 	}
 	
@@ -238,7 +237,7 @@ void TIMER1_IRQHandler()
 			
 		}
 		
-		sprintf(tmsg,"%i: TIMER1 CC1\n",TIMER_CounterGet(TIMER1));
+		sprintf(tmsg,"%i: TIMER1 CC1\n",(int)TIMER_CounterGet(TIMER1));
 		//TRACE(tmsg);
 	}
 	
@@ -257,11 +256,49 @@ void TIMER1_IRQHandler()
 			
 		}
 		
-		sprintf(tmsg,"%i: TIMER1 CC2\n",TIMER_CounterGet(TIMER1));
+		sprintf(tmsg,"%i: TIMER1 CC2\n",(int)TIMER_CounterGet(TIMER1));
 		//TRACE(tmsg);
 	}
 	
 	TIMER_IntClear(TIMER1,flags);
+	
+}
+
+void TIMER3_IRQHandler()
+{
+	
+	uint32_t flags = TIMER_IntGet(TIMER3);
+	char tmsg[255];
+	
+	if (flags & TIMER_IF_CC0)
+	{
+		TIMER_CompareSet(TIMER1, 0, config.guardPeriod + (config.guardPeriod + config.transmitPeriod) * secondSlot.slot);
+		RADIO_EnableAutoTransmit(false);
+		RADIO_SetMode(RADIO_TX);
+		TDMA_EnableTxCC(true);
+		TDMA_QueuePacket();
+		sprintf(tmsg,"%i: TIM3_CC0\n",(int)TIMER_CounterGet(TIMER3));
+		TRACE(tmsg);
+	}
+	if (flags & TIMER_IF_CC1)
+	{
+		RADIO_EnableAutoTransmit(false);
+		sprintf(tmsg,"%i: TIM3_CC1\n",(int)TIMER_CounterGet(TIMER3));
+		TRACE(tmsg);
+	}
+	if (flags & TIMER_IF_CC2)
+	{
+		TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * config.slot));
+		if (secondSlot.lease > 0)
+			secondSlot.lease--;
+		if (secondSlot.lease == 0)
+			TDMA_EnableSecondSlot(false);
+		RADIO_SetMode(RADIO_OFF);
+		sprintf(tmsg,"%i: TIM3_CC2\n",(int)TIMER_CounterGet(TIMER3));
+		TRACE(tmsg);
+	}
+	
+	TIMER_IntClear(TIMER3,flags);
 	
 }
 
@@ -283,6 +320,7 @@ void TDMA_Enable(bool enable)
 	
 	TIMER_Reset(TIMER0);
 	TIMER_Reset(TIMER1);
+	TIMER_Reset(TIMER3);
 	
 	if (!enable)
 	{
@@ -302,12 +340,14 @@ void TDMA_Enable(bool enable)
 	
 	TIMER_TopSet(TIMER0,top);
 	TIMER_TopSet(TIMER1,top);
+	TIMER_TopSet(TIMER3,top);
 	
 	TIMER0->ROUTE |= (TIMER_ROUTE_CC2PEN | TIMER_ROUTE_LOCATION_LOC2);
 	TIMER1->ROUTE |= (TIMER_ROUTE_CC0PEN | TIMER_ROUTE_LOCATION_LOC4);
 	
 	TIMER_Init(TIMER0, &timerInit);
 	TIMER_Init(TIMER1, &timerInit);
+	TIMER_Init(TIMER3, &timerInit);
 	
 	if (config.master)
 	{
@@ -343,6 +383,10 @@ void TDMA_Enable(bool enable)
 	TIMER_IntDisable(TIMER1,TIMER_IF_CC0);
 	TIMER_IntDisable(TIMER1,TIMER_IF_CC1);
 	TIMER_IntDisable(TIMER1,TIMER_IF_CC2);
+	
+	TIMER_IntDisable(TIMER3,TIMER_IF_CC0);
+	TIMER_IntDisable(TIMER3,TIMER_IF_CC1);
+	TIMER_IntDisable(TIMER3,TIMER_IF_CC2);
 	
 	TIMER_InitCC(TIMER0, 2, &timerCCIrq);
 	TIMER_IntEnable(TIMER0,TIMER_IF_CC2);
@@ -400,6 +444,8 @@ void TDMA_Enable(bool enable)
 	TIMER_IntEnable(TIMER1,TIMER_IF_CC2);
 	INT_Enable();
 	
+	secondSlot.enabled = false;
+	
 }
 void TDMA_SyncTimers(uint32_t time)
 {
@@ -412,11 +458,12 @@ void TDMA_SyncTimers(uint32_t time)
 
 	TIMER_CounterSet(TIMER0, time);
 	TIMER_CounterSet(TIMER1, time);
+	TIMER_CounterSet(TIMER3, time);
 	
 	INT_Enable();
 
 	char tmsg[255];
-	sprintf(tmsg, "Time sync'd to: %i\n", time);
+	sprintf(tmsg, "Time sync'd to: %i\n", (int)time);
 	//TRACE(tmsg);
 	
 }
@@ -546,7 +593,7 @@ void TDMA_CheckSync()
 	
 	if (syncMissCount > 3)
 	{
-		//TRACE("OUT OF SYNC\n");
+		TRACE("OUT OF SYNC\n");
 		TDMA_Enable(true);
 	}
 	
@@ -621,10 +668,18 @@ bool TDMA_PacketEnable(PACKET_Raw *packet)
 	
 }
 
-void TDMA_PacketSlotAllocation(PACKET_Raw *packet)
+void TDMA_SlotAllocation(uint8_t slot, uint8_t len, uint8_t lease, uint8_t seq)
 {
-	TDMA_SendAck(packet);
-	// pass on this for now
+	PACKET_Raw ack;
+	ack.addr = BASESTATION_ID;
+	ack.type = PACKET_TDMA_ACK;
+	PACKET_TDMA *ackTDMA = (PACKET_TDMA*)ack.payload;
+	ackTDMA->seqNum = seq;
+	
+	RADIO_Send((uint8_t*)&ack);
+	
+	// run configuration
+	
 }
 
 void TDMA_SendSlotEvent()
@@ -634,5 +689,48 @@ void TDMA_SendSlotEvent()
 	pRaw.type = PACKET_EVENT;
 	pRaw.payload[0] = 0xFF;
 	pRaw.payload[1] = 0x00;
+	char tmsg[255];
+	sprintf(tmsg,"%i: Sending SLOT event\n",(int)TIMER_CounterGet(TIMER1));
+	TRACE(tmsg);
 	USB_Transmit((uint8_t*)&pRaw,32);
+}
+
+void TDMA_ConfigureSecondSlot(TDMA_SecondSlot *slot)
+{
+	memcpy((void*)&secondSlot,(void*)slot,sizeof(TDMA_SecondSlot));
+	TDMA_EnableSecondSlot(secondSlot.enabled);
+}
+
+void TDMA_EnableSecondSlot(bool enable)
+{
+	if (enable)
+	{
+		TIMER_CompareSet(TIMER3, 0, (config.guardPeriod + config.transmitPeriod) * secondSlot.slot);
+		TIMER_CompareSet(TIMER3, 1, (config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len) - config.protectionPeriod);
+		TIMER_CompareSet(TIMER3, 2, (config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len) - 1);
+		
+		INT_Disable();
+		TIMER_InitCC(TIMER3, 0, &timerCCCompare);
+		TIMER_InitCC(TIMER3, 1, &timerCCCompare);
+		TIMER_InitCC(TIMER3, 2, &timerCCCompare);
+		
+		TIMER_IntClear(TIMER3,TIMER_IF_CC0);
+		TIMER_IntClear(TIMER3,TIMER_IF_CC1);
+		TIMER_IntClear(TIMER3,TIMER_IF_CC2);
+		
+		TIMER_IntEnable(TIMER3,TIMER_IF_CC0);
+		TIMER_IntEnable(TIMER3,TIMER_IF_CC1);
+		TIMER_IntEnable(TIMER3,TIMER_IF_CC2);
+		INT_Enable();
+	}
+	else
+	{
+		INT_Disable();
+		TIMER_IntDisable(TIMER3,TIMER_IF_CC0);
+		TIMER_IntDisable(TIMER3,TIMER_IF_CC1);
+		TIMER_IntDisable(TIMER3,TIMER_IF_CC2);
+		INT_Enable();
+	}
+	
+	secondSlot.enabled = enable;
 }

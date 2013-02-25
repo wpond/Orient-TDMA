@@ -128,6 +128,7 @@ void InitClocks()
 
 	// enable clock to RTC
 	CMU_ClockEnable(cmuClock_RTC, true);
+	RTC_Reset();
 	RTC_Enable(true);
 	
 	// enable radio usart
@@ -140,8 +141,10 @@ void InitClocks()
 	// enable timers 
 	CMU_ClockEnable(cmuClock_TIMER0, true);
 	CMU_ClockEnable(cmuClock_TIMER1, true);
+	CMU_ClockEnable(cmuClock_TIMER3, true);
 	TIMER_Reset(TIMER0);
 	TIMER_Reset(TIMER1);
+	TIMER_Reset(TIMER3);
 	
 }
 
@@ -152,14 +155,16 @@ void EnableInterrupts()
 	
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
+	NVIC_EnableIRQ(TIMER3_IRQn);
 	
-	NVIC_SetPriority(USB_IRQn, 4);
-	NVIC_SetPriority(DMA_IRQn, 0);
+	NVIC_SetPriority(USB_IRQn, 0);
+	NVIC_SetPriority(DMA_IRQn, 1);
 	
-	NVIC_SetPriority(TIMER0_IRQn, 1);
-	NVIC_SetPriority(TIMER1_IRQn, 2);
+	NVIC_SetPriority(TIMER0_IRQn, 2);
+	NVIC_SetPriority(TIMER1_IRQn, 3);
+	NVIC_SetPriority(TIMER3_IRQn, 3);
 	
-	NVIC_SetPriority(GPIO_EVEN_IRQn, 3);
+	NVIC_SetPriority(GPIO_EVEN_IRQn, 4);
 	
 }
 
@@ -255,7 +260,9 @@ int main()
 		
 		// data generation
 		bool generateData = false;
-		int i = 0;
+		uint8_t data[75], i;
+		for (i = 0; i < 75; i++)
+			data[i] = i;
 		
 		while (1)
 		{
@@ -296,6 +303,16 @@ int main()
 				}
 			}
 			
+			if (generateData)
+			{
+				TRANSPORT_Send(data,75);
+				/*
+				if (!TRANSPORT_Send(data,75))
+					TRACE("Unable to send data with transport layer\n");
+				*/
+			}
+			
+			/*
 			if (i++ % 100000 == 1 && generateData)
 			{
 				uint8_t data[80], i;
@@ -304,6 +321,7 @@ int main()
 				if (!TRANSPORT_Send(data,80))
 					TRACE("Unable to send data with transport layer\n");
 			}
+			*/
 			
 			TDMA_CheckSync();
 			

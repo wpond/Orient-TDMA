@@ -30,11 +30,13 @@
 #include "efm32_dma.h"
 #include "efm32_gpio.h"
 #include "efm32_int.h"
+#include "efm32_rtc.h"
 #include "efm32_usb.h"
 #include "efm32_usart.h"
 
 #include "queue.h"
 #include "usb.h"
+#include "led.h"
 #include "config.h"
 
 /**************************************************************************//**
@@ -126,14 +128,14 @@ static volatile bool           usbOnline, usbActive;
 // as on the base station all of these will need to be queued to 
 //		be sent back - this should ensure no waiting when  
 //		handling this
-#define USB_BUFFER_SIZE 1280
-#define USB_SEND_BUFFER_SIZE 256
+#define USB_SEND_QUEUE_SIZE 1280
+#define USB_SEND_BUFFER_SIZE 32
 
-uint8_t usbMemory[USB_BUFFER_SIZE],
-	usbSendBuffer[USB_SEND_BUFFER_SIZE];
-uint16_t usbStart = 0,
-	usbLen = 0,
-	transferring = 0;
+uint8_t usbSendMem[USB_SEND_QUEUE_SIZE],
+	usbXferMem[USB_SEND_BUFFER_SIZE];
+uint16_t usbQueueStart = 0,
+	usbQueueLen = 0,
+	usbTransferring = 0;
 queue_t usbQueue;
 uint8_t usbRecvMem[USB_RECV_SIZE * 32],
 	usbRecvPacket[32],
@@ -164,7 +166,7 @@ void USB_Init(void)
 	
 	while(!usbOnline);
 
-	TRACE("USB OK\n");
+	//TRACE("USB OK\n");
     
 }
 
@@ -210,42 +212,37 @@ bool USB_Recv(uint8_t packet[32])
 	return QUEUE_Dequeue(&usbQueue,packet);
 }
 
-static void USB_Send();
+static int USB_TransmitComplete(USB_Status_TypeDef status,
+                              uint32_t xferred,
+                              uint32_t remaining);
 
-static void USB_Queue(uint8_t *data, uint16_t len)
+void USB_Send()
 {
 	
-	uint8_t *pos = data;
+	if (!usbOnline)
+		return;
 	
-	while (len > 0)
+	INT_Disable();
+	
+	if (usbActive || usbQueueLen == 0)
 	{
-		
-		while (usbLen >= USB_BUFFER_SIZE);
-		
-		INT_Disable();
-		uint16_t usbEnd = (usbStart + usbLen) % USB_BUFFER_SIZE;
-		
-		if (usbStart <= usbEnd)
-		{
-			uint16_t toWrite = (USB_BUFFER_SIZE - usbEnd > len) ? len : USB_BUFFER_SIZE - usbEnd;
-			memcpy((void*)&usbMemory[usbEnd], (void*)pos, toWrite);
-			pos += toWrite;
-			len -= toWrite;
-			usbLen = (usbLen + toWrite) % USB_BUFFER_SIZE;
-		}
-		else
-		{
-			uint16_t toWrite = (USB_BUFFER_SIZE - usbLen > len) ? len : USB_BUFFER_SIZE - usbLen;
-			memcpy((void*)&usbMemory[usbEnd], (void*)pos, toWrite);
-			pos += toWrite;
-			len -= toWrite;
-			usbLen = (usbLen + toWrite) % USB_BUFFER_SIZE;
-		}
 		INT_Enable();
-		
+		return;
 	}
 	
-	USB_Send();
+	usbActive = true;
+	
+	uint8_t* buf = &usbSendMem[usbQueueStart];
+	uint16_t len = (USB_SEND_QUEUE_SIZE - usbQueueStart > usbQueueLen) ? usbQueueLen : USB_SEND_QUEUE_SIZE - usbQueueStart;
+	
+	len = (len < USB_SEND_BUFFER_SIZE) ? len : USB_SEND_BUFFER_SIZE;
+	
+	memcpy(usbXferMem,buf,len);
+	
+	USBD_Write(EP_DATA_IN, usbXferMem, len, USB_TransmitComplete);
+	
+	usbTransferring = len;
+	INT_Enable();
 	
 }
 
@@ -256,72 +253,77 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
   (void) xferred;              /* Unused parameter */
   (void) remaining;            /* Unused parameter */
 	
-	INT_Disable();
-	
-	usbActive = false;
-
-	usbStart = (usbStart + transferring) % USB_BUFFER_SIZE;
-	usbLen -= transferring;
-	transferring = 0;
-
-	USB_Send();
-	
-	INT_Enable();
+	if (status == USB_STATUS_OK)
+	{
+		INT_Disable();
+		usbActive = false;
+		
+		usbQueueStart = (usbQueueStart + xferred) % USB_SEND_QUEUE_SIZE;
+		usbQueueLen -= xferred;
+		usbTransferring = 0;
+		USB_Send();
+		INT_Enable();
+		
+	}
 	
 	return USB_STATUS_OK;
 }
 
-static void USB_Send()
+bool USB_Transmit(uint8_t *data, int len)
 {
 	
-	INT_Disable();
-	
-	if (!usbActive && usbLen > 0)
-	{
-	
-		transferring = (usbLen < USB_BUFFER_SIZE - usbStart) ? usbLen : USB_BUFFER_SIZE - usbStart;
-		
-		if (transferring > USB_SEND_BUFFER_SIZE)
-			transferring = USB_SEND_BUFFER_SIZE;
-		
-		memcpy(usbSendBuffer, &usbMemory[usbStart], transferring);
-		
-		if (transferring > 0)
-		{
-			usbActive = true;
-			USBD_Write(EP_DATA_IN, usbSendBuffer, transferring, USB_TransmitComplete);
-		}
-		
-	}
-	
-	INT_Enable();
-	
-}
-
-bool USB_Transmit(uint8_t *buf, int len)
-{
-	
-    if (!usbOnline)
+    if (!usbOnline || len > USB_SEND_QUEUE_SIZE)
+    {
         return false;
-    
-    if (usbActive)
-	{
-		USB_Queue(buf,len);
-	}
-	else
-	{	
-		INT_Disable();
-		usbActive = true;
-		transferring = 0;
-		USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
-		INT_Enable();
 	}
 	
 	/*
-	while (usbActive);
-	usbActive = true;
-	USBD_Write(EP_DATA_IN, buf, len, USB_TransmitComplete);
+	while (true)
+	{
+		
+		while ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len && usbActive);
+		
+		INT_Disable();
+		if ((USB_SEND_QUEUE_SIZE - usbQueueLen) >= len)
+		{
+			break;
+		}
+		INT_Enable();
+		
+		USB_Send();
+		
+	}
 	*/
+	
+	INT_Disable();
+	if ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len)
+	{
+		INT_Enable();
+		return false;
+	}
+	
+	uint16_t usbQueueEnd = (usbQueueStart + usbQueueLen) % USB_SEND_QUEUE_SIZE;
+	
+	uint16_t totalLen = len, remaining, toCopy;
+	while (len > 0)
+	{
+		
+		remaining = USB_SEND_QUEUE_SIZE - usbQueueEnd;
+		toCopy = (remaining > len) ? len : remaining;
+		memcpy(&usbSendMem[usbQueueEnd],data,toCopy);
+		usbQueueEnd = (usbQueueEnd + toCopy) % USB_SEND_QUEUE_SIZE;
+		len -= toCopy;
+		data += toCopy;
+		
+	}
+	
+	usbQueueLen += totalLen;
+	
+	if (!usbActive)
+		USB_Send();
+	
+	INT_Enable();
+	
     return true;
 }
 

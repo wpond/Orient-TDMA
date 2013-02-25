@@ -11,6 +11,7 @@
 #include "packets.h"
 #include "radio.h"
 #include "queue.h"
+#include "tdma.h"
 
 /* variables */
 uint8_t windowFrameStart = 0,
@@ -38,189 +39,202 @@ void TRANSPORT_Init()
 bool TRANSPORT_Send(uint8_t *data, uint8_t len)
 {
 	
-	PACKET_Raw pRaw;
-	PACKET_TransportData *pTrans;
-	uint8_t segId = 0;
-	
-	// try to store in buffer
-	while (len > 0)
-	{
+	#ifndef BASESTATION
+		PACKET_Raw pRaw;
+		PACKET_TransportData *pTrans;
+		uint8_t segId = 0;
 		
-		pRaw.addr = 0x00;
-		pRaw.type = PACKET_TRANSPORT_DATA;
-		pTrans = (PACKET_TransportData*)pRaw.payload;
+		if (len / 25 > TRANSPORT_QUEUE_SIZE - QUEUE_Count(&transportQueue) - 1)
+			return false;
 		
-		pTrans->senderId = NODE_ID;
-		pTrans->frameId = currentFrame;
-		pTrans->segmentId = segId++;
-		
-		if (len < 25)
+		// try to store in buffer
+		while (len > 0)
 		{
-			pTrans->segmentFill = len;
-			pTrans->flags = TRANSPORT_FLAG_SEGMENT_END;
-			memcpy(pTrans->data,data,len);
-			data += len;
-			len = 0;
-		}
-		else
-		{
-			pTrans->segmentFill = 25;
-			pTrans->flags = 0;
-			memcpy(pTrans->data,data,25);
-			data += 25;
-			len -= 25;
-		}
-		
-		if (bufferFull)
-			pTrans->flags |= TRANSPORT_FLAG_BUFFER_FULL;
-		
-		if (QUEUE_IsEmpty(&transportQueue) && segId == 1)
-			nextSegmentEnd = true;
-		
-		INT_Disable();
-		bool result = QUEUE_Queue(&transportQueue,(uint8_t*)&pRaw);
-		INT_Enable();
-		
-		if (!result)
-		{
-			bufferFull = true;
-			pTrans->flags |= TRANSPORT_FLAG_BUFFER_FULL;
 			
-			// store in alternate buffer
+			pRaw.addr = 0x00;
+			pRaw.type = PACKET_TRANSPORT_DATA;
+			pTrans = (PACKET_TransportData*)pRaw.payload;
+			
+			pTrans->senderId = NODE_ID;
+			pTrans->frameId = currentFrame;
+			pTrans->segmentId = segId++;
+			
+			if (len <= 25)
+			{
+				pTrans->segmentFill = len;
+				pTrans->flags = TRANSPORT_FLAG_SEGMENT_END;
+				memcpy(pTrans->data,data,len);
+				data += len;
+				len = 0;
+			}
+			else
+			{
+				pTrans->segmentFill = 25;
+				pTrans->flags = 0;
+				memcpy(pTrans->data,data,25);
+				data += 25;
+				len -= 25;
+			}
+			
+			if (bufferFull)
+				pTrans->flags |= TRANSPORT_FLAG_BUFFER_FULL;
+			
+			if (QUEUE_IsEmpty(&transportQueue) && segId == 1)
+				nextSegmentEnd = true;
+			
+			INT_Disable();
+			bool result = QUEUE_Queue(&transportQueue,(uint8_t*)&pRaw);
+			INT_Enable();
+			
+			if (!result)
+			{
+				bufferFull = true;
+				pTrans->flags |= TRANSPORT_FLAG_BUFFER_FULL;
+				
+				// store in alternate buffer
+			}
+			
 		}
 		
-	}
-	
-	currentFrame++;
-	
-	// if not, store on SD card
-	if (firstSend)
-	{
-		pendingReload = true;
-		TRANSPORT_Reload();
-		firstSend = false;
-	}
-	
-	return true;
+		currentFrame = (currentFrame + 1) % 255;
+		
+		// if not, store on SD card
+		if (firstSend)
+		{
+			pendingReload = true;
+			TRANSPORT_Reload();
+			firstSend = false;
+		}
+		
+		return true;
+	#else
+		return false;
+	#endif
 	
 }
 
 void TRANSPORT_Recv(PACKET_Raw *packet)
 {
-	
-	PACKET_TransportAck *ackPacket = NULL;
-	
-	switch (packet->type)
-	{
-	case PACKET_TRANSPORT_ACK:
+	#ifndef BASESTATION
+		PACKET_TransportAck *ackPacket = NULL;
 		
-		ackPacket = (PACKET_TransportAck*)packet->payload;
-		windowFrameStart = ackPacket->lastFrameId;
-		windowSegmentStart = ackPacket->lastSegmentId;
-		
-		/*
-		// update window start and end
-		if (windowFrameStart <= ackPacket->lastFrameId)
+		switch (packet->type)
 		{
+		case PACKET_TRANSPORT_ACK:
 			
+			ackPacket = (PACKET_TransportAck*)packet->payload;
 			windowFrameStart = ackPacket->lastFrameId;
 			windowSegmentStart = ackPacket->lastSegmentId;
 			
-		}
-		else if (windowSegmentStart < ackPacket->lastSegmentId)
-		{
+			if (ackPacket->secondSlot)
+			{
+				TDMA_SecondSlot slot;
+				slot.slot = ackPacket->slotId;
+				slot.len = ackPacket->len;
+				slot.lease = ackPacket->lease;
+				slot.enabled = true;
+				
+				TDMA_ConfigureSecondSlot(&slot);
+				
+				char tmsg[255];
+				sprintf(tmsg,"%i: Second slot received [id: %i; len: %i; lease: %i]\n",(int)TIMER_CounterGet(TIMER1),(int)slot.slot,(int)slot.len,(int)slot.lease);
+				TRACE(tmsg);
+				
+				PACKET_Raw pRaw;
+				pRaw.addr = 0;
+				pRaw.type = PACKET_TDMA_ACK;
+				pRaw.payload[0] = ackPacket->seqNum;
+				
+				RADIO_Send((uint8_t*)&pRaw);
+			}
 			
-			windowSegmentStart = ackPacket->lastSegmentId;
+			char tmsg[255];
+			sprintf(tmsg,"%i: Transport ack %i/%i received (seg/frame)\n",(int)TIMER_CounterGet(TIMER1),(int)ackPacket->lastSegmentId,(int)ackPacket->lastFrameId);
+			TRACE(tmsg);
 			
-		}
-		*/
-		
-		char tmsg[255];
-		sprintf(tmsg,"%i: Transport ack %i/%i received (seg/frame)\n",TIMER_CounterGet(TIMER1),ackPacket->lastSegmentId,ackPacket->lastFrameId);
-		TRACE(tmsg);
-		
-		break;
-	case PACKET_TRANSPORT_DATA:
-		break;
-	default:
-		break;
-	}
-	
-	PACKET_Raw *packetPtr = NULL;
-	PACKET_TransportData *pData = NULL;
-	uint8_t expFrame = windowFrameStart, expSeg = (windowSegmentStart + 1) % 0xFF;
-	
-	if (expSeg == 0)
-	{
-		expFrame = (windowFrameStart + 1) % 0xFF;
-	}
-	
-	char tmsg[255];
-	sprintf(tmsg,"%i: Transport %i/%i expected next (seg/frame)\n",TIMER_CounterGet(TIMER1),expSeg,expFrame);
-	TRACE(tmsg);
-	
-	packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,false);
-	
-	while (packetPtr != NULL)
-	{
-		pData = (PACKET_TransportData*)packetPtr->payload;
-		if ((!(nextSegmentEnd) && pData->frameId == expFrame && pData->segmentId == expSeg) ||
-			((nextSegmentEnd) && (pData->frameId == ((expFrame + 1) % 255)) && pData->segmentId == 0))
-		{
+			break;
+		case PACKET_TRANSPORT_DATA:
+			break;
+		default:
 			break;
 		}
-		nextSegmentEnd = pData->flags & TRANSPORT_FLAG_SEGMENT_END;
-		packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,true);
-		if (packetPtr == NULL)
-			break;
+		
+		PACKET_Raw *packetPtr = NULL;
+		PACKET_TransportData *pData = NULL;
+		uint8_t expFrame = windowFrameStart, expSeg = (windowSegmentStart + 1) % 0xFF;
+		
+		if (expSeg == 0)
+		{
+			expFrame = (windowFrameStart + 1) % 0xFF;
+		}
+		
 		char tmsg[255];
-		sprintf(tmsg,"%i: Transport %i/%i sent successfully (seg/frame)\n",TIMER_CounterGet(TIMER1),((PACKET_TransportData*)packetPtr->payload)->segmentId,((PACKET_TransportData*)packetPtr->payload)->frameId);
+		sprintf(tmsg,"%i: Transport %i/%i expected next (seg/frame)\n",(int)TIMER_CounterGet(TIMER1),(int)expSeg,(int)expFrame);
 		TRACE(tmsg);
 		
 		packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,false);
-	}
-	
-	
-	
-	packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,false);
-	
-	if (packetPtr != NULL)
-	{
-		char tmsg[255];
-		sprintf(tmsg,"%i: Transport %i/%i next to send [window start: %i/%i] (seg/frame)\n",TIMER_CounterGet(TIMER1),((PACKET_TransportData*)packetPtr->payload)->segmentId,((PACKET_TransportData*)packetPtr->payload)->frameId,windowSegmentStart,windowFrameStart);
-		TRACE(tmsg);
-	}
-	
-	pendingReload = true;
-	
+		
+		while (packetPtr != NULL)
+		{
+			pData = (PACKET_TransportData*)packetPtr->payload;
+			if ((!(nextSegmentEnd) && pData->frameId == expFrame && pData->segmentId == expSeg) ||
+				((nextSegmentEnd) && (pData->frameId == ((expFrame + 1) % 255)) && pData->segmentId == 0))
+			{
+				break;
+			}
+			nextSegmentEnd = pData->flags & TRANSPORT_FLAG_SEGMENT_END;
+			packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,true);
+			if (packetPtr == NULL)
+				break;
+			char tmsg[255];
+			sprintf(tmsg,"%i: Transport %i/%i sent successfully (seg/frame)\n",(int)TIMER_CounterGet(TIMER1),(int)((PACKET_TransportData*)packetPtr->payload)->segmentId,(int)((PACKET_TransportData*)packetPtr->payload)->frameId);
+			TRACE(tmsg);
+			
+			packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,false);
+		}
+		
+		
+		
+		packetPtr = (PACKET_Raw*)QUEUE_Peek(&transportQueue,false);
+		
+		if (packetPtr != NULL)
+		{
+			char tmsg[255];
+			sprintf(tmsg,"%i: Transport %i/%i next to send [window start: %i/%i] (seg/frame)\n",(int)TIMER_CounterGet(TIMER1),(int)((PACKET_TransportData*)packetPtr->payload)->segmentId,(int)((PACKET_TransportData*)packetPtr->payload)->frameId,(int)windowSegmentStart,(int)windowFrameStart);
+			TRACE(tmsg);
+		}
+		
+		pendingReload = true;
+	#endif
 }
 
 void TRANSPORT_Reload()
 {
 	
-	if (!pendingReload || loaded)
-		return;
-	
-	PACKET_Raw *packetPtr = NULL;
+	#ifndef BASESTATION
+		if (!pendingReload || loaded)
+			return;
 		
-	// check for reload of buffer from SD card
-	
-	// reload physical buffer
-	uint8_t i = 0;
-	do
-	{
-		packetPtr = (PACKET_Raw*)QUEUE_Get(&transportQueue,i++);
-	}
-	while (packetPtr != NULL && RADIO_Send((uint8_t*)packetPtr));
-	
-	
-	char tmsg[255];
-	sprintf(tmsg,"%i: Transport %i reloaded...%i/%i (seg/frame)\n",TIMER_CounterGet(TIMER1),i-1,windowSegmentStart,windowFrameStart);
-	TRACE(tmsg);
-	
-	pendingReload = false;
-	loaded = true;
-	
+		PACKET_Raw *packetPtr = NULL;
+			
+		// check for reload of buffer from SD card
+		
+		// reload physical buffer
+		uint8_t i = 0;
+		do
+		{
+			packetPtr = (PACKET_Raw*)QUEUE_Get(&transportQueue,i++);
+		}
+		while (packetPtr != NULL && RADIO_Send((uint8_t*)packetPtr));
+		
+		
+		char tmsg[255];
+		sprintf(tmsg,"%i: Transport %i reloaded...%i/%i (seg/frame)\n",(int)TIMER_CounterGet(TIMER1),(int)i-1,(int)windowSegmentStart,(int)windowFrameStart);
+		TRACE(tmsg);
+		
+		pendingReload = false;
+		loaded = true;
+	#endif
 }
 
 void TRANSPORT_ReloadReady()

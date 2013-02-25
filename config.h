@@ -21,26 +21,30 @@
 	#include <stdio.h>
 	#include <stdbool.h>
 	#include <string.h>
-
+	
+	#include "efm32_int.h"
+	
 	#include "usb.h"
 	
 	static void inline TRACE(char* msg)
 	{
 		#ifdef BASESTATION
-			uint8_t len;
+			INT_Disable();
+			uint8_t len, msglen;
 			bool end;
 			uint8_t packet[32];
+			msglen = strlen(msg);
 			
 			do
 			{
-				len = strlen(msg);
-				if (len > 28)
+				if (msglen > 28)
 				{
 					len = 28;
 					end = false;
 				}
 				else
 				{
+					len = msglen;
 					end = true;
 				}
 				packet[0] = 0;
@@ -50,8 +54,10 @@
 				memcpy(&packet[4],msg,len);
 				USB_Transmit((uint8_t*)packet,32);
 				msg += len;
+				msglen -= len;
 			}
-			while (!end);
+			while (msglen > 0);
+			INT_Enable();
 		#else
 			USB_Transmit((uint8_t*)msg,strlen(msg));
 		#endif

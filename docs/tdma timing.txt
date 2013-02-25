@@ -32,7 +32,7 @@ SLAVE
 	t=slot period (TIM0_CC0)
 		radio off
 
-	t=slot period * slot id (TIM0_CC1)
+	t=slot period * slot id (TIM0_CC1) [ REF 0 ]
 		disable auto transmit
 		config tx
 		enable timer CC
@@ -44,8 +44,23 @@ SLAVE
 		disable timer CC
 		enable auto transmit
 
-	t=slot period * (slot id + 1) - tx protection (TIM1_CC1)
+	t=slot period * (slot id + 1) - tx protection (TIM1_CC1) [ REF 1 ]
 		disable auto transmit
-
-	t=slot period * (slot id + 1) - 1 (TIM1_CC2)
+	
+	t=slot period * (slot id + 1) - 1 (TIM1_CC2) [ REF 2 ]
 		radio off
+	
+	[ SECOND SLOT ]
+	t=slot period * slot id (TIM3_CC0)
+		configure timer CC for second slot
+		[ REF 0 ]
+	
+	t=slot period * (slot id + 1 + slot count) - tx protection (TIM3_CC1)
+		[ REF 1 ]
+	
+	t=slot period * (slot id + 1) - 1 (TIM3_CC2)
+		configure timer CC for first slot
+		decrement lease
+		[ REF 2 ]
+	
+	[ END SECOND SLOT ]

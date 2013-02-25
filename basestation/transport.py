@@ -1,19 +1,22 @@
 import struct
+import Queue
 
 FLAG_SEGMENT_END = 0x01
 
 class Transport:
 	
 	acks = {}
+	outstandingAcks = 0
+	partialPacket = ""
+	packets = {}
 	
 	def __init__(self,parent):
 		self.parent = parent
 	
 	def recv(self,packet):
-		print struct.unpack("xxBBBBB25x",packet)
+		#print struct.unpack("xxBBBBB25x",packet)
 		(senderId,frameId,segmentId,segmentFill,flags) = struct.unpack("xxBBBBB25x",packet)
 		valid = False
-		EoF = False
 		
 		if senderId in self.acks:
 			if self.acks[senderId]["flags"] & FLAG_SEGMENT_END:
@@ -22,7 +25,6 @@ class Transport:
 					self.acks[senderId]["lastSegmentId"] = segmentId
 					self.acks[senderId]["flags"] = flags
 					valid = True
-					EoF = True
 			elif self.acks[senderId]["lastFrameId"] == frameId and self.acks[senderId]["lastSegmentId"] + 1 == segmentId:
 				self.acks[senderId]["lastSegmentId"] = segmentId
 				self.acks[senderId]["flags"] = flags
@@ -35,6 +37,7 @@ class Transport:
 			}
 			valid = True
 		
+		# debug info
 		if not valid:
 			if self.acks[senderId]["flags"] & FLAG_SEGMENT_END:
 				expectedFrame = (self.acks[senderId]["lastFrameId"] + 1) % 0xFF
@@ -48,17 +51,76 @@ class Transport:
 				segmentId,
 				frameId)
 		
+		if valid:
+			self.partialPacket += packet[7:7+segmentFill]
+			
+			EoF = flags & FLAG_SEGMENT_END
+			'''
+			s = ""
+			if EoF:
+				print "FRAGMENT %d/%d EOF" % (segmentId,frameId)
+			else:
+				print "FRAGMENT %d/%d" % (segmentId,frameId)
+			print "==="
+			for i in xrange(segmentFill):
+				(b,) = struct.unpack("B",packet[i+7])
+				s += str(b) + " "
+			print s
+			print "==="
+			'''
+		
 		# if EoF forward data (or print)
-		if EoF:
-			pass
+		if valid and EoF:
+			if not senderId in self.packets:
+				self.packets[senderId] = Queue.Queue()
+			self.packets[senderId].put(self.partialPacket)
+			self.partialPacket = ""
+	
+	def recvPackets(self):
+		return self.packets
+	def clearPackets(self):
+		self.packets = {}
+	
+	def ackSent(self):
+		#print "ack sent"
+		self.outstandingAcks -= 1
+	
+	def clearAcks(self):
+		self.outstandingAcks = 0
 	
 	def sendAcks(self):
-		for id in self.parent.connectedNodes:
-			if not id in self.acks:
-				packet = struct.pack("BBBB28x",id,self.parent.PACKET_TYPES["TRANSPORT_ACK"],0xFE,0xFE)
+		if self.outstandingAcks == 0:
+			slotAllocs = self.parent.alloc.getAllocs()
+			self.parent.alloc.clearAllocs()
+			
+			for id in self.parent.connectedNodes:
+				if not id in self.acks:
+					packet = struct.pack("BBBB",id,self.parent.PACKET_TYPES["TRANSPORT_ACK"],0xFE,0xFE)
+					if id in slotAllocs:
+						packet += slotAllocs[id]
+						del slotAllocs[id]
+					else:
+						packet += struct.pack("B",False)
+					packet += struct.pack(str(32-len(packet)) + "x")
+					
+					self.parent.send(packet)
+					self.outstandingAcks += 1
+					#print "ACK %d (seg/frame): %d/%d" % (id,0xFE,0xFE)
+			
+			for id,state in self.acks.items():
+				packet = struct.pack("BBBB",id,self.parent.PACKET_TYPES["TRANSPORT_ACK"],state["lastFrameId"],state["lastSegmentId"])
+				if id in slotAllocs:
+					packet += slotAllocs[id]
+					del slotAllocs[id]
+				else:
+					packet += struct.pack("B",False)
+				packet += struct.pack(str(32-len(packet)) + "x")
+				
 				self.parent.send(packet)
-				print "ACK %d (seg/frame): %d/%d" % (id,0xFE,0xFE)
-		for id,state in self.acks.items():
-			packet = struct.pack("BBBB28x",id,self.parent.PACKET_TYPES["TRANSPORT_ACK"],state["lastFrameId"],state["lastSegmentId"])
-			self.parent.send(packet)
-			print "ACK %d (seg/frame): %d/%d" % (id,state["lastSegmentId"],state["lastFrameId"])
+				#print "ACK %d (seg/frame): %d/%d" % (id,state["lastSegmentId"],state["lastFrameId"])
+				self.outstandingAcks += 1
+			
+			if slotAllocs:
+				print "Unable to send the following allocations"
+				print slotAllocs
+			

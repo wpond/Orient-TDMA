@@ -14,6 +14,11 @@ class EventManager:
 			if e == 0:
 				break
 			
+			#print "EVENT RECVD [%d]" % e
+			
+			if e == 0xFE:
+				self.parent.transport.ackSent()
+			
 			if e == 0xFF:
 				self.parent.transport.sendAcks()
 			

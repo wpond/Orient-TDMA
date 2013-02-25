@@ -8,6 +8,8 @@ import debugger
 import eventmanager
 import transport
 import sys
+import alloc
+import bandwidthmonitor
 
 class OrientSerial:
 	
@@ -104,7 +106,7 @@ class OrientSerial:
 					if not id in self.parent.connectedNodes:
 						self.parent.connectedNodes.add(id)
 				elif type == self.parent.PACKET_TYPES["TDMA_ACK"]:
-					self.parent.connectionmanager.ackReceived(packet)
+					self.parent.alloc.handleAck(packet)
 				elif type == self.parent.PACKET_TYPES["EVENT"]:
 					self.parent.eventmanager.handle(packet)
 				elif type == self.parent.PACKET_TYPES["TRANSPORT_DATA"]:
@@ -125,7 +127,10 @@ class OrientSerial:
 		self.handler = OrientSerial.PacketHandler(self.recvr.queue,self)
 		self.eventmanager = eventmanager.EventManager(self)
 		self.transport = transport.Transport(self)
+		self.alloc = alloc.Alloc(5,10) # insert actual slot values here
+		self.bandwidthmonitor = bandwidthmonitor.BandwidthMonitor(self)
 		
+		self.bandwidthmonitor.start()
 		self.sender.start()
 		self.recvr.start()
 		self.handler.start()
@@ -140,10 +145,12 @@ class OrientSerial:
 		self.sender.stop()
 		self.recvr.stop()
 		self.handler.stop()
+		self.bandwidthmonitor.stop()
 		
 		self.sender.join()
 		self.recvr.join()
 		self.handler.join()
+		self.bandwidthmonitor.join()
 		
 		self.serial.close()
 	

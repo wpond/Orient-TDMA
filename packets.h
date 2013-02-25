@@ -10,7 +10,7 @@
 		PACKET_HELLO = 0x01,
 		PACKET_TDMA_CONFIG = 0x02,
 		PACKET_TDMA_ENABLE = 0x03,
-		PACKET_TDMA_SLOT = 0x04,
+		PACKET_TDMA_SLOT = 0x04, // piggyback on transport ack
 		PACKET_TDMA_ACK = 0x05,
 		PACKET_TRANSPORT_DATA = 0x06,
 		PACKET_TRANSPORT_ACK = 0x07,
@@ -52,17 +52,26 @@
 	}
 	PACKET_TransportData;
 	
-	#define TRANSPORT_FLAG_SEGMENT_END 0x01
-	#define TRANSPORT_FLAG_BUFFER_FULL 0x02
-	#define TRANSPORT_FLAG_SD_IN_USE 0x04
-	#define TRANSPORT_FLAG_SLOT_REQUEST 0x08
+	#define TRANSPORT_FLAG_SEGMENT_END 0x01 					// 0000 0001
+	#define TRANSPORT_FLAG_BUFFER_LEVEL_HIGH 0x02				// 0000 0010
+	#define TRANSPORT_FLAG_BUFFER_FULL 0x04 					// 0000 0100
+	#define TRANSPORT_FLAG_EXTERNAL_STORAGE_FULL 0x08 			// 0000 1000
+	#define TRANSPORT_FLAG_UNUSED_1 0x10						// 0001 0000
+	#define TRANSPORT_FLAG_UNUSED_2 0x20						// 0010 0000
+	#define TRANSPORT_FLAG_UNUSED_3 0x40						// 0100 0000
+	#define TRANSPORT_FLAG_SLOT_REQUEST 0x80					// 1000 0000
 	
 	typedef struct
 	{
 		
 		uint8_t lastFrameId;
 		uint8_t lastSegmentId;
-		uint8_t padding[28];
+		bool secondSlot;
+		uint8_t seqNum;
+		uint8_t slotId;
+		uint8_t len;
+		uint8_t lease;
+		uint8_t padding[23];
 		
 	}
 	PACKET_TransportAck;
