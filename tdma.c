@@ -16,6 +16,7 @@
 #include "aloha.h"
 #include "radio.h"
 #include "transport.h"
+#include "alloc.h"
 
 /* prototypes */
 void TDMA_QueuePacket();
@@ -26,6 +27,7 @@ void TDMA_RadioTransferComplete(unsigned int channel, bool primary, void *transf
 void TDMA_SendAck(PACKET_Raw *packet);
 void TDMA_SendSlotEvent();
 void TDMA_EnableSecondSlot(bool enable);
+void TDMA_SetSecondSlotReloadCallback(uint32_t time);
 
 /* variables */
 TDMA_Config config;
@@ -43,6 +45,9 @@ DMA_CB_TypeDef cb;
 bool timersSyncd = false;
 volatile uint16_t syncMissCount = 0;
 uint8_t txCount = 0;
+
+bool secondSlotReloadEnabled = true;
+uint32_t secondSlotReloadCallback;
 
 TIMER_Init_TypeDef timerInit =
 {
@@ -130,7 +135,7 @@ void TIMER0_IRQHandler()
 		}
 		
 		sprintf(tmsg,"%i: TIMER0 CC2 (RADIO IRQ)\n",(int)TIMER_CounterGet(TIMER0));
-		TRACE(tmsg);
+		//TRACE(tmsg);
 		RADIO_IRQHandler();
 		txCount++;
 	}
@@ -162,7 +167,8 @@ void TIMER0_IRQHandler()
 		RADIO_EnableAutoTransmit(false);
 		RADIO_SetMode(RADIO_TX);
 		TDMA_EnableTxCC(true);
-		TDMA_QueuePacket();
+		TDMA_QueuePacket(); // dup push with transport_reload
+		TRANSPORT_Reload();
 		
 		sprintf(tmsg,"%i: TIMER0 CC1\n",(int)TIMER_CounterGet(TIMER0));
 		//TRACE(tmsg);
@@ -180,12 +186,12 @@ void TIMER1_IRQHandler()
 	{
 		if (config.master)
 		{
-			TDMA_SendSlotEvent();
 			RADIO_EnableAutoTransmit(false);
 			RADIO_SetMode(RADIO_TX);
-			TDMA_QueueTimingPacket();
 			TDMA_EnableTxCC(true);
 			TRANSPORT_Reset();
+			//TDMA_SendSlotEvent();
+			TDMA_QueueTimingPacket();
 			//TRANSPORT_ReloadReady();
 		}
 		else
@@ -195,7 +201,7 @@ void TIMER1_IRQHandler()
 			syncTimers = true;
 		}
 		
-		sprintf(tmsg,"%i: TX count = %i\n",(int)TIMER_CounterGet(TIMER1),txCount);
+		sprintf(tmsg,"%i: IRQ count = %i\n",(int)TIMER_CounterGet(TIMER1),txCount);
 		TRACE(tmsg);
 		
 		txCount = 0;
@@ -276,24 +282,64 @@ void TIMER3_IRQHandler()
 		RADIO_EnableAutoTransmit(false);
 		RADIO_SetMode(RADIO_TX);
 		TDMA_EnableTxCC(true);
-		TDMA_QueuePacket();
+		TRANSPORT_ReloadReady();
+		TRANSPORT_Reload();
+		//TDMA_QueuePacket();
+		
+		if (secondSlot.len > 1)
+		{
+			secondSlotReloadEnabled = true;
+			secondSlotReloadCallback = (config.guardPeriod + config.transmitPeriod) * (secondSlot.slot) + config.guardPeriod + config.transmitPeriod/2;
+			TDMA_SetSecondSlotReloadCallback(secondSlotReloadCallback);
+		}
+		else
+		{
+			secondSlotReloadEnabled = false;
+			TDMA_SetSecondSlotReloadCallback((config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len) - 1);
+		}
+		
 		sprintf(tmsg,"%i: TIM3_CC0\n",(int)TIMER_CounterGet(TIMER3));
 		TRACE(tmsg);
 	}
 	if (flags & TIMER_IF_CC1)
 	{
+		TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * config.slot));
 		RADIO_EnableAutoTransmit(false);
+		secondSlotReloadEnabled = false;
+		TDMA_SetSecondSlotReloadCallback((config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len) - 1);
 		sprintf(tmsg,"%i: TIM3_CC1\n",(int)TIMER_CounterGet(TIMER3));
 		TRACE(tmsg);
 	}
 	if (flags & TIMER_IF_CC2)
 	{
-		TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * config.slot));
-		if (secondSlot.lease > 0)
-			secondSlot.lease--;
-		if (secondSlot.lease == 0)
-			TDMA_EnableSecondSlot(false);
-		RADIO_SetMode(RADIO_OFF);
+		if (secondSlotReloadEnabled)
+		{
+			if (secondSlotReloadCallback >= (config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len))
+			{
+				TDMA_SetSecondSlotReloadCallback((config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len) - 1);
+				secondSlotReloadEnabled = false;
+			}
+			else
+			{
+				secondSlotReloadCallback += config.transmitPeriod / 2;
+				
+				if (secondSlotReloadCallback > (config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len - 1))
+					secondSlotReloadCallback = (config.guardPeriod + config.transmitPeriod) * (secondSlot.slot + secondSlot.len - 1) - 1;
+				
+				TDMA_SetSecondSlotReloadCallback(secondSlotReloadCallback);
+				
+				TRANSPORT_ReloadReady();
+				TRANSPORT_Reload();
+			}
+		}
+		else
+		{
+			if (secondSlot.lease > 0)
+				secondSlot.lease--;
+			if (secondSlot.lease == 0)
+				TDMA_EnableSecondSlot(false);
+			RADIO_SetMode(RADIO_OFF);
+		}
 		sprintf(tmsg,"%i: TIM3_CC2\n",(int)TIMER_CounterGet(TIMER3));
 		TRACE(tmsg);
 	}
@@ -351,6 +397,8 @@ void TDMA_Enable(bool enable)
 	
 	if (config.master)
 	{
+		
+		ALLOC_Init(5,5); // TODO: get these values from config
 		
 		TIMER_CompareSet(TIMER1, 0, config.guardPeriod);
 		TIMER_CompareSet(TIMER1, 1, (config.guardPeriod + config.transmitPeriod) - config.protectionPeriod);
@@ -501,6 +549,13 @@ void TDMA_RadioTransfer(uint8_t data[33])
 	}
 	INT_Enable();
 	
+	if (data[2] == PACKET_TRANSPORT_DATA)
+	{
+		char tmsg[255];
+		sprintf(tmsg,"%i: sending DATA packet %i/%i\n",(int)TIMER_CounterGet(TIMER1),(int)data[5],(int)data[4]);
+		TRACE(tmsg);
+	}
+	
 	DMA_CfgChannel_TypeDef  rxChnlCfg;
 	DMA_CfgDescr_TypeDef    rxDescrCfg;
 	DMA_CfgChannel_TypeDef  txChnlCfg;
@@ -594,6 +649,7 @@ void TDMA_CheckSync()
 	if (syncMissCount > 3)
 	{
 		TRACE("OUT OF SYNC\n");
+		TDMA_EnableSecondSlot(false);
 		TDMA_Enable(true);
 	}
 	
@@ -668,18 +724,24 @@ bool TDMA_PacketEnable(PACKET_Raw *packet)
 	
 }
 
-void TDMA_SlotAllocation(uint8_t slot, uint8_t len, uint8_t lease, uint8_t seq)
+void TDMA_SlotAllocationPacket(PACKET_Raw *packet)
 {
-	PACKET_Raw ack;
-	ack.addr = BASESTATION_ID;
-	ack.type = PACKET_TDMA_ACK;
-	PACKET_TDMA *ackTDMA = (PACKET_TDMA*)ack.payload;
-	ackTDMA->seqNum = seq;
+	PACKET_TDMASlot *pTdma = (PACKET_TDMASlot*)packet->payload;
 	
-	RADIO_Send((uint8_t*)&ack);
+	TDMA_SecondSlot slot;
+	slot.slot = pTdma->slotId;
+	slot.len = pTdma->len;
+	slot.lease = pTdma->lease;
+	slot.enabled = true;
 	
-	// run configuration
+	TDMA_ConfigureSecondSlot(&slot);
 	
+	PACKET_Raw pRaw;
+	pRaw.addr = 0;
+	pRaw.type = PACKET_TDMA_ACK;
+	pRaw.payload[0] = pTdma->seqNum;
+	
+	RADIO_Send((uint8_t*)&pRaw);
 }
 
 void TDMA_SendSlotEvent()
@@ -733,4 +795,9 @@ void TDMA_EnableSecondSlot(bool enable)
 	}
 	
 	secondSlot.enabled = enable;
+}
+
+void TDMA_SetSecondSlotReloadCallback(uint32_t time)
+{
+	TIMER_CompareSet(TIMER3, 2, time);
 }

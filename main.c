@@ -22,6 +22,7 @@
 #include "aloha.h"
 #include "transport.h"
 #include "eventmanager.h"
+#include "alloc.h"
 
 /* variables */
 
@@ -160,7 +161,7 @@ void EnableInterrupts()
 	NVIC_SetPriority(USB_IRQn, 0);
 	NVIC_SetPriority(DMA_IRQn, 1);
 	
-	NVIC_SetPriority(TIMER0_IRQn, 2);
+	NVIC_SetPriority(TIMER0_IRQn, 3);
 	NVIC_SetPriority(TIMER1_IRQn, 3);
 	NVIC_SetPriority(TIMER3_IRQn, 3);
 	
@@ -231,8 +232,8 @@ int main()
 				else
 				{
 					char tmsg[255];
-					sprintf(tmsg,"%i: forwarding [%i] on RADIO\n",TIMER_CounterGet(TIMER1),packet[1]);
-					TRACE(tmsg);
+					sprintf(tmsg,"%i: forwarding [%i] on RADIO\n",(int)TIMER_CounterGet(TIMER1),(int)packet[1]);
+					//TRACE(tmsg);
 					
 					RADIO_Send(packet);
 				}
@@ -241,10 +242,33 @@ int main()
 			if (RADIO_Recv(packet))
 			{
 				char tmsg[255];
-				sprintf(tmsg,"%i: forwarding [%i] on USB\n",TIMER_CounterGet(TIMER1),packet[1]);
-				TRACE(tmsg);
+				sprintf(tmsg,"%i: forwarding [%i] on USB\n",(int)TIMER_CounterGet(TIMER1),(int)packet[1]);
+				//TRACE(tmsg);
 				
 				USB_Transmit(packet,32);
+			}
+			
+			if (EVENT_Count() > 0)
+			{
+				uint8_t e = EVENT_Next();
+				switch (e)
+				{
+				
+				case EVENT_REQUEST_SLOT:
+					#ifdef BASESTATION
+						ALLOC_Request(1);
+					#endif
+					break;
+				
+				default:
+				{
+					char tmsg[255];
+					sprintf(tmsg,"UNKNOWN EVENT RECVD [%2.2X]\n",e);
+					TRACE(tmsg);
+					break;
+				}
+				
+				}
 			}
 			
 		}
@@ -295,7 +319,7 @@ int main()
 				default:
 				{
 					char tmsg[255];
-					sprintf(tmsg,"EVENT RECVD [%2.2X]\n",e);
+					sprintf(tmsg,"UNKNOWN EVENT RECVD [%2.2X]\n",e);
 					TRACE(tmsg);
 					break;
 				}
@@ -306,22 +330,7 @@ int main()
 			if (generateData)
 			{
 				TRANSPORT_Send(data,75);
-				/*
-				if (!TRANSPORT_Send(data,75))
-					TRACE("Unable to send data with transport layer\n");
-				*/
 			}
-			
-			/*
-			if (i++ % 100000 == 1 && generateData)
-			{
-				uint8_t data[80], i;
-				for (i = 0; i < 80; i++)
-					data[i] = i;
-				if (!TRANSPORT_Send(data,80))
-					TRACE("Unable to send data with transport layer\n");
-			}
-			*/
 			
 			TDMA_CheckSync();
 			

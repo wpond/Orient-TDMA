@@ -1,0 +1,2366 @@
+RELOAD READY
+6923: Transport 13 reloaded...1/241 to 1/245 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/245 to 1/249 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...2/249 to 2/253 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8261: Transport 12 reloaded...0/254 to 2/2 (seg/frame)
+8276: TIM3_CC2
+RELOAD READY
+8721: Transport 13 reloaded...0/3 to 0/7 (seg/frame)
+8734: TIM3_CC2
+RELOAD READY
+9009: Transport 8 reloaded...1/7 to 2/9 (seg/frame)
+9020: TIM3_CC2
+9962: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 155
+163: Second slot received [id: 5; len: 5; lease: 42]
+173: Transport ack 0/9 received (seg/frame)
+183: Transport 1/9 expected next (seg/frame)
+1508: Transport 1/9 next to send [window start: 0/9] (seg/frame)
+1561: Transport 33 reloaded...1/9 to 0/20 (seg/frame)
+RELOAD READY
+5024: Transport 14 reloaded...1/20 to 2/24 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5569: Transport 14 reloaded...0/25 to 1/29 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6016: Transport 13 reloaded...2/29 to 2/33 (seg/frame)
+6032: TIM3_CC2
+RELOAD READY
+6464: Transport 13 reloaded...0/34 to 0/38 (seg/frame)
+6479: TIM3_CC2
+RELOAD READY
+6912: Transport 13 reloaded...1/38 to 1/42 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7362: Transport 13 reloaded...2/42 to 2/46 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7812: Transport 13 reloaded...0/47 to 0/51 (seg/frame)
+7828: TIM3_CC2
+RELOAD READY
+8262: Transport 13 reloaded...1/51 to 1/55 (seg/frame)
+8277: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...2/55 to 2/59 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/60 to 1/62 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 159
+160: Second slot received [id: 5; len: 5; lease: 41]
+171: Transport ack 0/61 received (seg/frame)
+182: Transport 1/61 expected next (seg/frame)
+1455: Transport 1/61 next to send [window start: 0/61] (seg/frame)
+1514: Transport 33 reloaded...1/61 to 0/72 (seg/frame)
+RELOAD READY
+5024: Transport 15 reloaded...1/72 to 0/77 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/77 to 2/81 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...0/82 to 0/86 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6466: Transport 13 reloaded...1/86 to 1/90 (seg/frame)
+6481: TIM3_CC2
+RELOAD READY
+6915: Transport 13 reloaded...2/90 to 2/94 (seg/frame)
+6930: TIM3_CC2
+RELOAD READY
+7364: Transport 13 reloaded...0/95 to 0/99 (seg/frame)
+7380: TIM3_CC2
+RELOAD READY
+7813: Transport 13 reloaded...1/99 to 1/103 (seg/frame)
+7830: TIM3_CC2
+RELOAD READY
+8263: Transport 13 reloaded...2/103 to 2/107 (seg/frame)
+8280: TIM3_CC2
+RELOAD READY
+8718: Transport 13 reloaded...0/108 to 0/112 (seg/frame)
+8735: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/112 to 2/114 (seg/frame)
+9024: TIM3_CC2
+9962: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 160
+RELOAD READY
+5034: Transport 33 reloaded...0/115 to 2/125 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/126 to 0/130 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/130 to 1/134 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/134 to 1/138 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...2/138 to 2/142 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7356: Transport 3 reloaded...0/143 to 2/143 (seg/frame)
+7372: TIM3_CC2
+RELOAD READY
+7810: Transport 0 reloaded...0/0 to 2/143 (seg/frame)
+7824: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/143 (seg/frame)
+8268: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/143 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/143 (seg/frame)
+9017: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 87
+159: Second slot received [id: 5; len: 5; lease: 39]
+170: Transport ack 1/113 received (seg/frame)
+182: Transport 2/113 expected next (seg/frame)
+1504: Transport 2/113 next to send [window start: 1/113] (seg/frame)
+1567: Transport 33 reloaded...2/113 to 1/124 (seg/frame)
+RELOAD READY
+5025: Transport 14 reloaded...2/124 to 0/129 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/129 to 1/133 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6021: Transport 13 reloaded...2/133 to 2/137 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...0/138 to 2/141 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...0/142 to 0/146 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...1/146 to 0/150 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...1/150 to 1/154 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/154 to 1/158 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...2/158 to 2/162 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...0/163 to 1/165 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+160: Second slot received [id: 5; len: 5; lease: 38]
+171: Transport ack 2/163 received (seg/frame)
+182: Transport 3/163 expected next (seg/frame)
+1562: Transport 0/164 next to send [window start: 2/163] (seg/frame)
+1625: Transport 33 reloaded...0/164 to 2/174 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...0/175 to 2/178 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/179 to 0/183 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...1/183 to 1/187 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/187 to 1/191 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/191 to 2/195 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/196 to 2/199 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/200 to 0/204 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/204 to 0/208 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...1/208 to 1/212 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...2/212 to 0/215 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 152
+160: Second slot received [id: 5; len: 5; lease: 37]
+170: Transport ack 1/213 received (seg/frame)
+182: Transport 2/213 expected next (seg/frame)
+1550: Transport 2/213 next to send [window start: 1/213] (seg/frame)
+1613: Transport 33 reloaded...2/213 to 1/224 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...2/224 to 1/228 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/228 to 2/232 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/233 to 0/237 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/237 to 0/241 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/241 to 1/245 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/245 to 1/249 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...2/249 to 2/253 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8261: Transport 12 reloaded...0/254 to 2/2 (seg/frame)
+8276: TIM3_CC2
+RELOAD READY
+8721: Transport 13 reloaded...0/3 to 0/7 (seg/frame)
+8734: TIM3_CC2
+RELOAD READY
+9009: Transport 8 reloaded...1/7 to 2/9 (seg/frame)
+9020: TIM3_CC2
+9962: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 155
+RELOAD READY
+5033: Transport 33 reloaded...0/10 to 2/20 (seg/frame)
+5049: TIM3_CC0
+RELOAD READY
+5569: Transport 14 reloaded...0/21 to 1/25 (seg/frame)
+5584: TIM3_CC2
+RELOAD READY
+6015: Transport 13 reloaded...2/25 to 2/29 (seg/frame)
+6030: TIM3_CC2
+RELOAD READY
+6463: Transport 13 reloaded...0/30 to 0/34 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6912: Transport 13 reloaded...1/34 to 1/38 (seg/frame)
+6928: TIM3_CC2
+RELOAD READY
+7358: Transport 7 reloaded...2/38 to 2/40 (seg/frame)
+7373: TIM3_CC2
+RELOAD READY
+7803: Transport 0 reloaded...0/0 to 2/40 (seg/frame)
+7817: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/40 (seg/frame)
+8267: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/40 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/40 (seg/frame)
+9016: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 93
+159: Second slot received [id: 5; len: 5; lease: 35]
+170: Transport ack 0/9 received (seg/frame)
+179: Transport 1/9 expected next (seg/frame)
+1504: Transport 1/9 next to send [window start: 0/9] (seg/frame)
+1557: Transport 33 reloaded...1/9 to 0/20 (seg/frame)
+RELOAD READY
+5024: Transport 14 reloaded...1/20 to 2/24 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5569: Transport 14 reloaded...0/25 to 1/29 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6017: Transport 13 reloaded...2/29 to 2/33 (seg/frame)
+6032: TIM3_CC2
+RELOAD READY
+6463: Transport 13 reloaded...0/34 to 0/38 (seg/frame)
+6479: TIM3_CC2
+RELOAD READY
+6912: Transport 13 reloaded...1/38 to 1/42 (seg/frame)
+6928: TIM3_CC2
+RELOAD READY
+7362: Transport 13 reloaded...2/42 to 2/46 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7812: Transport 13 reloaded...0/47 to 0/51 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8262: Transport 13 reloaded...1/51 to 1/55 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...2/55 to 2/59 (seg/frame)
+8727: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/60 to 1/62 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 159
+162: Second slot received [id: 5; len: 5; lease: 34]
+173: Transport ack 0/61 received (seg/frame)
+183: Transport 1/61 expected next (seg/frame)
+1457: Transport 1/61 next to send [window start: 0/61] (seg/frame)
+1516: Transport 33 reloaded...1/61 to 0/72 (seg/frame)
+RELOAD READY
+5025: Transport 15 reloaded...1/72 to 0/77 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/77 to 2/81 (seg/frame)
+5586: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...0/82 to 0/86 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6467: Transport 13 reloaded...1/86 to 1/90 (seg/frame)
+6483: TIM3_CC2
+RELOAD READY
+6916: Transport 13 reloaded...2/90 to 2/94 (seg/frame)
+6931: TIM3_CC2
+RELOAD READY
+7365: Transport 13 reloaded...0/95 to 0/99 (seg/frame)
+7381: TIM3_CC2
+RELOAD READY
+7814: Transport 13 reloaded...1/99 to 1/103 (seg/frame)
+7831: TIM3_CC2
+RELOAD READY
+8264: Transport 13 reloaded...2/103 to 2/107 (seg/frame)
+8281: TIM3_CC2
+RELOAD READY
+8719: Transport 13 reloaded...0/108 to 0/112 (seg/frame)
+8736: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/112 to 2/114 (seg/frame)
+9024: TIM3_CC2
+9961: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 160
+160: Second slot received [id: 5; len: 5; lease: 33]
+171: Transport ack 0/113 received (seg/frame)
+182: Transport 1/113 expected next (seg/frame)
+1496: Transport 1/113 next to send [window start: 0/113] (seg/frame)
+1558: Transport 33 reloaded...1/113 to 0/124 (seg/frame)
+RELOAD READY
+5025: Transport 14 reloaded...1/124 to 2/128 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/129 to 0/133 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6021: Transport 13 reloaded...1/133 to 1/137 (seg/frame)
+6038: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...2/137 to 1/141 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/141 to 2/145 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/146 to 2/149 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...0/150 to 0/154 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/154 to 0/158 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...1/158 to 1/162 (seg/frame)
+8740: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...2/162 to 0/165 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+RELOAD READY
+5034: Transport 33 reloaded...1/165 to 0/176 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/176 to 1/180 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...2/180 to 2/184 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/185 to 2/188 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...0/189 to 0/193 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7358: Transport 8 reloaded...1/193 to 2/195 (seg/frame)
+7375: TIM3_CC2
+RELOAD READY
+7813: Transport 0 reloaded...0/0 to 2/195 (seg/frame)
+7826: TIM3_CC2
+RELOAD READY
+8265: Transport 0 reloaded...0/0 to 2/195 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/195 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/195 (seg/frame)
+9018: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 92
+159: Second slot received [id: 5; len: 5; lease: 31]
+170: Transport ack 1/163 received (seg/frame)
+181: Transport 2/163 expected next (seg/frame)
+1561: Transport 2/163 next to send [window start: 1/163] (seg/frame)
+1624: Transport 33 reloaded...2/163 to 1/174 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...2/174 to 1/178 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/178 to 2/182 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/183 to 0/187 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/187 to 0/191 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/191 to 1/195 (seg/frame)
+6941: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...2/195 to 1/199 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...2/199 to 2/203 (seg/frame)
+7841: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/204 to 2/207 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...0/208 to 0/212 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...1/212 to 2/214 (seg/frame)
+9032: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+6: IRQ count = 152
+160: Second slot received [id: 5; len: 5; lease: 30]
+171: Transport ack 0/213 received (seg/frame)
+183: Transport 1/213 expected next (seg/frame)
+1550: Transport 1/213 next to send [window start: 0/213] (seg/frame)
+1613: Transport 33 reloaded...1/213 to 0/224 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...1/224 to 0/228 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/228 to 1/232 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...2/232 to 2/236 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/237 to 2/240 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...0/241 to 0/245 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...1/245 to 0/249 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...1/249 to 1/253 (seg/frame)
+7841: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/253 to 1/2 (seg/frame)
+8275: TIM3_CC2
+RELOAD READY
+8721: Transport 13 reloaded...2/2 to 2/6 (seg/frame)
+8734: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/7 to 1/9 (seg/frame)
+9019: TIM3_CC2
+9964: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 155
+161: Second slot received [id: 5; len: 5; lease: 29]
+171: Transport ack 1/8 received (seg/frame)
+181: Transport 2/8 expected next (seg/frame)
+1501: Transport 2/8 next to send [window start: 1/8] (seg/frame)
+1554: Transport 33 reloaded...2/8 to 1/19 (seg/frame)
+RELOAD READY
+5024: Transport 14 reloaded...2/19 to 0/24 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5569: Transport 14 reloaded...1/24 to 2/28 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6017: Transport 13 reloaded...0/29 to 0/33 (seg/frame)
+6032: TIM3_CC2
+RELOAD READY
+6464: Transport 13 reloaded...1/33 to 1/37 (seg/frame)
+6480: TIM3_CC2
+RELOAD READY
+6913: Transport 13 reloaded...2/37 to 2/41 (seg/frame)
+6928: TIM3_CC2
+RELOAD READY
+7362: Transport 13 reloaded...0/42 to 0/46 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7812: Transport 13 reloaded...1/46 to 1/50 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8262: Transport 13 reloaded...2/50 to 2/54 (seg/frame)
+8277: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...0/55 to 0/59 (seg/frame)
+8727: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/59 to 2/61 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 159
+RELOAD READY
+5033: Transport 33 reloaded...0/62 to 2/72 (seg/frame)
+5049: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...0/73 to 1/77 (seg/frame)
+5586: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...2/77 to 2/81 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6467: Transport 13 reloaded...0/82 to 0/86 (seg/frame)
+6483: TIM3_CC2
+RELOAD READY
+6916: Transport 13 reloaded...1/86 to 1/90 (seg/frame)
+6932: TIM3_CC2
+RELOAD READY
+7360: Transport 1 reloaded...2/90 to 2/90 (seg/frame)
+7374: TIM3_CC2
+RELOAD READY
+7803: Transport 0 reloaded...0/0 to 2/90 (seg/frame)
+7817: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/90 (seg/frame)
+8267: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/90 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/90 (seg/frame)
+9016: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 87
+159: Second slot received [id: 5; len: 5; lease: 27]
+170: Transport ack 1/60 received (seg/frame)
+180: Transport 2/60 expected next (seg/frame)
+1450: Transport 2/60 next to send [window start: 1/60] (seg/frame)
+1509: Transport 33 reloaded...2/60 to 1/71 (seg/frame)
+RELOAD READY
+5025: Transport 16 reloaded...2/71 to 2/76 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...0/77 to 1/81 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6020: Transport 13 reloaded...2/81 to 2/85 (seg/frame)
+6036: TIM3_CC2
+RELOAD READY
+6468: Transport 13 reloaded...0/86 to 0/90 (seg/frame)
+6483: TIM3_CC2
+RELOAD READY
+6917: Transport 13 reloaded...1/90 to 1/94 (seg/frame)
+6933: TIM3_CC2
+RELOAD READY
+7366: Transport 13 reloaded...2/94 to 2/98 (seg/frame)
+7382: TIM3_CC2
+RELOAD READY
+7816: Transport 13 reloaded...0/99 to 0/103 (seg/frame)
+7832: TIM3_CC2
+RELOAD READY
+8265: Transport 13 reloaded...1/103 to 1/107 (seg/frame)
+8282: TIM3_CC2
+RELOAD READY
+8718: Transport 13 reloaded...2/107 to 2/111 (seg/frame)
+8736: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/112 to 1/114 (seg/frame)
+9025: TIM3_CC2
+9961: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 161
+162: Second slot received [id: 5; len: 5; lease: 26]
+173: Transport ack 2/112 received (seg/frame)
+184: Transport 3/112 expected next (seg/frame)
+1506: Transport 0/113 next to send [window start: 2/112] (seg/frame)
+1569: Transport 33 reloaded...0/113 to 2/123 (seg/frame)
+RELOAD READY
+5025: Transport 13 reloaded...0/124 to 0/128 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/128 to 1/132 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...2/132 to 2/136 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/137 to 2/140 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...0/141 to 0/145 (seg/frame)
+6939: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...1/145 to 0/149 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...1/149 to 1/153 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8261: Transport 12 reloaded...2/153 to 1/157 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...2/157 to 2/161 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...0/162 to 1/164 (seg/frame)
+9030: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 153
+160: Second slot received [id: 5; len: 5; lease: 25]
+171: Transport ack 2/162 received (seg/frame)
+183: Transport 3/162 expected next (seg/frame)
+1552: Transport 0/163 next to send [window start: 2/162] (seg/frame)
+1615: Transport 33 reloaded...0/163 to 2/173 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...0/174 to 2/177 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/178 to 0/182 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/182 to 1/186 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...2/186 to 1/190 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/190 to 2/194 (seg/frame)
+6941: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/195 to 2/198 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...0/199 to 0/203 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/203 to 0/207 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/207 to 1/211 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...2/211 to 0/214 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 152
+RELOAD READY
+5034: Transport 33 reloaded...1/214 to 0/225 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/225 to 1/229 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...2/229 to 2/233 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/234 to 2/237 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...0/238 to 0/242 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 11 reloaded...1/242 to 2/245 (seg/frame)
+7377: TIM3_CC2
+RELOAD READY
+7816: Transport 0 reloaded...0/0 to 2/245 (seg/frame)
+7829: TIM3_CC2
+RELOAD READY
+8268: Transport 0 reloaded...0/0 to 2/245 (seg/frame)
+8282: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/245 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/245 (seg/frame)
+9017: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 95
+159: Second slot received [id: 5; len: 5; lease: 23]
+169: Transport ack 1/212 received (seg/frame)
+181: Transport 2/212 expected next (seg/frame)
+1549: Transport 2/212 next to send [window start: 1/212] (seg/frame)
+1612: Transport 33 reloaded...2/212 to 1/223 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...2/223 to 1/227 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/227 to 2/231 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...0/232 to 0/236 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/236 to 0/240 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...1/240 to 1/244 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...2/244 to 1/248 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...2/248 to 2/252 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8261: Transport 12 reloaded...0/253 to 2/1 (seg/frame)
+8276: TIM3_CC2
+RELOAD READY
+8721: Transport 13 reloaded...0/2 to 0/6 (seg/frame)
+8734: TIM3_CC2
+RELOAD READY
+9009: Transport 8 reloaded...1/6 to 2/8 (seg/frame)
+9020: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+160: Second slot received [id: 5; len: 5; lease: 22]
+171: Transport ack 2/7 received (seg/frame)
+180: Transport 3/7 expected next (seg/frame)
+1505: Transport 0/8 next to send [window start: 2/7] (seg/frame)
+1559: Transport 33 reloaded...0/8 to 2/18 (seg/frame)
+RELOAD READY
+5024: Transport 14 reloaded...0/19 to 1/23 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5569: Transport 14 reloaded...2/23 to 0/28 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6016: Transport 13 reloaded...1/28 to 1/32 (seg/frame)
+6032: TIM3_CC2
+RELOAD READY
+6464: Transport 13 reloaded...2/32 to 2/36 (seg/frame)
+6479: TIM3_CC2
+RELOAD READY
+6912: Transport 13 reloaded...0/37 to 0/41 (seg/frame)
+6928: TIM3_CC2
+RELOAD READY
+7362: Transport 13 reloaded...1/41 to 1/45 (seg/frame)
+7377: TIM3_CC2
+RELOAD READY
+7811: Transport 13 reloaded...2/45 to 2/49 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8261: Transport 13 reloaded...0/50 to 0/54 (seg/frame)
+8277: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...1/54 to 1/58 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...2/58 to 0/61 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 159
+162: Second slot received [id: 5; len: 5; lease: 21]
+173: Transport ack 2/59 received (seg/frame)
+184: Transport 3/59 expected next (seg/frame)
+1450: Transport 0/60 next to send [window start: 2/59] (seg/frame)
+1509: Transport 33 reloaded...0/60 to 2/70 (seg/frame)
+RELOAD READY
+5025: Transport 16 reloaded...0/71 to 0/76 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/76 to 2/80 (seg/frame)
+5586: TIM3_CC2
+RELOAD READY
+6019: Transport 13 reloaded...0/81 to 0/85 (seg/frame)
+6035: TIM3_CC2
+RELOAD READY
+6466: Transport 13 reloaded...1/85 to 1/89 (seg/frame)
+6482: TIM3_CC2
+RELOAD READY
+6916: Transport 13 reloaded...2/89 to 2/93 (seg/frame)
+6932: TIM3_CC2
+RELOAD READY
+7365: Transport 13 reloaded...0/94 to 0/98 (seg/frame)
+7381: TIM3_CC2
+RELOAD READY
+7814: Transport 13 reloaded...1/98 to 1/102 (seg/frame)
+7830: TIM3_CC2
+RELOAD READY
+8264: Transport 13 reloaded...2/102 to 2/106 (seg/frame)
+8281: TIM3_CC2
+RELOAD READY
+8716: Transport 13 reloaded...0/107 to 0/111 (seg/frame)
+8733: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/111 to 2/113 (seg/frame)
+9024: TIM3_CC2
+9960: TIM3_CC1
+1: TIM3_CC2
+7: IRQ count = 161
+RELOAD READY
+5034: Transport 33 reloaded...0/114 to 2/124 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/125 to 0/129 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/129 to 1/133 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/133 to 1/137 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...2/137 to 2/141 (seg/frame)
+6939: TIM3_CC2
+RELOAD READY
+7356: Transport 3 reloaded...0/142 to 2/142 (seg/frame)
+7372: TIM3_CC2
+RELOAD READY
+7810: Transport 0 reloaded...0/0 to 2/142 (seg/frame)
+7824: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/142 (seg/frame)
+8268: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/142 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/142 (seg/frame)
+9017: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 87
+162: Second slot received [id: 5; len: 5; lease: 19]
+173: Transport ack 1/112 received (seg/frame)
+184: Transport 2/112 expected next (seg/frame)
+1513: Transport 2/112 next to send [window start: 1/112] (seg/frame)
+1576: Transport 33 reloaded...2/112 to 1/123 (seg/frame)
+RELOAD READY
+5024: Transport 13 reloaded...2/123 to 2/127 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/128 to 0/132 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6021: Transport 13 reloaded...1/132 to 1/136 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/136 to 1/140 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/140 to 2/144 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/145 to 2/148 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...0/149 to 0/153 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/153 to 0/157 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/157 to 1/161 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...2/161 to 0/164 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 153
+160: Second slot received [id: 5; len: 5; lease: 18]
+170: Transport ack 1/162 received (seg/frame)
+182: Transport 2/162 expected next (seg/frame)
+1552: Transport 2/162 next to send [window start: 1/162] (seg/frame)
+1615: Transport 33 reloaded...2/162 to 1/173 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...2/173 to 1/177 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/177 to 2/181 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/182 to 0/186 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/186 to 0/190 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/190 to 1/194 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/194 to 1/198 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...2/198 to 2/202 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/203 to 2/206 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...0/207 to 0/211 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...1/211 to 2/213 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 152
+160: Second slot received [id: 5; len: 5; lease: 17]
+170: Transport ack 0/212 received (seg/frame)
+182: Transport 1/212 expected next (seg/frame)
+1549: Transport 1/212 next to send [window start: 0/212] (seg/frame)
+1612: Transport 33 reloaded...1/212 to 0/223 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...1/223 to 0/227 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/227 to 1/231 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...2/231 to 2/235 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/236 to 2/239 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...0/240 to 0/244 (seg/frame)
+6941: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...1/244 to 0/248 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...1/248 to 1/252 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/252 to 1/1 (seg/frame)
+8275: TIM3_CC2
+RELOAD READY
+8721: Transport 13 reloaded...2/1 to 2/5 (seg/frame)
+8734: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/6 to 1/8 (seg/frame)
+9020: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+RELOAD READY
+5032: Transport 33 reloaded...2/8 to 1/19 (seg/frame)
+5046: TIM3_CC0
+RELOAD READY
+5564: Transport 14 reloaded...2/19 to 0/24 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6012: Transport 13 reloaded...1/24 to 1/28 (seg/frame)
+6027: TIM3_CC2
+RELOAD READY
+6461: Transport 13 reloaded...2/28 to 2/32 (seg/frame)
+6477: TIM3_CC2
+RELOAD READY
+6911: Transport 13 reloaded...0/33 to 0/37 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7358: Transport 8 reloaded...1/37 to 2/39 (seg/frame)
+7373: TIM3_CC2
+RELOAD READY
+7803: Transport 0 reloaded...0/0 to 2/39 (seg/frame)
+7818: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/39 (seg/frame)
+8267: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/39 (seg/frame)
+8717: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/39 (seg/frame)
+9016: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 94
+159: Second slot received [id: 5; len: 5; lease: 15]
+169: Transport ack 1/7 received (seg/frame)
+179: Transport 2/7 expected next (seg/frame)
+1506: Transport 2/7 next to send [window start: 1/7] (seg/frame)
+1559: Transport 33 reloaded...2/7 to 1/18 (seg/frame)
+RELOAD READY
+5024: Transport 14 reloaded...2/18 to 0/23 (seg/frame)
+5040: TIM3_CC0
+RELOAD READY
+5568: Transport 14 reloaded...1/23 to 2/27 (seg/frame)
+5584: TIM3_CC2
+RELOAD READY
+6016: Transport 13 reloaded...0/28 to 0/32 (seg/frame)
+6032: TIM3_CC2
+RELOAD READY
+6463: Transport 13 reloaded...1/32 to 1/36 (seg/frame)
+6479: TIM3_CC2
+RELOAD READY
+6912: Transport 13 reloaded...2/36 to 2/40 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7361: Transport 13 reloaded...0/41 to 0/45 (seg/frame)
+7377: TIM3_CC2
+RELOAD READY
+7811: Transport 13 reloaded...1/45 to 1/49 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8261: Transport 13 reloaded...2/49 to 2/53 (seg/frame)
+8277: TIM3_CC2
+RELOAD READY
+8711: Transport 13 reloaded...0/54 to 0/58 (seg/frame)
+8727: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/58 to 2/60 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 159
+160: Second slot received [id: 5; len: 5; lease: 14]
+170: Transport ack 1/59 received (seg/frame)
+181: Transport 2/59 expected next (seg/frame)
+1446: Transport 2/59 next to send [window start: 1/59] (seg/frame)
+1505: Transport 33 reloaded...2/59 to 1/70 (seg/frame)
+RELOAD READY
+5025: Transport 16 reloaded...2/70 to 2/75 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5571: Transport 14 reloaded...0/76 to 1/80 (seg/frame)
+o 1/137 (seg/frRELOAD READY
+6018: Transport 13 reloaded...2/80 to 2/84 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6467: Transport 13 reloaded...0/85 to 0/89 (seg/frame)
+6482: TIM3_CC2
+RELOAD READY
+6916: Transport 13 reloaded...1/89 to 1/93 (seg/frame)
+6932: TIM3_CC2
+RELOAD READY
+7365: Transport 13 reloaded...2/93 to 2/97 (seg/frame)
+7381: TIM3_CC2
+RELOAD READY
+7814: Transport 13 reloaded...0/98 to 0/102 (seg/frame)
+7831: TIM3_CC2
+RELOAD READY
+8264: Transport 13 reloaded...1/102 to 1/106 (seg/frame)
+8281: TIM3_CC2
+RELOAD READY
+8716: Transport 13 reloaded...2/106 to 2/110 (seg/frame)
+8733: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/111 to 1/113 (seg/frame)
+9023: TIM3_CC2
+9959: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 161
+437: Second slot received [id: 5; len: 5; lease: 13]
+448: Transport ack 0/112 received (seg/frame)
+460: Transport 1/112 expected next (seg/frame)
+1823: Transport 1/112 next to send [window start: 0/112] (seg/frame)
+1886: Transport 33 reloaded...1/112 to 0/123 (seg/frame)
+RELOAD READY
+5019: Transport 3 reloaded...1/123 to 0/124 (seg/frame)
+5035: TIM3_CC0
+RELOAD READY
+5562: Transport 14 reloaded...1/124 to 2/128 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/129 to 0/133 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/133 to 0/137 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...1/137 to 1/141 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/141 to 1/145 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...2/145 to 2/149 (seg/frame)
+7839: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/150 to 2/153 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...0/154 to 0/158 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...1/158 to 2/160 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 144
+RELOAD READY
+5034: Transport 33 reloaded...0/161 to 2/171 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/172 to 0/176 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...1/176 to 1/180 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/180 to 1/184 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/184 to 2/188 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/189 to 2/192 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7819: Transport 6 reloaded...0/193 to 2/194 (seg/frame)
+7836: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/194 (seg/frame)
+8268: TIM3_CC2
+RELOAD READY
+8707: Transport 0 reloaded...0/0 to 2/194 (seg/frame)
+8721: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/194 (seg/frame)
+9017: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+6: IRQ count = 102
+162: Second slot received [id: 5; len: 5; lease: 11]
+172: Transport ack 0/159 received (seg/frame)
+184: Transport 1/159 expected next (seg/frame)
+1468: Transport 1/159 next to send [window start: 0/159] (seg/frame)
+1530: Transport 33 reloaded...1/159 to 0/170 (seg/frame)
+RELOAD READY
+5026: Transport 15 reloaded...1/170 to 0/175 (seg/frame)
+5043: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/175 to 1/179 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...2/179 to 2/183 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...0/184 to 2/187 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...0/188 to 0/192 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...1/192 to 0/196 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...1/196 to 1/200 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/200 to 1/204 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...2/204 to 2/208 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...0/209 to 1/211 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 155
+162: Second slot received [id: 5; len: 5; lease: 10]
+173: Transport ack 2/209 received (seg/frame)
+184: Transport 3/209 expected next (seg/frame)
+1581: Transport 0/210 next to send [window start: 2/209] (seg/frame)
+1643: Transport 33 reloaded...0/210 to 2/220 (seg/frame)
+RELOAD READY
+5023: Transport 11 reloaded...0/221 to 1/224 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/224 to 2/228 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/229 to 0/233 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/233 to 0/237 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/237 to 1/241 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/241 to 1/245 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...2/245 to 2/249 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/250 to 2/253 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...0/254 to 0/3 (seg/frame)
+8739: TIM3_CC2
+RELOAD READY
+9013: Transport 8 reloaded...1/3 to 2/5 (seg/frame)
+9024: TIM3_CC2
+9964: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 153
+160: Second slot received [id: 5; len: 5; lease: 9]
+169: Transport ack 1/4 received (seg/frame)
+178: Transport 2/4 expected next (seg/frame)
+1508: Transport 2/4 next to send [window start: 1/4] (seg/frame)
+1561: Transport 33 reloaded...2/4 to 1/15 (seg/frame)
+RELOAD READY
+5023: Transport 15 reloaded...2/15 to 1/20 (seg/frame)
+5039: TIM3_CC0
+RELOAD READY
+5568: Transport 14 reloaded...2/20 to 0/25 (seg/frame)
+5584: TIM3_CC2
+RELOAD READY
+6015: Transport 13 reloaded...1/25 to 1/29 (seg/frame)
+6031: TIM3_CC2
+RELOAD READY
+6462: Transport 13 reloaded...2/29 to 2/33 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6912: Transport 13 reloaded...0/34 to 0/38 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7362: Transport 13 reloaded...1/38 to 1/42 (seg/frame)
+7377: TIM3_CC2
+RELOAD READY
+7812: Transport 13 reloaded...2/42 to 2/46 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8262: Transport 13 reloaded...0/47 to 0/51 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...1/51 to 1/55 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...2/55 to 0/58 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 160
+RELOAD READY
+5033: Transport 33 reloaded...1/58 to 0/69 (seg/frame)
+5049: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/69 to 2/73 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...0/74 to 0/78 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6466: Transport 13 reloaded...1/78 to 1/82 (seg/frame)
+6481: TIM3_CC2
+RELOAD READY
+6914: Transport 13 reloaded...2/82 to 2/86 (seg/frame)
+6930: TIM3_CC2
+RELOAD READY
+7357: Transport 0 reloaded...0/0 to 2/86 (seg/frame)
+7370: TIM3_CC2
+RELOAD READY
+7803: Transport 0 reloaded...0/0 to 2/86 (seg/frame)
+7818: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/86 (seg/frame)
+8267: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/86 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/86 (seg/frame)
+9016: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 86
+159: Second slot received [id: 5; len: 5; lease: 7]
+168: Transport ack 2/56 received (seg/frame)
+179: Transport 3/56 expected next (seg/frame)
+1437: Transport 0/57 next to send [window start: 2/56] (seg/frame)
+1496: Transport 33 reloaded...0/57 to 2/67 (seg/frame)
+RELOAD READY
+5025: Transport 16 reloaded...0/68 to 0/73 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/73 to 2/77 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...0/78 to 0/82 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6466: Transport 13 reloaded...1/82 to 1/86 (seg/frame)
+6482: TIM3_CC2
+RELOAD READY
+6916: Transport 13 reloaded...2/86 to 2/90 (seg/frame)
+6931: TIM3_CC2
+RELOAD READY
+7365: Transport 13 reloaded...0/91 to 0/95 (seg/frame)
+7380: TIM3_CC2
+RELOAD READY
+7814: Transport 13 reloaded...1/95 to 1/99 (seg/frame)
+7829: TIM3_CC2
+RELOAD READY
+8263: Transport 13 reloaded...2/99 to 2/103 (seg/frame)
+8279: TIM3_CC2
+RELOAD READY
+8713: Transport 13 reloaded...0/104 to 0/108 (seg/frame)
+8730: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/108 to 2/110 (seg/frame)
+9024: TIM3_CC2
+9958: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 161
+160: Second slot received [id: 5; len: 5; lease: 6]
+169: Transport ack 1/109 received (seg/frame)
+180: Transport 2/109 expected next (seg/frame)
+1502: Transport 2/109 next to send [window start: 1/109] (seg/frame)
+1564: Transport 33 reloaded...2/109 to 1/120 (seg/frame)
+RELOAD READY
+5025: Transport 14 reloaded...2/120 to 0/125 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/125 to 1/129 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...2/129 to 2/133 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/134 to 2/137 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...0/138 to 0/142 (seg/frame)
+6939: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...1/142 to 0/146 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...1/146 to 1/150 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/150 to 1/154 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...2/154 to 2/158 (seg/frame)
+8740: TIM3_CC2
+RELOAD READY
+9013: Transport 8 reloaded...0/159 to 1/161 (seg/frame)
+9029: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+238: Second slot received [id: 5; len: 5; lease: 5]
+247: Transport ack 2/159 received (seg/frame)
+259: Transport 3/159 expected next (seg/frame)
+1646: Transport 0/160 next to send [window start: 2/159] (seg/frame)
+1709: Transport 33 reloaded...0/160 to 2/170 (seg/frame)
+RELOAD READY
+5022: Transport 9 reloaded...0/171 to 2/173 (seg/frame)
+5038: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/174 to 0/178 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/178 to 1/182 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/182 to 1/186 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/186 to 2/190 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/191 to 2/194 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/195 to 0/199 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/199 to 0/203 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/203 to 1/207 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...2/207 to 0/210 (seg/frame)
+9032: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 149
+RELOAD READY
+5034: Transport 33 reloaded...1/210 to 0/221 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/221 to 1/225 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...2/225 to 2/229 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/230 to 2/233 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...0/234 to 0/238 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...1/238 to 0/242 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7817: Transport 2 reloaded...1/242 to 2/242 (seg/frame)
+7833: TIM3_CC2
+RELOAD READY
+8272: Transport 0 reloaded...0/0 to 2/242 (seg/frame)
+8286: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/242 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/242 (seg/frame)
+9018: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 98
+159: Second slot received [id: 5; len: 5; lease: 3]
+168: Transport ack 1/208 received (seg/frame)
+179: Transport 2/208 expected next (seg/frame)
+1519: Transport 2/208 next to send [window start: 1/208] (seg/frame)
+1581: Transport 33 reloaded...2/208 to 1/219 (seg/frame)
+RELOAD READY
+5025: Transport 13 reloaded...2/219 to 2/223 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/224 to 0/228 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/228 to 1/232 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/232 to 1/236 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/236 to 2/240 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...0/241 to 2/244 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/245 to 0/249 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/249 to 0/253 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/253 to 1/2 (seg/frame)
+8739: TIM3_CC2
+RELOAD READY
+9013: Transport 8 reloaded...2/2 to 0/5 (seg/frame)
+9024: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+160: Second slot received [id: 5; len: 5; lease: 2]
+169: Transport ack 2/3 received (seg/frame)
+178: Transport 3/3 expected next (seg/frame)
+1533: Transport 0/4 next to send [window start: 2/3] (seg/frame)
+1586: Transport 33 reloaded...0/4 to 2/14 (seg/frame)
+RELOAD READY
+5022: Transport 14 reloaded...0/15 to 1/19 (seg/frame)
+5038: TIM3_CC0
+RELOAD READY
+5564: Transport 14 reloaded...2/19 to 0/24 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6012: Transport 13 reloaded...1/24 to 1/28 (seg/frame)
+6028: TIM3_CC2
+RELOAD READY
+6461: Transport 13 reloaded...2/28 to 2/32 (seg/frame)
+6477: TIM3_CC2
+RELOAD READY
+6911: Transport 13 reloaded...0/33 to 0/37 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7361: Transport 13 reloaded...1/37 to 1/41 (seg/frame)
+7376: TIM3_CC2
+RELOAD READY
+7811: Transport 13 reloaded...2/41 to 2/45 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8261: Transport 13 reloaded...0/46 to 0/50 (seg/frame)
+8277: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...1/50 to 1/54 (seg/frame)
+8727: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...2/54 to 0/57 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 159
+379: Second slot received [id: 5; len: 5; lease: 1]
+389: Transport ack 2/55 received (seg/frame)
+399: Transport 3/55 expected next (seg/frame)
+1673: Transport 0/56 next to send [window start: 2/55] (seg/frame)
+1733: Transport 33 reloaded...0/56 to 2/66 (seg/frame)
+RELOAD READY
+5021: Transport 9 reloaded...0/67 to 2/69 (seg/frame)
+5036: TIM3_CC0
+RELOAD READY
+5569: Transport 14 reloaded...0/70 to 1/74 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...2/74 to 2/78 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6466: Transport 13 reloaded...0/79 to 0/83 (seg/frame)
+6482: TIM3_CC2
+RELOAD READY
+6915: Transport 13 reloaded...1/83 to 1/87 (seg/frame)
+6930: TIM3_CC2
+RELOAD READY
+7364: Transport 13 reloaded...2/87 to 2/91 (seg/frame)
+7380: TIM3_CC2
+RELOAD READY
+7813: Transport 13 reloaded...0/92 to 0/96 (seg/frame)
+7829: TIM3_CC2
+RELOAD READY
+8263: Transport 13 reloaded...1/96 to 1/100 (seg/frame)
+8279: TIM3_CC2
+RELOAD READY
+8714: Transport 13 reloaded...2/100 to 2/104 (seg/frame)
+8731: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...0/105 to 1/107 (seg/frame)
+9023: TIM3_CC2
+9952: TIM3_CC1
+1: TIM3_CC2
+7: IRQ count = 154
+2: IRQ count = 0
+159: Second slot received [id: 5; len: 5; lease: 1]
+168: Transport ack 0/106 received (seg/frame)
+180: Transport 1/106 expected next (seg/frame)
+1434: Transport 1/106 next to send [window start: 0/106] (seg/frame)
+1496: Transport 33 reloaded...1/106 to 0/117 (seg/frame)
+RELOAD READY
+5026: Transport 16 reloaded...1/117 to 1/122 (seg/frame)
+5043: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/122 to 2/126 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/127 to 0/131 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/131 to 0/135 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...1/135 to 1/139 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/139 to 1/143 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...2/143 to 2/147 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/148 to 2/151 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...0/152 to 0/156 (seg/frame)
+8740: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...1/156 to 2/158 (seg/frame)
+9030: TIM3_CC2
+9951: TIM3_CC1
+1: TIM3_CC2
+8: IRQ count = 156
+160: Second slot received [id: 5; len: 5; lease: 1]
+169: Transport ack 0/157 received (seg/frame)
+181: Transport 1/157 expected next (seg/frame)
+1576: Transport 1/157 next to send [window start: 0/157] (seg/frame)
+1638: Transport 33 reloaded...1/157 to 0/168 (seg/frame)
+RELOAD READY
+5024: Transport 11 reloaded...1/168 to 2/171 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/172 to 0/176 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/176 to 1/180 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/180 to 1/184 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/184 to 2/188 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/189 to 2/192 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/193 to 0/197 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8261: Transport 12 reloaded...1/197 to 0/201 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/201 to 1/205 (seg/frame)
+8742: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...2/205 to 0/208 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+1: TIM3_CC2
+7: IRQ count = 151
+160: Second slot received [id: 5; len: 5; lease: 1]
+169: Transport ack 1/206 received (seg/frame)
+181: Transport 2/206 expected next (seg/frame)
+1538: Transport 2/206 next to send [window start: 1/206] (seg/frame)
+1601: Transport 33 reloaded...2/206 to 1/217 (seg/frame)
+RELOAD READY
+5025: Transport 13 reloaded...2/217 to 2/221 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/222 to 0/226 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/226 to 1/230 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...2/230 to 1/234 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/234 to 2/238 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/239 to 2/242 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/243 to 0/247 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/247 to 0/251 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/251 to 1/0 (seg/frame)
+8738: TIM3_CC2
+RELOAD READY
+9012: Transport 8 reloaded...2/0 to 0/3 (seg/frame)
+9023: TIM3_CC2
+9951: TIM3_CC1
+1: TIM3_CC2
+7: IRQ count = 154
+2: IRQ count = 0
+159: Second slot received [id: 5; len: 5; lease: 45]
+169: Transport ack 2/1 received (seg/frame)
+179: Transport 3/1 expected next (seg/frame)
+1548: Transport 0/2 next to send [window start: 2/1] (seg/frame)
+1601: Transport 33 reloaded...0/2 to 2/12 (seg/frame)
+RELOAD READY
+5022: Transport 13 reloaded...0/13 to 0/17 (seg/frame)
+5038: TIM3_CC0
+RELOAD READY
+5561: Transport 14 reloaded...1/17 to 2/21 (seg/frame)
+5577: TIM3_CC2
+RELOAD READY
+6011: Transport 13 reloaded...0/22 to 0/26 (seg/frame)
+6026: TIM3_CC2
+RELOAD READY
+6461: Transport 13 reloaded...1/26 to 1/30 (seg/frame)
+6477: TIM3_CC2
+RELOAD READY
+6911: Transport 13 reloaded...2/30 to 2/34 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7361: Transport 13 reloaded...0/35 to 0/39 (seg/frame)
+7377: TIM3_CC2
+RELOAD READY
+7811: Transport 13 reloaded...1/39 to 1/43 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8262: Transport 13 reloaded...2/43 to 2/47 (seg/frame)
+8277: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...0/48 to 0/52 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/52 to 2/54 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 158
+163: Second slot received [id: 5; len: 5; lease: 44]
+173: Transport ack 1/53 received (seg/frame)
+184: Transport 2/53 expected next (seg/frame)
+1412: Transport 2/53 next to send [window start: 1/53] (seg/frame)
+1471: Transport 33 reloaded...2/53 to 1/64 (seg/frame)
+RELOAD READY
+5025: Transport 17 reloaded...2/64 to 0/70 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/70 to 2/74 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...0/75 to 0/79 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6467: Transport 13 reloaded...1/79 to 1/83 (seg/frame)
+6482: TIM3_CC2
+RELOAD READY
+6915: Transport 13 reloaded...2/83 to 2/87 (seg/frame)
+6931: TIM3_CC2
+RELOAD READY
+7364: Transport 13 reloaded...0/88 to 0/92 (seg/frame)
+7380: TIM3_CC2
+RELOAD READY
+7814: Transport 13 reloaded...1/92 to 1/96 (seg/frame)
+7829: TIM3_CC2
+RELOAD READY
+8263: Transport 13 reloaded...2/96 to 2/100 (seg/frame)
+8279: TIM3_CC2
+RELOAD READY
+8714: Transport 13 reloaded...0/101 to 0/105 (seg/frame)
+8731: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/105 to 2/107 (seg/frame)
+9023: TIM3_CC2
+9953: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 162
+RELOAD READY
+5034: Transport 33 reloaded...0/108 to 2/118 (seg/frame)
+5051: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/119 to 0/123 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6021: Transport 13 reloaded...1/123 to 1/127 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/127 to 1/131 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...2/131 to 2/135 (seg/frame)
+6939: TIM3_CC2
+RELOAD READY
+7353: Transport 0 reloaded...0/0 to 2/135 (seg/frame)
+7368: TIM3_CC2
+RELOAD READY
+7805: Transport 0 reloaded...0/0 to 2/135 (seg/frame)
+7820: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/135 (seg/frame)
+8268: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/135 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/135 (seg/frame)
+9017: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+6: IRQ count = 84
+159: Second slot received [id: 5; len: 5; lease: 42]
+169: Transport ack 1/106 received (seg/frame)
+181: Transport 2/106 expected next (seg/frame)
+1505: Transport 2/106 next to send [window start: 1/106] (seg/frame)
+1566: Transport 33 reloaded...2/106 to 1/117 (seg/frame)
+RELOAD READY
+5025: Transport 14 reloaded...2/117 to 0/122 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/122 to 1/126 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6021: Transport 13 reloaded...2/126 to 2/130 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/131 to 2/134 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...0/135 to 0/139 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...1/139 to 0/143 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...1/143 to 1/147 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/147 to 1/151 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...2/151 to 2/155 (seg/frame)
+8740: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...0/156 to 1/158 (seg/frame)
+9030: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 154
+163: Second slot received [id: 5; len: 5; lease: 41]
+174: Transport ack 2/156 received (seg/frame)
+185: Transport 3/156 expected next (seg/frame)
+1561: Transport 0/157 next to send [window start: 2/156] (seg/frame)
+1624: Transport 33 reloaded...0/157 to 2/167 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...0/168 to 2/171 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/172 to 0/176 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/176 to 1/180 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/180 to 1/184 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/184 to 2/188 (seg/frame)
+6941: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/189 to 2/192 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/193 to 0/197 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/197 to 0/201 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...1/201 to 1/205 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...2/205 to 0/208 (seg/frame)
+9032: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 152
+162: Second slot received [id: 5; len: 5; lease: 40]
+172: Transport ack 1/206 received (seg/frame)
+184: Transport 2/206 expected next (seg/frame)
+1551: Transport 2/206 next to send [window start: 1/206] (seg/frame)
+1614: Transport 33 reloaded...2/206 to 1/217 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...2/217 to 1/221 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/221 to 2/225 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...0/226 to 0/230 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/230 to 0/234 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/234 to 1/238 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/238 to 1/242 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...2/242 to 2/246 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/247 to 2/250 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...0/251 to 0/0 (seg/frame)
+8739: TIM3_CC2
+RELOAD READY
+9013: Transport 8 reloaded...1/0 to 2/2 (seg/frame)
+9024: TIM3_CC2
+9954: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 153
+470: Second slot received [id: 5; len: 5; lease: 39]
+480: Transport ack 1/1 received (seg/frame)
+490: Transport 2/1 expected next (seg/frame)
+1888: Transport 2/1 next to send [window start: 1/1] (seg/frame)
+1941: Transport 33 reloaded...2/1 to 1/12 (seg/frame)
+RELOAD READY
+5016: Transport 1 reloaded...2/12 to 2/12 (seg/frame)
+5030: TIM3_CC0
+RELOAD READY
+5562: Transport 15 reloaded...0/13 to 2/17 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6011: Transport 13 reloaded...0/18 to 0/22 (seg/frame)
+6026: TIM3_CC2
+RELOAD READY
+6461: Transport 13 reloaded...1/22 to 1/26 (seg/frame)
+6477: TIM3_CC2
+RELOAD READY
+6911: Transport 13 reloaded...2/26 to 2/30 (seg/frame)
+6927: TIM3_CC2
+RELOAD READY
+7361: Transport 13 reloaded...0/31 to 0/35 (seg/frame)
+7377: TIM3_CC2
+RELOAD READY
+7811: Transport 13 reloaded...1/35 to 1/39 (seg/frame)
+7827: TIM3_CC2
+RELOAD READY
+8261: Transport 13 reloaded...2/39 to 2/43 (seg/frame)
+8276: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...0/44 to 0/48 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/48 to 2/50 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 147
+RELOAD READY
+5033: Transport 33 reloaded...0/51 to 2/61 (seg/frame)
+5049: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...0/62 to 1/66 (seg/frame)
+5585: TIM3_CC2
+RELOAD READY
+6017: Transport 13 reloaded...2/66 to 2/70 (seg/frame)
+6033: TIM3_CC2
+RELOAD READY
+6465: Transport 13 reloaded...0/71 to 0/75 (seg/frame)
+6481: TIM3_CC2
+RELOAD READY
+6914: Transport 13 reloaded...1/75 to 1/79 (seg/frame)
+6930: TIM3_CC2
+RELOAD READY
+7363: Transport 13 reloaded...2/79 to 2/83 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7805: Transport 0 reloaded...0/0 to 2/83 (seg/frame)
+7818: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/83 (seg/frame)
+8267: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/83 (seg/frame)
+8717: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/83 (seg/frame)
+9016: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 99
+162: Second slot received [id: 5; len: 5; lease: 37]
+172: Transport ack 1/49 received (seg/frame)
+183: Transport 2/49 expected next (seg/frame)
+1313: Transport 2/49 next to send [window start: 1/49] (seg/frame)
+1373: Transport 33 reloaded...2/49 to 1/60 (seg/frame)
+RELOAD READY
+5027: Transport 20 reloaded...2/60 to 0/67 (seg/frame)
+5043: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...1/67 to 2/71 (seg/frame)
+5586: TIM3_CC2
+RELOAD READY
+6018: Transport 13 reloaded...0/72 to 0/76 (seg/frame)
+6034: TIM3_CC2
+RELOAD READY
+6466: Transport 13 reloaded...1/76 to 1/80 (seg/frame)
+6482: TIM3_CC2
+RELOAD READY
+6915: Transport 13 reloaded...2/80 to 2/84 (seg/frame)
+6931: TIM3_CC2
+RELOAD READY
+7364: Transport 13 reloaded...0/85 to 0/89 (seg/frame)
+7380: TIM3_CC2
+RELOAD READY
+7813: Transport 13 reloaded...1/89 to 1/93 (seg/frame)
+7828: TIM3_CC2
+RELOAD READY
+8263: Transport 13 reloaded...2/93 to 2/97 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8713: Transport 13 reloaded...0/98 to 0/102 (seg/frame)
+8729: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/102 to 2/104 (seg/frame)
+9023: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 165
+160: Second slot received [id: 5; len: 5; lease: 36]
+170: Transport ack 1/103 received (seg/frame)
+182: Transport 2/103 expected next (seg/frame)
+1526: Transport 2/103 next to send [window start: 1/103] (seg/frame)
+1588: Transport 33 reloaded...2/103 to 1/114 (seg/frame)
+RELOAD READY
+5024: Transport 13 reloaded...2/114 to 2/118 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/119 to 0/123 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6021: Transport 13 reloaded...1/123 to 1/127 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...2/127 to 1/131 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6921: Transport 13 reloaded...2/131 to 2/135 (seg/frame)
+6939: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...0/136 to 2/139 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...0/140 to 0/144 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...1/144 to 0/148 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...1/148 to 1/152 (seg/frame)
+8740: TIM3_CC2
+RELOAD READY
+9014: Transport 8 reloaded...2/152 to 0/155 (seg/frame)
+9030: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 153
+262: Second slot received [id: 5; len: 5; lease: 35]
+273: Transport ack 1/153 received (seg/frame)
+284: Transport 2/153 expected next (seg/frame)
+1661: Transport 2/153 next to send [window start: 1/153] (seg/frame)
+1724: Transport 33 reloaded...2/153 to 1/164 (seg/frame)
+RELOAD READY
+5022: Transport 9 reloaded...2/164 to 1/167 (seg/frame)
+5039: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/167 to 2/171 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...0/172 to 0/176 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/176 to 0/180 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/180 to 1/184 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/184 to 1/188 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7822: Transport 13 reloaded...2/188 to 2/192 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/193 to 2/196 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...0/197 to 0/201 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...1/201 to 2/203 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 149
+RELOAD READY
+5034: Transport 33 reloaded...0/204 to 2/214 (seg/frame)
+5052: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...0/215 to 0/219 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...1/219 to 1/223 (seg/frame)
+6039: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...2/223 to 1/227 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...2/227 to 2/231 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...0/232 to 2/235 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7816: Transport 0 reloaded...0/0 to 2/235 (seg/frame)
+7830: TIM3_CC2
+RELOAD READY
+8268: Transport 0 reloaded...0/0 to 2/235 (seg/frame)
+8282: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/235 (seg/frame)
+8718: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/235 (seg/frame)
+9018: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 96
+159: Second slot received [id: 5; len: 5; lease: 33]
+169: Transport ack 0/202 received (seg/frame)
+181: Transport 1/202 expected next (seg/frame)
+1519: Transport 1/202 next to send [window start: 0/202] (seg/frame)
+1582: Transport 33 reloaded...1/202 to 0/213 (seg/frame)
+RELOAD READY
+5025: Transport 13 reloaded...1/213 to 1/217 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/217 to 2/221 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6023: Transport 13 reloaded...0/222 to 0/226 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6461: Transport 12 reloaded...1/226 to 0/230 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/230 to 1/234 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7360: Transport 12 reloaded...2/234 to 1/238 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...2/238 to 2/242 (seg/frame)
+7840: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...0/243 to 2/246 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8723: Transport 13 reloaded...0/247 to 0/251 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...1/251 to 2/253 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 153
+163: Second slot received [id: 5; len: 5; lease: 32]
+173: Transport ack 0/252 received (seg/frame)
+185: Transport 1/252 expected next (seg/frame)
+1562: Transport 1/252 next to send [window start: 0/252] (seg/frame)
+1625: Transport 33 reloaded...1/252 to 0/8 (seg/frame)
+RELOAD READY
+5021: Transport 12 reloaded...1/8 to 0/12 (seg/frame)
+5036: TIM3_CC0
+RELOAD READY
+5561: Transport 14 reloaded...1/12 to 2/16 (seg/frame)
+5577: TIM3_CC2
+RELOAD READY
+6025: Transport 14 reloaded...0/17 to 1/21 (seg/frame)
+6041: TIM3_CC2
+RELOAD READY
+6472: Transport 13 reloaded...2/21 to 2/25 (seg/frame)
+6488: TIM3_CC2
+RELOAD READY
+6920: Transport 13 reloaded...0/26 to 0/30 (seg/frame)
+6935: TIM3_CC2
+RELOAD READY
+7368: Transport 13 reloaded...1/30 to 1/34 (seg/frame)
+7384: TIM3_CC2
+RELOAD READY
+7816: Transport 13 reloaded...2/34 to 2/38 (seg/frame)
+7832: TIM3_CC2
+RELOAD READY
+8264: Transport 13 reloaded...0/39 to 0/43 (seg/frame)
+8280: TIM3_CC2
+RELOAD READY
+8714: Transport 13 reloaded...1/43 to 1/47 (seg/frame)
+8729: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...2/47 to 0/50 (seg/frame)
+9022: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 158
+160: Second slot received [id: 5; len: 5; lease: 31]
+170: Transport ack 2/48 received (seg/frame)
+181: Transport 3/48 expected next (seg/frame)
+1406: Transport 0/49 next to send [window start: 2/48] (seg/frame)
+1466: Transport 33 reloaded...0/49 to 2/59 (seg/frame)
+RELOAD READY
+5026: Transport 17 reloaded...0/60 to 1/65 (seg/frame)
+5041: TIM3_CC0
+RELOAD READY
+5570: Transport 14 reloaded...2/65 to 0/70 (seg/frame)
+5586: TIM3_CC2
+RELOAD READY
+6017: Transport 13 reloaded...1/70 to 1/74 (seg/frame)
+6033: TIM3_CC2
+RELOAD READY
+6465: Transport 13 reloaded...2/74 to 2/78 (seg/frame)
+6481: TIM3_CC2
+RELOAD READY
+6915: Transport 13 reloaded...0/79 to 0/83 (seg/frame)
+6930: TIM3_CC2
+RELOAD READY
+7364: Transport 13 reloaded...1/83 to 1/87 (seg/frame)
+7380: TIM3_CC2
+RELOAD READY
+7813: Transport 13 reloaded...2/87 to 2/91 (seg/frame)
+7828: TIM3_CC2
+RELOAD READY
+8262: Transport 13 reloaded...0/92 to 0/96 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8712: Transport 13 reloaded...1/96 to 1/100 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...2/100 to 0/103 (seg/frame)
+9023: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 162
+RELOAD READY
+5034: Transport 33 reloaded...1/103 to 0/114 (seg/frame)
+5051: TIM3_CC0
+RELOAD READY
+5579: Transport 14 reloaded...1/114 to 2/118 (seg/frame)
+5596: TIM3_CC2
+RELOAD READY
+6010: Transport 12 reloaded...0/119 to 2/122 (seg/frame)
+6028: TIM3_CC2
+RELOAD READY
+6471: Transport 13 reloaded...0/123 to 0/127 (seg/frame)
+6488: TIM3_CC2
+RELOAD READY
+6910: Transport 12 reloaded...1/127 to 0/131 (seg/frame)
+6928: TIM3_CC2
+RELOAD READY
+7366: Transport 2 reloaded...1/131 to 2/131 (seg/frame)
+7382: TIM3_CC2
+RELOAD READY
+7820: Transport 0 reloaded...0/0 to 2/131 (seg/frame)
+7834: TIM3_CC2
+RELOAD READY
+8253: Transport 0 reloaded...0/0 to 2/131 (seg/frame)
+8268: TIM3_CC2
+RELOAD READY
+8703: Transport 0 reloaded...0/0 to 2/131 (seg/frame)
+8719: TIM3_CC2
+RELOAD READY
+9002: Transport 0 reloaded...0/0 to 2/131 (seg/frame)
+9017: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 86
+159: Second slot received [id: 5; len: 5; lease: 29]
+170: Transport ack 2/101 received (seg/frame)
+181: Transport 3/101 expected next (seg/frame)
+1496: Transport 0/102 next to send [window start: 2/101] (seg/frame)
+1558: Transport 33 reloaded...0/102 to 2/112 (seg/frame)
+RELOAD READY
+5025: Transport 14 reloaded...0/113 to 1/117 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5580: Transport 14 reloaded...2/117 to 0/122 (seg/frame)
+5597: TIM3_CC2
+RELOAD READY
+6010: Transport 12 reloaded...1/122 to 0/126 (seg/frame)
+6028: TIM3_CC2
+RELOAD READY
+6471: Transport 13 reloaded...1/126 to 1/130 (seg/frame)
+6489: TIM3_CC2
+RELOAD READY
+6911: Transport 12 reloaded...2/130 to 1/134 (seg/frame)
+6928: TIM3_CC2
+RELOAD READY
+7372: Transport 13 reloaded...2/134 to 2/138 (seg/frame)
+7390: TIM3_CC2
+RELOAD READY
+7810: Transport 12 reloaded...0/139 to 2/142 (seg/frame)
+7828: TIM3_CC2
+RELOAD READY
+8272: Transport 13 reloaded...0/143 to 0/147 (seg/frame)
+8290: TIM3_CC2
+RELOAD READY
+8711: Transport 12 reloaded...1/147 to 0/151 (seg/frame)
+8728: TIM3_CC2
+RELOAD READY
+9008: Transport 8 reloaded...1/151 to 2/153 (seg/frame)
+9024: TIM3_CC2
+9965: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 155
+160: Second slot received [id: 5; len: 5; lease: 28]
+170: Transport ack 0/152 received (seg/frame)
+182: Transport 1/152 expected next (seg/frame)
+1555: Transport 1/152 next to send [window start: 0/152] (seg/frame)
+1618: Transport 33 reloaded...1/152 to 0/163 (seg/frame)
+RELOAD READY
+5024: Transport 12 reloaded...1/163 to 0/167 (seg/frame)
+5042: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...1/167 to 1/171 (seg/frame)
+5579: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...2/171 to 2/175 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...0/176 to 2/179 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6922: Transport 13 reloaded...0/180 to 0/184 (seg/frame)
+6940: TIM3_CC2
+RELOAD READY
+7361: Transport 12 reloaded...1/184 to 0/188 (seg/frame)
+7378: TIM3_CC2
+RELOAD READY
+7823: Transport 13 reloaded...1/188 to 1/192 (seg/frame)
+7841: TIM3_CC2
+RELOAD READY
+8260: Transport 12 reloaded...2/192 to 1/196 (seg/frame)
+8278: TIM3_CC2
+RELOAD READY
+8724: Transport 13 reloaded...2/196 to 2/200 (seg/frame)
+8741: TIM3_CC2
+RELOAD READY
+9015: Transport 8 reloaded...0/201 to 1/203 (seg/frame)
+9031: TIM3_CC2
+9951: TIM3_CC1
+0: TIM3_CC2
+7: IRQ count = 152
+370: Second slot received [id: 5; len: 5; lease: 27]
+380: Transport ack 2/201 received (seg/frame)
+392: Transport 3/201 expected next (seg/frame)
+1783: Transport 0/202 next to send [window start: 2/201] (seg/frame)
+1846: Transport 33 reloaded...0/202 to 2/212 (seg/frame)
+RELOAD READY
+5020: Transport 5 reloaded...0/213 to 1/214 (seg/frame)
+5036: TIM3_CC0
+RELOAD READY
+5561: Transport 13 reloaded...2/214 to 2/218 (seg/frame)
+5578: TIM3_CC2
+RELOAD READY
+6022: Transport 13 reloaded...0/219 to 0/223 (seg/frame)
+6040: TIM3_CC2
+RELOAD READY
+6460: Transport 12 reloaded...1/223 to 0/227 (seg/frame)
+6478: TIM3_CC2
+RELOAD READY
+6923: Transport 13 reloaded...1/227 to 1/231 (seg/frame)
+6940: TIM3_CC2

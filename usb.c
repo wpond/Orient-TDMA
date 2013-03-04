@@ -128,8 +128,13 @@ static volatile bool           usbOnline, usbActive;
 // as on the base station all of these will need to be queued to 
 //		be sent back - this should ensure no waiting when  
 //		handling this
-#define USB_SEND_QUEUE_SIZE 1280
-#define USB_SEND_BUFFER_SIZE 32
+#define USB_SEND_QUEUE_SIZE 20480
+
+#ifndef BASESTATION
+	#define USB_SEND_BUFFER_SIZE 256
+#else
+	#define USB_SEND_BUFFER_SIZE 32
+#endif
 
 uint8_t usbSendMem[USB_SEND_QUEUE_SIZE],
 	usbXferMem[USB_SEND_BUFFER_SIZE];
@@ -220,12 +225,22 @@ void USB_Send()
 {
 	
 	if (!usbOnline)
+	{
+		usbActive = false;
 		return;
+	}
 	
 	INT_Disable();
 	
-	if (usbActive || usbQueueLen == 0)
+	if (usbActive)
 	{
+		INT_Enable();
+		return;
+	}
+	
+	if (usbQueueLen == 0)
+	{
+		usbActive = false;
 		INT_Enable();
 		return;
 	}
@@ -242,6 +257,7 @@ void USB_Send()
 	USBD_Write(EP_DATA_IN, usbXferMem, len, USB_TransmitComplete);
 	
 	usbTransferring = len;
+	usbQueueLen -= usbTransferring;
 	INT_Enable();
 	
 }
@@ -255,12 +271,13 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
 	
 	if (status == USB_STATUS_OK)
 	{
-		INT_Disable();
-		usbActive = false;
 		
-		usbQueueStart = (usbQueueStart + xferred) % USB_SEND_QUEUE_SIZE;
-		usbQueueLen -= xferred;
+		INT_Disable();
+		
+		usbQueueStart = (usbQueueStart + usbTransferring) % USB_SEND_QUEUE_SIZE;
+
 		usbTransferring = 0;
+		usbActive = false;
 		USB_Send();
 		INT_Enable();
 		
@@ -277,11 +294,11 @@ bool USB_Transmit(uint8_t *data, int len)
         return false;
 	}
 	
-	/*
 	while (true)
 	{
 		
-		while ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len && usbActive);
+		USB_Send();
+		while ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len);
 		
 		INT_Disable();
 		if ((USB_SEND_QUEUE_SIZE - usbQueueLen) >= len)
@@ -290,17 +307,17 @@ bool USB_Transmit(uint8_t *data, int len)
 		}
 		INT_Enable();
 		
-		USB_Send();
-		
 	}
-	*/
 	
+	/*
 	INT_Disable();
 	if ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len)
 	{
 		INT_Enable();
+		LED_On(RED);
 		return false;
 	}
+	*/
 	
 	uint16_t usbQueueEnd = (usbQueueStart + usbQueueLen) % USB_SEND_QUEUE_SIZE;
 	

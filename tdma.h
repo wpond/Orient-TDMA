@@ -41,5 +41,6 @@
 	bool TDMA_PacketConfigure(PACKET_Raw *packet);
 	bool TDMA_PacketEnable(PACKET_Raw *packet);
 	void TDMA_ConfigureSecondSlot(TDMA_SecondSlot *slot);
+	void TDMA_SlotAllocationPacket(PACKET_Raw *packet);
 	
 #endif

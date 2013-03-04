@@ -24,7 +24,7 @@ class Basestation:
 			"slotCount": 10,
 			"guardPeriod": 100,
 			"transmitPeriod": 900,
-			"protectionPeriod": 30,
+			"protectionPeriod": 50,
 		}
 		
 		try:

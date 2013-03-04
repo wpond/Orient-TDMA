@@ -7,7 +7,7 @@
 	
 	#include "packets.h"
 	
-	#define TRANSPORT_QUEUE_SIZE 128
+	#define TRANSPORT_QUEUE_SIZE 250
 	
 	void TRANSPORT_Init();
 	bool TRANSPORT_Send(uint8_t *data, uint8_t len);

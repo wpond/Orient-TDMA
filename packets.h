@@ -83,4 +83,14 @@
 	}
 	PACKET_TDMA;
 	
+	typedef struct
+	{
+		uint8_t seqNum;
+		uint8_t slotId;
+		uint8_t len;
+		uint8_t lease;
+		uint8_t padding[26];
+	}
+	PACKET_TDMASlot;
+	
 #endif

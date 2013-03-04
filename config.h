@@ -3,7 +3,7 @@
 	#define __CONFIG_H__
 	
 	// controls whether basestation or not
-	//#define BASESTATION
+	#define BASESTATION
 	
 	
 	
@@ -29,7 +29,7 @@
 	static void inline TRACE(char* msg)
 	{
 		#ifdef BASESTATION
-			INT_Disable();
+			//INT_Disable();
 			uint8_t len, msglen;
 			bool end;
 			uint8_t packet[32];
@@ -57,7 +57,7 @@
 				msglen -= len;
 			}
 			while (msglen > 0);
-			INT_Enable();
+			//INT_Enable();
 		#else
 			USB_Transmit((uint8_t*)msg,strlen(msg));
 		#endif

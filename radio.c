@@ -441,7 +441,7 @@ bool RADIO_HandleIncomingPacket(PACKET_Raw *packet)
 		
 		char tmsg[255];
 		sprintf(tmsg,"MSG RECVD [addr=0x%X; type=0x%X]\n",packet->addr,packet->type);
-		TRACE(tmsg);
+		//TRACE(tmsg);
 		
 		switch (packet->type)
 		{
@@ -470,7 +470,7 @@ bool RADIO_HandleIncomingPacket(PACKET_Raw *packet)
 			return true;
 		
 		case PACKET_TDMA_SLOT:
-			//TDMA_PacketSlotAllocation(packet);
+			TDMA_SlotAllocationPacket(packet);
 			return true;
 		
 		case PACKET_EVENT:
@@ -602,6 +602,14 @@ bool RADIO_PacketUpload(uint8_t packet[32])
 		sprintf(tmsg,"%i: sending ACK packet [%i %i]\n\n",(int)TIMER_CounterGet(TIMER1),(int)packet[0],(int)packet[1]);
 		TRACE(tmsg);
 	}
+	
+	if (packet[1] == PACKET_TRANSPORT_DATA)
+	{
+		char tmsg[255];
+		sprintf(tmsg,"%i: sending DATA packet %i/%i\n",(int)TIMER_CounterGet(TIMER1),(int)packet[4],(int)packet[3]);
+		//TRACE(tmsg);
+	}
+	
 	
 	transferActive = true;
 	transmitActive = true;

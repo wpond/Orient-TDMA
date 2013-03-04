@@ -20,7 +20,8 @@ class EventManager:
 				self.parent.transport.ackSent()
 			
 			if e == 0xFF:
-				self.parent.transport.sendAcks()
+				#self.parent.transport.sendAcks()
+				pass
 			
 			events = events[1:]
 	

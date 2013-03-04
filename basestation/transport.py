@@ -7,7 +7,6 @@ class Transport:
 	
 	acks = {}
 	outstandingAcks = 0
-	partialPacket = ""
 	packets = {}
 	
 	def __init__(self,parent):
@@ -34,6 +33,7 @@ class Transport:
 				"lastFrameId": frameId,
 				"lastSegmentId": segmentId,
 				"flags": flags,
+				"partialPacket": "",
 			}
 			valid = True
 		
@@ -45,14 +45,16 @@ class Transport:
 			else:
 				expectedFrame = self.acks[senderId]["lastFrameId"]
 				expectedSegment = self.acks[senderId]["lastSegmentId"] + 1
+			'''
 			print "Expected %d/%d but received %d/%d (seg/frame)" % (
 				expectedSegment,
 				expectedFrame,
 				segmentId,
 				frameId)
+			'''
 		
 		if valid:
-			self.partialPacket += packet[7:7+segmentFill]
+			self.acks[senderId]["partialPacket"] += packet[7:7+segmentFill]
 			
 			EoF = flags & FLAG_SEGMENT_END
 			'''
@@ -73,8 +75,8 @@ class Transport:
 		if valid and EoF:
 			if not senderId in self.packets:
 				self.packets[senderId] = Queue.Queue()
-			self.packets[senderId].put(self.partialPacket)
-			self.partialPacket = ""
+			self.packets[senderId].put(self.acks[senderId]["partialPacket"])
+			self.acks[senderId]["partialPacket"] = ""
 	
 	def recvPackets(self):
 		return self.packets
@@ -105,7 +107,7 @@ class Transport:
 					
 					self.parent.send(packet)
 					self.outstandingAcks += 1
-					#print "ACK %d (seg/frame): %d/%d" % (id,0xFE,0xFE)
+					print "ACK %d (seg/frame): %d/%d" % (id,0xFE,0xFE)
 			
 			for id,state in self.acks.items():
 				packet = struct.pack("BBBB",id,self.parent.PACKET_TYPES["TRANSPORT_ACK"],state["lastFrameId"],state["lastSegmentId"])
@@ -117,7 +119,7 @@ class Transport:
 				packet += struct.pack(str(32-len(packet)) + "x")
 				
 				self.parent.send(packet)
-				#print "ACK %d (seg/frame): %d/%d" % (id,state["lastSegmentId"],state["lastFrameId"])
+				print "ACK %d (seg/frame): %d/%d" % (id,state["lastSegmentId"],state["lastFrameId"])
 				self.outstandingAcks += 1
 			
 			if slotAllocs:

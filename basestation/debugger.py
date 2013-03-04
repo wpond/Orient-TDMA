@@ -21,6 +21,7 @@ class Debugger():
 			
 			m = struct.pack("xxB?" + str(l) + "s" + ("x" * (32 - 4 - l)),l,end,msg[:l])
 			self.sock.sendto(m, (self.UDP_IP,self.UDP_PORT))
+			msg = msg[l:]
 	
 	def send(self,packet):
 		self.sock.sendto(packet, (self.UDP_IP,self.UDP_PORT))

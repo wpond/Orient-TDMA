@@ -1,0 +1,752 @@
+
+
+=====
+
+
+BASESTATIONChallenge/Response: 0x1
+Challenge/Response: 0x2
+Challenge/Response: 0x1
+Incoming packet:
+0x00 0x02 0x02 0x01 0x66 0x0 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 Changed to channel 102
+9: IRQ count = 0
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 2
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 2
+9: IRQ count = 2
+9: IRQ count = 2
+9: IRQ count = 1
+9: IRQ count = 2
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+Incoming packet:
+0x00 0x02 0x04 0x01 0x66 0x0 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 Changed to channel 102
+9: IRQ count = 2
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+Incoming packet:
+0x00 0x02 0x06 0x01 0x66 0x0x84 0x03 0x00 0x00 0x32 0x00 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 Changed to channel 102
+9: IRQ count = 2
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 2
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+9: IRQ count = 1
+6: sending ACK packet [2 7]
+18: SENT ACK 2/0 TO NODE 2
+35: IRQ count = 5
+6: sending ACK packet [2 7]
+18: SENT ACK 0/19 TO NODE 2
+36: IRQ count = 58
+6: sending ACK packet [2 7]
+15: SENT ACK 1/46 TO NODE 2
+36: IRQ count = 85
+6: sending ACK packet [2 7]
+36: IRQ count = 114
+1178: out of sequence packet received 0/84 [node 2]
+1235: out of sequence packet1281: out of sequence packet1338: out of sequence packet received 0/85 [node 2]
+1395: out of sequence packet1442: out of sequence packet1499: out of sequence packet1555: out of sequence packet1603: out of sequence packet1660: out of sequence packet1716: out of sequence packet1764: out of sequence packet1821: out of sequence packet1868: out of sequence packet1925: out of sequence packet received 2/88 [node 2]
+1982: out of sequence packet2019: out of sequence packet2055: out of sequence packet2092: out of sequence packet2129: out of sequence packet2166: out of sequence packet2202: out of sequence packet2239: out of sequence packet2275: out of sequence packet2312: out of sequence packet2349: out of sequence packet5138: out of sequence packet received 2/92 [node 2]
+5196: out of sequence packet5243: out of sequence packet5301: out of sequence packet received 2/93 [node 2]
+5360: out of sequence packet5407: out of sequence packet5465: out of sequence packet received 2/94 [node 2]
+5523: out of sequence packet5571: out of sequence packet5618: out of sequence packet received 2/95 [node 2]
+5676: out of sequence packet5724: out of sequence packet5782: out of sequence packet received 2/96 [node 2]
+5840: out of sequence packet5888: out of sequence packet5946: out of sequence packet5993: out of sequence packet6051: out of sequence packet6099: out of sequence packet6146: out of sequence packet6204: out of sequence packet6261: out of sequence packet6310: out of sequence packet6369: out of sequence packet6418: out of sequence packet6478: out of sequence packet6516: out of sequence packet6575: out of sequence packet6635: out of sequence packet6684: out of sequence packet6743: out of sequence packet6803: out of sequence packet6852: out of sequence packet6911: out of sequence packet6960: out of sequence packet7009: out of sequence packet7068: out of sequence packet7128: out of sequence packet7177: out of sequence packet7236: out of sequence packet7294: out of sequence packet7344: out of sequence packet7393: out of sequence packet7442: out of sequence packet7502: out of sequence packet7550: out of sequence packet7610: out of sequence packetIncoming packet:
+7669: out of sequence packet 0x00 0x00 0x01 0x00 0x00 0x7718: out of sequence packet7778: out of sequence packet9: IRQ count = 1
+7827: out of sequence packet9: IRQ count = 1
+7876: out of sequence packet9: IRQ count = 1
+7935: out of sequence packet9: IRQ count = 1
+7994: out of sequence packet9: IRQ count = 1
+8044: out of sequence packet9: IRQ count = 1
+8094: out of sequence packet9: IRQ count = 2
+8153: out of sequence packet9: IRQ count = 1
+8203: out of sequence packet9: IRQ count = 1
+8263: out of sequence packet9: IRQ count = 1
+8323: out of sequence packet9: IRQ count = 1
+8372: out of sequence packet9: IRQ count = 2
+8432: out of sequence packet9: IRQ count = 1
+8493: out of sequence packetIncoming packet:
+8551: out of sequence packet 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 8602: out of sequence packet8662: out of sequence packet9: IRQ count = 1
+8720: out of sequence packetIncoming packet:
+0 0x0A 0x64 0x00 0x00 0x00 08771: out of sequence packet 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 8831: out of sequence packet8889: out of sequence packet9: IRQ count = 1
+8940: out of sequence packet9: IRQ count = 1
+9: IRQ count = 1
+9000: out of sequence packet9: IRQ count = 1
+9039: out of sequence packet9: IRQ count = 1
+9: IRQ count = 1
+9078: out of sequence packet9: IRQ count = 1
+9116: out of sequence packet9: IRQ count = 1
+9155: out of sequence packet9: IRQ count = 1
+9194: out of sequence packet9: IRQ count = 1
+9233: out of sequence packet9: IRQ count = 1
+9272: out of sequence packet9: IRQ count = 1
+9311: out of sequence packet9: IRQ count = 1
+9350: out of sequence packet9: IRQ count = 1
+9389: out of sequence packet9: IRQ count = 1
+9428: out of sequence packet9: IRQ count = 1
+9466: out of sequence packet9: IRQ count = 1
+9: IRQ count = 1
+9505: out of sequence packet9: IRQ count = 1
+9544: out of sequence packet9: IRQ count = 1
+9583: out of sequence packet9: IRQ count = 1
+9622: out of sequence packet9: IRQ count = 1
+9660: out of sequence packet9: IRQ count = 1
+9699: out of sequence packet9: IRQ count = 1
+9738: out of sequence packet9: IRQ count = 1
+9777: out of sequence packet9: IRQ count = 1
+9816: out of sequence packet9: IRQ count = 1
+9855: out of sequence packet9: IRQ count = 1
+9894: out of sequence packet9: IRQ count = 1
+9: IRQ count = 1
+9932: out of sequence packet9: IRQ count = 1
+9971: out of sequence packet6: sending ACK packet [2 7]
+18: SENT ACK 2/0 TO NODE 2
+18: SENT ACK 1/83 TO NODE 2
+37: IRQ count = 140
+54: out of sequence packet r87: out of sequence packet r136: out of sequence packet 171: out of sequence packet 206: out of sequence packet 241: out of sequence packet 276: out of sequence packet 311: out of sequence packet 346: out of sequence packet 381: out of sequence packet 416: out of sequence packet 451: out of sequence packet 486: out of sequence packet 522: out of sequence packet 6: sending ACK packet [2 7]
+19: SENT ACK 0/138 TO NODE 25: sending ACK packet [2 7]
+
+12: SENT ACK 1/187 TO NODE 2
+31: IRQ count = 150
+ received 2/96 [node 2]
+ received 0/98 [node 2]
+5: sending ACK packet [2 7]
+
+11: SENT ACK 1/237 TO NODE 2
+28: IRQ count = 153
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/34 TO NODE 2
+27: IRQ count = 158
+7: sending ACK packet [2 7]
+
+14: SENT ACK 0/87 TO NODE 2
+29: IRQ count = 162
+5: sending ACK packet [2 7]
+
+12: SENT ACK 0/138 TO NODE 2
+28: IRQ count = 156
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/188 TO NODE 2
+28: IRQ count = 153
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/238 TO NODE 2
+28: IRQ count = 153
+5: sending ACK packet [2 7]
+
+11: SENT ACK 2/34 TO NODE 2
+27: IRQ count = 158
+5: sending ACK packet [2 7]
+
+12: SENT ACK 2/87 TO NODE 2
+27: IRQ count = 162
+5: sending ACK packet [2 7]
+
+11: SENT ACK 2/138 TO NODE 2
+28: IRQ count = 156
+5: sending ACK packet [2 7]
+
+11: SENT ACK 2/188 TO NODE 2
+28: IRQ count = 153
+5: sending ACK packet [2 7]
+
+12: SENT ACK 2/238 TO NODE 2
+31: IRQ count = 152
+5: sending ACK packet [2 7]
+
+11: SENT ACK 1/35 TO NODE 2
+26: IRQ count = 158
+5: sending ACK packet [2 7]
+
+11: SENT ACK 1/88 TO NODE 2
+29: IRQ count = 162
+5: sending ACK packet [2 7]
+
+12: SENT ACK 1/139 TO NODE 2
+31: IRQ count = 156
+5: sending ACK packet [2 7]
+
+11: SENT ACK 1/189 TO NODE 2
+30: IRQ count = 153
+12: sending ACK packet [2 7]
+
+181: SENT ACK 2/228 TO NODE 2
+359: IRQ count = 153
+3355: out of sequence packet received 0/229 [node 2]
+3675: out of sequence packet received 1/229 [node 2]
+4003: out of sequence packet received 2/229 [node 2]
+4259: out of sequence packet received 0/230 [node 2]
+4503: out of sequence packet received 1/230 [node 2]
+4755: out of sequence packet received 2/230 [node 2]
+5006: out of sequence packet received 0/231 [node 2]
+5261: out of sequence packet received 1/231 [node 2]
+5594: out of sequence packet received 2/231 [node 2]
+5837: out of sequence packet received 0/232 [node 2]
+6100: out of sequence packet received 1/232 [node 2]
+6332: out of sequence packet received 2/232 [node 2]
+6577: out of sequence packet received 0/233 [node 2]
+6829: out of sequence packet received 1/233 [node 2]
+7066: out of sequence packet received 2/233 [node 2]
+7305: out of sequence packet received 0/234 [node 2]
+7544: out of sequence packet received 1/234 [node 2]
+7776: out of sequence packet received 2/234 [node 2]
+8012: out of sequence packet received 0/235 [node 2]
+8238: out of sequence packet received 1/235 [node 2]
+8481: out of sequence packet received 2/235 [node 2]
+8757: out of sequence packet received 0/236 [node 2]
+9072: out of sequence packet received 1/236 [node 2]
+9324: out of sequence packet received 2/236 [node 2]
+9555: out of sequence packet received 0/237 [node 2]
+9804: out of sequence packet received 1/237 [node 2]
+39: sending ACK packet [2 7]
+
+210: SENT ACK 1/239 TO NODE 2
+390: IRQ count = 159
+563: out of sequence packet received 2/237 [node 2]
+824: out of sequence packet received 0/238 [node 2]
+1080: out of sequence packet received 1/238 [node 2]
+1349: out of sequence packet received 2/238 [node 2]
+1587: out of sequence packet received 0/239 [node 2]
+1846: out of sequence packet received 1/239 [node 2]
+26: sending ACK packet [2 7]
+
+194: SENT ACK 0/16 TO NODE 2
+361: IRQ count = 8
+2765: out of sequence packet received 2/239 [node 2]
+2999: out of sequence packet received 0/240 [node 2]
+3233: out of sequence packet received 1/240 [node 2]
+3545: out of sequence packet received 1/16 [node 2]
+3785: out of sequence packet received 2/16 [node 2]
+4021: out of sequence packet received 0/17 [node 2]
+4265: out of sequence packet received 1/17 [node 2]
+4526: out of sequence packet received 2/17 [node 2]
+4797: out of sequence packet received 0/18 [node 2]
+5062: out of sequence packet received 1/18 [node 2]
+5324: out of sequence packet received 2/18 [node 2]
+5568: out of sequence packet received 0/19 [node 2]
+5815: out of sequence packet received 1/19 [node 2]
+6075: out of sequence packet received 2/19 [node 2]
+6318: out of sequence packet received 0/20 [node 2]
+6586: out of sequence packet received 1/20 [node 2]
+6842: out of sequence packet received 2/20 [node 2]
+7117: out of sequence packet received 0/21 [node 2]
+7360: out of sequence packet received 1/21 [node 2]
+7603: out of sequence packet received 2/21 [node 2]
+7838: out of sequence packet received 0/22 [node 2]
+8075: out of sequence packet received 1/22 [node 2]
+8296: out of sequence packet received 2/22 [node 2]
+8541: out of sequence packet received 0/23 [node 2]
+8773: out of sequence packet received 1/23 [node 2]
+9020: out of sequence packet received 2/23 [node 2]
+9252: out of sequence packet received 0/24 [node 2]
+9605: out of sequence packet received 1/24 [node 2]
+9844: out of sequence packet6: sending ACK packet [2 7]
+
+169: SENT ACK 2/24 TO NODE 2
+351: IRQ count = 157
+ received 2/24 [node 2]
+50: sending ACK packet [2 7]
+
+224: SENT ACK 2/62 TO NODE 2
+393: IRQ count = 100
+1638: out of sequence packet received 0/25 [node 2]
+1871: out of sequence packet received 1/25 [node 2]
+2127: out of sequence packet received 2/25 [node 2]
+2374: out of sequence packet received 0/26 [node 2]
+2625: out of sequence packet received 1/26 [node 2]
+2870: out of sequence packet received 2/26 [node 2]
+3100: out of sequence packet received 0/27 [node 2]
+3333: out of sequence packet received 1/27 [node 2]
+3573: out of sequence packet received 2/27 [node 2]
+3811: out of sequence packet received 0/28 [node 2]
+4044: out of sequence packet received 1/28 [node 2]
+4280: out of sequence packet received 2/28 [node 2]
+4521: out of sequence packet received 0/29 [node 2]
+4783: out of sequence packet received 1/29 [node 2]
+5036: out of sequence packet received 2/29 [node 2]
+5290: out of sequence packet received 2/30 [node 2]
+5528: out of sequence packet received 2/31 [node 2]
+5840: out of sequence packet received 1/32 [node 2]
+6094: out of sequence packet received 1/33 [node 2]
+6334: out of sequence packet received 2/33 [node 2]
+6596: out of sequence packet received 0/34 [node 2]
+6866: out of sequence packet received 1/34 [node 2]
+7128: out of sequence packet received 2/34 [node 2]
+7387: out of sequence packet received 0/35 [node 2]
+7641: out of sequence packet received 1/35 [node 2]
+7906: out of sequence packet received 2/35 [node 2]
+8141: out of sequence packet received 0/36 [node 2]
+8376: out of sequence packet received 1/36 [node 2]
+8613: out of sequence packet received 2/36 [node 2]
+8849: out of sequence packet received 0/37 [node 2]
+9081: out of sequence packet received 1/37 [node 2]
+9319: out of sequence packet received 2/37 [node 2]
+9559: out of sequence packet received 0/38 [node 2]
+9802: out of sequence packet received 1/38 [node 2]
+105: sending ACK packet [2 7]
+
+291: SENT ACK 2/66 TO NODE 2
+469: IRQ count = 69
+636: out of sequence packet received 2/38 [node 2]
+896: out of sequence packet received 0/39 [node 2]
+1227: out of sequence packet received 1/39 [node 2]
+1592: out of sequence packet received 2/39 [node 2]
+1946: out of sequence packet received 0/40 [node 2]
+2297: out of sequence packet received 1/40 [node 2]
+2538: out of sequence packet received 2/40 [node 2]
+2780: out of sequence packet received 0/41 [node 2]
+3028: out of sequence packet received 1/41 [node 2]
+3264: out of sequence packet received 2/41 [node 2]
+3499: out of sequence packet received 0/42 [node 2]
+3737: out of sequence packet received 1/42 [node 2]
+3978: out of sequence packet received 2/42 [node 2]
+4211: out of sequence packet received 0/43 [node 2]
+4446: out of sequence packet received 1/43 [node 2]
+4681: out of sequence packet received 2/43 [node 2]
+4935: out of sequence packet received 0/44 [node 2]
+5190: out of sequence packet received 1/44 [node 2]
+5440: out of sequence packet received 2/44 [node 2]
+5692: out of sequence packet received 0/45 [node 2]
+5953: out of sequence packet received 1/45 [node 2]
+6227: out of sequence packet received 2/45 [node 2]
+6494: out of sequence packet received 0/46 [node 2]
+6754: out of sequence packet received 1/46 [node 2]
+7026: out of sequence packet received 2/46 [node 2]
+7296: out of sequence packet received 0/47 [node 2]
+7548: out of sequence packet received 1/47 [node 2]
+7804: out of sequence packet received 2/47 [node 2]
+8086: out of sequence packet received 0/48 [node 2]
+8370: out of sequence packet received 1/48 [node 2]
+8604: out of sequence packet received 2/48 [node 2]
+8836: out of sequence packet received 0/49 [node 2]
+9070: out of sequence packet received 1/49 [node 2]
+9321: out of sequence packet received 2/49 [node 2]
+9557: out of sequence packet received 0/50 [node 2]
+9785: out of sequence packet received 1/50 [node 2]
+12: sending ACK packet [2 7]
+
+183: SENT ACK 2/66 TO NODE 2
+353: IRQ count = 22
+530: out of sequence packet received 2/50 [node 2]
+781: out of sequence packet received 0/51 [node 2]
+1039: out of sequence packet received 1/51 [node 2]
+1288: out of sequence packet received 2/51 [node 2]
+1532: out of sequence packet received 0/52 [node 2]
+1803: out of sequence packet received 1/52 [node 2]
+2038: out of sequence packet received 2/52 [node 2]
+2273: out of sequence packet received 0/53 [node 2]
+2523: out of sequence packet received 1/53 [node 2]
+2772: out of sequence packet received 2/53 [node 2]
+3017: out of sequence packet received 0/54 [node 2]
+3270: out of sequence packet received 1/54 [node 2]
+3502: out of sequence packet received 2/54 [node 2]
+3736: out of sequence packet received 0/55 [node 2]
+3999: out of sequence packet received 0/56 [node 2]
+4318: out of sequence packet received 1/63 [node 2]
+4551: out of sequence packet received 0/64 [node 2]
+4788: out of sequence packet received 1/64 [node 2]
+5025: out of sequence packet received 2/64 [node 2]
+5265: out of sequence packet received 0/65 [node 2]
+5570: out of sequence packet received 1/65 [node 2]
+5820: out of sequence packet received 2/65 [node 2]
+6070: out of sequence packet received 0/66 [node 2]
+6309: out of sequence packet received 1/66 [node 2]
+6555: out of sequence packet received 2/66 [node 2]
+41: sending ACK packet [2 7]
+
+193: SENT ACK 2/79 TO NODE 2
+381: IRQ count = 79
+1730: out of sequence packet received 0/67 [node 2]
+1978: out of sequence packet received 1/67 [node 2]
+2233: out of sequence packet received 2/67 [node 2]
+2490: out of sequence packet received 0/68 [node 2]
+2760: out of sequence packet received 1/68 [node 2]
+3023: out of sequence packet received 2/68 [node 2]
+3281: out of sequence packet received 0/69 [node 2]
+3521: out of sequence packet received 1/69 [node 2]
+3755: out of sequence packet received 2/69 [node 2]
+3985: out of sequence packet received 0/70 [node 2]
+4225: out of sequence packet received 1/70 [node 2]
+4463: out of sequence packet received 2/70 [node 2]
+4695: out of sequence packet received 0/71 [node 2]
+4929: out of sequence packet received 1/71 [node 2]
+5164: out of sequence packet received 2/71 [node 2]
+5418: out of sequence packet received 0/72 [node 2]
+5737: out of sequence packet received 1/72 [node 2]
+5980: out of sequence packet received 0/124 [node 2]
+6234: out of sequence packet received 1/124 [node 2]
+6492: out of sequence packet received 2/124 [node 2]
+6735: out of sequence packet received 0/125 [node 2]
+6976: out of sequence packet received 1/125 [node 2]
+7219: out of sequence packet received 2/125 [node 2]
+7477: out of sequence packet received 0/126 [node 2]
+7748: out of sequence packet received 1/126 [node 2]
+8013: out of sequence packet received 2/126 [node 2]
+8275: out of sequence packet received 0/127 [node 2]
+8611: out of sequence packet received 1/127 [node 2]
+8862: out of sequence packet received 2/127 [node 2]
+9100: out of sequence packet received 0/128 [node 2]
+9334: out of sequence packet received 1/128 [node 2]
+9569: out of sequence packet received 2/128 [node 2]
+9803: out of sequence packet received 0/129 [node 2]
+23: sending ACK packet [2 7]
+
+180: SENT ACK 0/84 TO NODE 2
+344: IRQ count = 1
+522: out of sequence packet received 1/129 [node 2]
+785: out of sequence packet received 2/129 [node 2]
+1035: out of sequence packet received 0/130 [node 2]
+1273: out of sequence packet received 1/130 [node 2]
+1530: out of sequence packet received 2/130 [node 2]
+1791: out of sequence packet received 0/131 [node 2]
+2056: out of sequence packet received 1/131 [node 2]
+2299: out of sequence packet received 2/131 [node 2]
+2533: out of sequence packet received 0/132 [node 2]
+2775: out of sequence packet received 1/132 [node 2]
+3011: out of sequence packet received 2/132 [node 2]
+3248: out of sequence packet received 0/133 [node 2]
+3506: out of sequence packet received 1/133 [node 2]
+3750: out of sequence packet received 2/133 [node 2]
+3985: out of sequence packet received 0/134 [node 2]
+4234: out of sequence packet received 1/134 [node 2]
+4474: out of sequence packet received 2/134 [node 2]
+4710: out of sequence packet received 0/135 [node 2]
+4948: out of sequence packet received 1/135 [node 2]
+5186: out of sequence packet received 2/135 [node 2]
+5421: out of sequence packet received 0/136 [node 2]
+5667: out of sequence packet received 1/136 [node 2]
+5919: out of sequence packet received 2/136 [node 2]
+6192: out of sequence packet received 0/137 [node 2]
+6458: out of sequence packet received 1/137 [node 2]
+6717: out of sequence packet received 2/137 [node 2]
+6967: out of sequence packet received 0/138 [node 2]
+7208: out of sequence packet received 1/138 [node 2]
+7458: out of sequence packet received 2/138 [node 2]
+7711: out of sequence packet received 0/139 [node 2]
+7966: out of sequence packet received 1/139 [node 2]
+8216: out of sequence packet received 2/139 [node 2]
+8473: out of sequence packet received 0/140 [node 2]
+8724: out of sequence packet received 1/140 [node 2]
+8967: out of sequence packet received 2/140 [node 2]
+9199: out of sequence packet received 0/141 [node 2]
+9451: out of sequence packet received 1/141 [node 2]
+9706: out of sequence packet received 2/141 [node 2]
+43: sending ACK packet [2 7]
+
+229: SENT ACK 0/84 TO NODE 2
+402: IRQ count = 1
+9968: out of sequence packet received 0/142 [node 2]
+742: out of sequence packet received 1/142 [node 2]
+995: out of sequence packet received 2/142 [node 2]
+1258: out of sequence packet received 0/143 [node 2]
+1525: out of sequence packet received 1/143 [node 2]
+1802: out of sequence packet received 2/143 [node 2]
+2071: out of sequence packet received 0/144 [node 2]
+2344: out of sequence packet received 1/144 [node 2]
+2611: out of sequence packet received 2/144 [node 2]
+2872: out of sequence packet received 0/145 [node 2]
+3132: out of sequence packet received 1/145 [node 2]
+3408: out of sequence packet received 2/145 [node 2]
+3669: out of sequence packet received 0/146 [node 2]
+3919: out of sequence packet received 1/146 [node 2]
+4158: out of sequence packet received 2/146 [node 2]
+4400: out of sequence packet received 0/147 [node 2]
+4640: out of sequence packet received 1/147 [node 2]
+4879: out of sequence packet received 2/147 [node 2]
+5120: out of sequence packet received 2/148 [node 2]
+5364: out of sequence packet received 1/149 [node 2]
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/84 TO NODE 2
+26: IRQ count = 1
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/84 TO NODE 2
+29: IRQ count = 2
+5: sending ACK packet [2 7]
+
+12: SENT ACK 0/84 TO NODE 2
+29: IRQ count = 2
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/84 TO NODE 2
+29: IRQ count = 2
+5: sending ACK packet [2 7]
+
+11: SENT ACK 0/84 TO NODE 2
+27: IRQ count = 2
+5: sending ACK packet [2 7]
+
+14: SENT ACK 0/84 TO NODE 2
+29: IRQ count = 2
+6: sending ACK packet [2 7]
+4521: out of sequence packet17: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 3
+6: sending ACK packet [2 7]
+18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 2/30 [node 2]
+18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+5840: out of sequence packet15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 0/34 [node 2]
+18: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+7128: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+19: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 2/35 [node 2]
+18: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+8376: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+19: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 1/37 [node 2]
+15: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+9559: out of sequence packet15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+19: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+469: IRQ count = 69
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+896: out of sequence packet 15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+16: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 0/40 [node 2]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+2538: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+17: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 2/41 [node 2]
+17: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+3737: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 1/43 [node 2]
+17: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+4935: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+18: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 0/45 [node 2]
+18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+6227: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+17: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 2/46 [node 2]
+17: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+7548: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 1/48 [node 2]
+18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+8836: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 0/50 [node 2]
+16: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+12: sending ACK packet [2 7]15: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+received 0/51 [node 2]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+1288: out of sequence packet15: SENT ACK 0/84 TO NODE 2
+36: IRQ count = 2
+6: sending ACK packet [2 7]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 2/52 [node 2]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+2523: out of sequence packet15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+3270: out of sequence packet received 1/54 [node 2]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+3736: out of sequence packet19: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+20: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+4551: out of sequence packet18: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+17: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
+6: sending ACK packet [2 7]
+ received 0/65 [node 2]
+15: SENT ACK 0/84 TO NODE 2
+37: IRQ count = 2
