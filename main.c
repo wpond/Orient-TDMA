@@ -154,6 +154,8 @@ void EnableInterrupts()
 	
 	NVIC_SetPriority(USB_IRQn, 0);
 	
+	NVIC_SetPriority(GPIO_EVEN_IRQn, 1);
+	
 	NVIC_SetPriority(TIMER0_IRQn, 1);
 	NVIC_SetPriority(TIMER1_IRQn, 1);
 	NVIC_SetPriority(TIMER3_IRQn, 1);
@@ -198,7 +200,8 @@ int main()
 	RADIO_Init();
 	
 	//RADIO_EnableTDMA();
-	RADIO_SetMode(RADIO_RX);
+	//RADIO_SetMode(RADIO_RX);
+	RADIO_SetMode(RADIO_TX);
 	
 	uint32_t itr = 0;
 	while (1)
@@ -215,7 +218,9 @@ int main()
 		if (itr++ % 100000 == 0)
 		{
 			static char msg[32];
-			USB_Transmit((uint8_t*)"NOP\n",4);
+			//USB_Transmit((uint8_t*)"NOP \n",5);
+			USB_Transmit((uint8_t*)"SEND\n",5);
+			RADIO_Send(packet);
 		}
 		
 		// if no pending irqs, sleep

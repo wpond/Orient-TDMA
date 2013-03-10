@@ -7,6 +7,7 @@
 
 #include "efm32_int.h"
 #include "efm32_timer.h"
+#include "efm32_gpio.h"
 
 #include "nRF24L01.h"
 
@@ -179,7 +180,7 @@ void RADIO_Init()
 	RADIO_WriteRegister(NRF_SETUP_AW, 0x03);
 	RADIO_WriteRegister(NRF_SETUP_RETR, 0x00);
 	RADIO_WriteRegister(NRF_RF_CH, NODE_CHANNEL);
-	RADIO_WriteRegister(NRF_RF_SETUP, 0x1F); // 1mbps (was at 2)
+	RADIO_WriteRegister(NRF_RF_SETUP, 0x0F);
 	
 	RADIO_WriteRegisterMultiple(NRF_RX_ADDR_P0,addr,5);
 	RADIO_WriteRegister(NRF_RX_PW_P0, 32);
@@ -211,6 +212,7 @@ void RADIO_Init()
 	
 	// configure timers
 	memset(timingPacket,0,32);
+	RADIO_DisableTDMA();
 	
 }
 
@@ -235,7 +237,10 @@ void RADIO_SetMode(RADIO_Mode mode)
 	
 	NRF_CE_lo;
 	NRF_RXEN_lo;
-		
+	
+	if (!(mode == RADIO_RX || mode == RADIO_TX || mode == RADIO_OFF))
+		return;
+	
 	RADIO_WriteRegister(NRF_CONFIG,mode);
 	
 	currentMode = mode;
@@ -407,7 +412,9 @@ void RADIO_IRQHandler()
 		NRF_CE_lo;
 	}
 	RADIO_SafeIncrement(&irqCount);
-	RADIO_TimingUpdate("RADIO_IRQHandler");
+	static char help[32];
+	sprintf(help,"IRQ [%2.2X]",RADIO_ReadRegister(NRF_STATUS));
+	RADIO_TimingUpdate(help);
 	RADIO_WriteRegister(NRF_STATUS,0xF0);
 	LED_Toggle(RED);
 }
@@ -416,7 +423,7 @@ void RADIO_Main()
 {
 	
 	static uint8_t packet[32];
-	
+	/*
 	if (stateChanged)
 	{
 		
@@ -561,7 +568,7 @@ void RADIO_Main()
 		}
 		
 	}
-	
+	*/
 	INT_Disable();
 	uint8_t _irqCount = irqCount;
 	INT_Enable();
@@ -577,7 +584,7 @@ void RADIO_Main()
 		{
 			 fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
 			 
-			 if (fifoStatus & 0x10 && !QUEUE_IsEmpty(&txQueue))
+			 if (fifoStatus & 0x10)
 			 {
 				QUEUE_Dequeue(&txQueue,(void*)packet);
 				RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packet,32);
@@ -618,7 +625,7 @@ bool RADIO_Send(const uint8_t packet[32])
 	return QUEUE_Queue(&txQueue,(void*)packet);
 }
 
-// improve using QUEUE_Peek 
+// improve using QUEUE_Peek ?
 bool RADIO_Recv(uint8_t packet[32])
 {
 	return QUEUE_Dequeue(&rxQueue,(void*)packet);
