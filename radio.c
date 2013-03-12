@@ -11,10 +11,12 @@
 
 #include "nRF24L01.h"
 
+#include "config.h"
 #include "led.h"
 #include "queue.h"
 #include "usb.h"
 #include "packets.h"
+#include "alloc.h"
 
 typedef enum
 {
@@ -40,6 +42,16 @@ typedef enum
 }
 RADIO_State;
 
+typedef struct
+{
+	bool enabled,
+		slotRequest;
+	uint8_t lastFrame;
+	uint8_t lastSeg;
+	uint8_t lastFlags;
+}
+RADIO_DataState;
+
 /* prototypes */
 static void RADIO_WriteRegister(uint8_t reg, uint8_t val);
 static uint8_t RADIO_ReadRegister(uint8_t reg);
@@ -55,18 +67,20 @@ static void RADIO_TimingUpdate(char* msg);
 static RADIO_State RADIO_GetState();
 
 /* variables */
-static uint8_t scratch;
+static uint8_t scratch,
+	dataFrameId = 0,
+	dataSendPos = 0;
 static RADIO_Mode currentMode;
-static uint8_t rxQueueMemory[RADIO_RECV_QUEUE_SIZE * 32],
-	txQueueMemory[RADIO_SEND_QUEUE_SIZE * 32];
-static queue_t rxQueue,
-		txQueue;
+static uint8_t txQueueMemory[RADIO_SEND_QUEUE_SIZE * 32],
+	dataQueueMemory[RADIO_DATA_SIZE * 32];
+static queue_t txQueue,
+		dataQueue;
 static volatile uint8_t irqCount = 0;
 static RADIO_TDMAConfig config =
 {
 	.master = false,
 	.channel = 102,
-	.slot = 1,
+	.slot = 0,
 	.slotCount = 10,
 	.guardPeriod = 100,
 	.transmitPeriod = 900,
@@ -75,8 +89,14 @@ static RADIO_TDMAConfig config =
 static volatile RADIO_State state = RADIO_STATE_OFF;
 static volatile bool stateChanged = false,
 	sendPackets = true,
-	syncNextPacket = false;
+	syncNextPacket = false,
+	syncd = false;
 static uint8_t timingPacket[32];
+static uint32_t lastIrq = 0xFFFFFFFF,
+	countSinceSync = 0;
+static bool tdmaEnabled = false;
+static RADIO_DataState nodeStates[255];
+static uint8_t lastNodeAckd = 0;
 
 static TIMER_Init_TypeDef timerInit =
 {
@@ -147,8 +167,18 @@ static TIMER_InitCC_TypeDef timerCCIrq =
 void RADIO_Init()
 {
 	
-	QUEUE_Init(&rxQueue, (uint8_t*)rxQueueMemory, 32, RADIO_RECV_QUEUE_SIZE);
+	int i;
+	for (i = 0; i < 256; i++)
+	{
+		nodeStates[i].enabled = false;
+	}
+	
+	#ifdef BASESTATION
+		ALLOC_Init(5,5);
+	#endif
+	
 	QUEUE_Init(&txQueue, (uint8_t*)txQueueMemory, 32, RADIO_SEND_QUEUE_SIZE);
+	QUEUE_Init(&dataQueue, (uint8_t*)dataQueueMemory, 32, RADIO_DATA_SIZE);
 	
 	GPIO_PinModeSet(NRF_CE_PORT, NRF_CE_PIN, gpioModePushPull, 0);
 	GPIO_PinModeSet(NRF_CSN_PORT, NRF_CSN_PIN, gpioModePushPull, 1);
@@ -213,6 +243,7 @@ void RADIO_Init()
 	// configure timers
 	memset(timingPacket,0,32);
 	RADIO_DisableTDMA();
+	RADIO_SetMode(RADIO_RX);
 	
 }
 
@@ -220,7 +251,7 @@ static void RADIO_TimingUpdate(char* msg)
 {
 	static char tmsg[255];
 	sprintf(tmsg,"%i: %s\n",(int)TIMER_CounterGet(TIMER0),msg);
-	USB_Transmit((uint8_t*)tmsg,(uint8_t)strlen(tmsg));
+	TRACE(tmsg);
 }
 
 static RADIO_State RADIO_GetState()
@@ -412,18 +443,16 @@ void RADIO_IRQHandler()
 		NRF_CE_lo;
 	}
 	RADIO_SafeIncrement(&irqCount);
-	static char help[32];
-	sprintf(help,"IRQ [%2.2X]",RADIO_ReadRegister(NRF_STATUS));
-	RADIO_TimingUpdate(help);
 	RADIO_WriteRegister(NRF_STATUS,0xF0);
-	LED_Toggle(RED);
+	lastIrq = TIMER_CounterGet(TIMER1);
 }
 
+uint16_t count = 0;
 void RADIO_Main()
 {
 	
 	static uint8_t packet[32];
-	/*
+	
 	if (stateChanged)
 	{
 		
@@ -440,10 +469,14 @@ void RADIO_Main()
 			break;
 		case RADIO_STATE_MASTER_OF:
 			sendPackets = false;
+			lastNodeAckd = 0;
 			RADIO_SetMode(RADIO_TX);
 			TIMER_InitCC(TIMER1, 0, &timerCCCe);
 			RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,timingPacket,32);
-			RADIO_TimingUpdate("of");
+			char msg[32];
+			sprintf(msg,"last recv count = %i",count);
+			count = 0;
+			RADIO_TimingUpdate(msg);
 			break;
 		case RADIO_STATE_MASTER_TIM1_CC0:
 			sendPackets = true;
@@ -460,6 +493,8 @@ void RADIO_Main()
 		case RADIO_STATE_SLAVE_OF:
 			RADIO_SetMode(RADIO_RX);
 			syncNextPacket = true;
+			countSinceSync++;
+			dataSendPos = 0; // reset send offset
 			RADIO_TimingUpdate("of");
 			break;
 		case RADIO_STATE_SLAVE_TIM0_CC0:
@@ -472,8 +507,18 @@ void RADIO_Main()
 			TIMER_InitCC(TIMER1, 0, &timerCCCe);
 			if (!QUEUE_IsEmpty(&txQueue))
 			{
-				QUEUE_Dequeue(&txQueue,(void*)packet);
-				RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packet,32);
+				if (QUEUE_Dequeue(&txQueue,(void*)packet))
+				{
+					RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packet,32);
+				}
+			}
+			else
+			{
+				uint8_t *packetPtr = QUEUE_Get(&dataQueue,dataSendPos++);
+				if (packetPtr != NULL)
+				{
+					RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packetPtr,32);
+				}
 			}
 			RADIO_TimingUpdate("queuing first packet");
 			break;
@@ -494,28 +539,17 @@ void RADIO_Main()
 			// check radio queue for sync packet
 			bool syncFound = false;
 			
-			while (!QUEUE_IsEmpty(&rxQueue))
+			if (countSinceSync == 0)
 			{
-				uint8_t *packet;
-				if ((packet = QUEUE_Peek(&rxQueue,false)) != NULL)
-				{
-					if (packet[1] == PACKET_TDMA_TIMING)
-					{
-						uint32_t t = TIMER_TopGet(TIMER0) - config.guardPeriod;
+				uint32_t t = config.guardPeriod + (TIMER_CounterGet(TIMER1) - lastIrq);
 						
-						TIMER_CounterSet(TIMER0,t);
-						TIMER_CounterSet(TIMER1,t);
-						TIMER_CounterSet(TIMER3,t);
-						
-						TIMER_IntEnable(TIMER0,TIMER_IF_CC0);
-						TIMER_IntEnable(TIMER1,TIMER_IF_OF);
-						
-						syncFound = true;
-					}
-				}
+				TIMER_CounterSet(TIMER0,t);
+				TIMER_CounterSet(TIMER1,t);
+				TIMER_CounterSet(TIMER3,t);
 				
-				QUEUE_Peek(&rxQueue,true);
+				syncFound = true;
 				
+				TIMER_IntEnable(TIMER1,TIMER_IF_OF);
 			}
 			
 			if (!syncFound)
@@ -526,6 +560,7 @@ void RADIO_Main()
 			else
 			{
 				RADIO_TimingUpdate("timing packet found");
+				RADIO_SetState(RADIO_STATE_SLAVE_SYNC);
 			}
 			
 			break;
@@ -533,6 +568,7 @@ void RADIO_Main()
 		case RADIO_STATE_SLAVE_SYNC:
 			break;
 		case RADIO_STATE_SLAVE_SYNC_COMPLETE:
+			
 			TIMER_CompareSet(TIMER0, 1, (config.guardPeriod + config.transmitPeriod) * config.slot + 1);
 			TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * config.slot));
 			TIMER_CompareSet(TIMER1, 1, ((config.guardPeriod + config.transmitPeriod) * (config.slot + 1))  - config.protectionPeriod);
@@ -563,57 +599,285 @@ void RADIO_Main()
 			TIMER_IntEnable(TIMER1,TIMER_IF_CC1);
 			TIMER_IntEnable(TIMER1,TIMER_IF_CC2);
 			INT_Enable();
+			
 			RADIO_TimingUpdate("sync complete\n");
+			syncd = true;
 			break;
 		}
 		
 	}
-	*/
+	
+	if (!tdmaEnabled)
+	{
+		if (currentMode == RADIO_RX && !QUEUE_IsEmpty(&txQueue))
+		{
+			wait(*(uint32_t*)(0xFE081F0) & 0x0000000F);
+			RADIO_SetMode(RADIO_TX);
+			sendPackets = true;
+			RADIO_TimingUpdate("aloha tx mode");
+		}
+		else if (currentMode == RADIO_TX && QUEUE_IsEmpty(&txQueue) && (RADIO_ReadRegister(NRF_FIFO_STATUS) & 0x10))
+		{
+			RADIO_SetMode(RADIO_RX);
+			sendPackets = false;
+			RADIO_TimingUpdate("aloha rx mode");
+		}
+	}
+	
 	INT_Disable();
 	uint8_t _irqCount = irqCount;
 	INT_Enable();
 	
+	uint8_t *packetPtr;
 	if (_irqCount > 0)
 	{
 	
-		uint8_t	fifoStatus;
+		uint8_t fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
 		
 		RADIO_SafeDecrement(&irqCount);
 		
-		if (sendPackets && currentMode == RADIO_TX && !QUEUE_IsEmpty(&txQueue))
+		if (sendPackets && currentMode == RADIO_TX && (!QUEUE_IsEmpty(&txQueue) || !QUEUE_IsEmpty(&dataQueue) || lastNodeAckd < 255))
 		{
-			 fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
 			 
 			 if (fifoStatus & 0x10)
 			 {
-				QUEUE_Dequeue(&txQueue,(void*)packet);
-				RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packet,32);
-				fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
+				packetPtr = NULL;
+				if (QUEUE_Dequeue(&txQueue,(void*)packet))
+				{
+					packetPtr = packet;
+				}
+				else
+				{
+					packetPtr = QUEUE_Get(&dataQueue,dataSendPos++);
+				}
+				
+				#ifdef BASESTATION
+					if (packetPtr == NULL)
+					{
+						if (lastNodeAckd < 255)
+						{
+							
+							while (++lastNodeAckd < 255)
+							{
+								if (nodeStates[lastNodeAckd].enabled)
+								{
+									packet[0] = lastNodeAckd;
+									packet[1] = PACKET_TRANSPORT_ACK;
+									packet[2] = nodeStates[lastNodeAckd].lastFrame;
+									packet[3] = nodeStates[lastNodeAckd].lastSeg;
+									packet[4] = nodeStates[lastNodeAckd].lastFlags;
+									if (nodeStates[lastNodeAckd].slotRequest)
+									{
+										ALLOC_Request(lastNodeAckd);
+									}
+									uint8_t slotId,
+										len,
+										lease,
+										ack;
+									if (ALLOC_CheckAndDecrement(lastNodeAckd,&slotId,&len,&lease,&ack))
+									{
+										packet[5] = 1;
+										packet[6] = ack;
+										packet[7] = slotId;
+										packet[8] = len;
+										packet[9] = lease;
+										
+										static char msg[64];
+										sprintf(msg,"lease: [nid=%i,slotid=%i,len=%i,lease=%i,ack=%i]",lastNodeAckd,slotId,len,lease,ack);
+										RADIO_TimingUpdate(msg);
+									}
+									else
+									{
+										packet[5] = 0;
+									}
+									packetPtr = packet;
+									
+									static char msg[32];
+									sprintf(msg,"send ack n:%i %i/%i",(int)lastNodeAckd,(int)packet[3],(int)packet[2]);
+									RADIO_TimingUpdate(msg);
+									
+									nodeStates[lastNodeAckd].slotRequest = false;
+									break;
+								}
+							}
+							
+						}
+					}
+				#endif
+				
+				if (packetPtr != NULL)
+				{
+					RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packetPtr,32);
+				}
+				
 			 }
 			 
 			 NRF_CE_hi;
 			 
 		}
-		else if (currentMode == RADIO_RX && !QUEUE_IsFull(&rxQueue))
+		else if (currentMode == RADIO_RX)
 		{
-			fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
-			 while (!(fifoStatus & 0x01) && !QUEUE_IsFull(&rxQueue))
-			 {
+			while (!(fifoStatus & 0x01))
+			{
 				RADIO_ReadRegisterMultiple(NRF_R_RX_PAYLOAD,packet,32);
-				QUEUE_Queue(&rxQueue,(void*)packet);
 				
-				if (((PACKET_Raw*)packet)->type == PACKET_TDMA_TIMING)
+				#ifdef BASESTATION
+					if (packet[1] == PACKET_TRANSPORT_DATA)
+					{
+						
+						if (nodeStates[packet[2]].enabled)
+						{
+							uint8_t nextSeg = nodeStates[packet[2]].lastSeg + 1,
+								nextFrame = nodeStates[packet[2]].lastFrame;
+							if (nodeStates[packet[2]].lastFlags & TRANSPORT_FLAG_SEGMENT_END)
+							{
+								nextFrame++;
+								nextSeg = 0;
+							}
+							
+							if (packet[4] == nextSeg && packet[3] == nextFrame)
+							{
+								nodeStates[packet[2]].lastSeg = packet[4];
+								nodeStates[packet[2]].lastFrame = packet[3];
+								nodeStates[packet[2]].lastFlags = packet[6];
+								nodeStates[packet[2]].slotRequest |= (nodeStates[packet[2]].lastFlags & TRANSPORT_FLAG_SLOT_REQUEST);
+							}
+							else
+							{
+								static char msg[32];
+								sprintf(msg,"got %i/%i expecting %i/%i",packet[4],packet[3],nextSeg,nextFrame);
+								RADIO_TimingUpdate(msg);
+							}
+						}
+						else
+						{
+							nodeStates[packet[2]].enabled = true;
+							nodeStates[packet[2]].slotRequest = false;
+							nodeStates[packet[2]].lastSeg = packet[4];
+							nodeStates[packet[2]].lastFrame = packet[3];
+							nodeStates[packet[2]].lastFlags = packet[6];
+						}
+						
+					}
+					USB_Transmit(packet,32);
+				#else
+				RADIO_TimingUpdate("packet received");
+				if (packet[0] == NODE_ID || packet[0] == BROADCAST_ID || packet[1] == 0)
 				{
-					
+					switch (packet[1])
+					{
+					case PACKET_TDMA_TIMING:
+						countSinceSync = 0;
+						RADIO_TimingUpdate("sync packet found");
+						break;
+					case PACKET_HELLO:
+						if (packet[2] == 0xFF)
+						{
+							packet[2] = NODE_ID;
+							RADIO_Send(packet);
+						}
+						break;
+					case PACKET_TDMA_CONFIG:
+					{
+						PACKET_TDMA *packetTDMA = (PACKET_TDMA*)&packet[2];
+						RADIO_TDMAConfig *c = (RADIO_TDMAConfig*)packetTDMA->payload;
+						RADIO_ConfigTDMA(c);
+						if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)])
+						{
+							RADIO_EnableTDMA();
+						}
+						else
+						{
+							RADIO_DisableTDMA();
+						}
+						break;
+					}
+					case PACKET_TDMA_ENABLE:
+						if (packet[3])
+						{
+							RADIO_EnableTDMA();
+						}
+						else
+						{
+							RADIO_DisableTDMA();
+						}
+					case PACKET_TDMA_SLOT:
+						break;
+					case PACKET_TDMA_ACK:
+						break;
+					case PACKET_TRANSPORT_DATA:
+						break;
+					case PACKET_TRANSPORT_ACK:
+					{
+						uint8_t *p = QUEUE_Peek(&dataQueue,false),
+							nextFrame = packet[2],
+							nextSeg = packet[3] + 1;
+						uint16_t sent = 0;
+						
+						if (packet[4] & TRANSPORT_FLAG_SEGMENT_END)
+						{
+							nextFrame++;
+							nextSeg = 0;
+						}
+						
+						static char msg[32];
+						
+						sprintf(msg,"fast forward to %i/%i",nextSeg,nextFrame);
+						RADIO_TimingUpdate(msg);
+						
+						while (p != NULL)
+						{
+							
+							if (p[3] == nextFrame && p[4] == nextSeg)
+							{
+								break;
+							}
+							
+							sent++;
+							QUEUE_Peek(&dataQueue,true); // fast dequeue
+							p = QUEUE_Peek(&dataQueue,false);
+							
+						}
+						
+						sprintf(msg,"sent %i packets %i remaining [ack %i/%i]",sent,QUEUE_Count(&dataQueue),packet[3],packet[2]);
+						RADIO_TimingUpdate(msg);
+						
+						break;
+					}
+					case PACKET_EVENT:
+					{
+						uint8_t e, p = 2;
+						for (p = 2; p < 32; p++)
+						{
+							e = packet[p];
+							if (e == 0)
+								break;
+							static char msg[32];
+							sprintf(msg,"event 0x%2.2X",e);
+							RADIO_TimingUpdate(msg);
+						}
+					}
+						break;
+					}
 				}
+				#endif
 				
+				count++;
 				fifoStatus = RADIO_ReadRegister(NRF_FIFO_STATUS);
 			 }
 		}
+		/*
 		static char help[32];
 		sprintf(help,"irqCount = %i[%2.2X]",_irqCount,RADIO_ReadRegister(NRF_STATUS));
 		RADIO_TimingUpdate(help);
-		
+		*/
+	}
+	
+	if (tdmaEnabled && countSinceSync > 3)
+	{
+		RADIO_DisableTDMA();
+		RADIO_TimingUpdate("tdma out of sync");
+		RADIO_EnableTDMA();
 	}
 	
 }
@@ -621,14 +885,7 @@ void RADIO_Main()
 bool RADIO_Send(const uint8_t packet[32])
 {
 	RADIO_SafeIncrement(&irqCount);
-	RADIO_TimingUpdate("RADIO_Send");
 	return QUEUE_Queue(&txQueue,(void*)packet);
-}
-
-// improve using QUEUE_Peek ?
-bool RADIO_Recv(uint8_t packet[32])
-{
-	return QUEUE_Dequeue(&rxQueue,(void*)packet);
 }
 
 RADIO_Mode RADIO_GetMode()
@@ -723,11 +980,16 @@ void RADIO_EnableTDMA()
 		
 		TIMER_CompareSet(TIMER0, 0, config.guardPeriod + config.transmitPeriod);
 		
+		syncd = false;
+		
 		RADIO_SetMode(RADIO_RX);
 		RADIO_SetState(RADIO_STATE_SLAVE_SYNC_INIT);
 		
+		countSinceSync = 0;
+		
 	}
 	
+	tdmaEnabled = true;
 	RADIO_TimingUpdate("tdma started");
 	
 }
@@ -741,6 +1003,14 @@ void RADIO_DisableTDMA()
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	
 	RADIO_WriteRegister(NRF_RF_CH,NODE_CHANNEL);
+	tdmaEnabled = false;
+	
+	RADIO_SetMode(RADIO_RX);
+}
+
+void RADIO_ConfigTDMA(RADIO_TDMAConfig *_config)
+{
+	memcpy(&config,_config,sizeof(RADIO_TDMAConfig));
 }
 
 static void RADIO_SetState(RADIO_State _state)
@@ -758,12 +1028,28 @@ void TIMER0_IRQHandler()
 	
 	if (flags & TIMER_IF_CC2)
 	{
+		uint32_t time = TIMER_CaptureGet(TIMER0,2);
+		
 		if (!config.master && syncNextPacket)
 		{
 			// sync timers
+			INT_Disable();
+			time = TIMER_CounterGet(TIMER0) - (time - (config.guardPeriod + 14));
 			
+			while (time < 0)
+				time += TIMER_TopGet(TIMER0); 
+			
+			TIMER_CounterSet(TIMER0, time);
+			TIMER_CounterSet(TIMER1, time);
+			TIMER_CounterSet(TIMER3, time);
+			
+			INT_Enable();
+			
+			static char msg[32];
+			sprintf(msg,"sync timers[%i]",time);
+			//RADIO_TimingUpdate(msg);
 			// enable full slave mode
-			if (RADIO_GetState() == RADIO_STATE_SLAVE_SYNC)
+			if (!syncd)
 			{
 				RADIO_SetState(RADIO_STATE_SLAVE_SYNC_COMPLETE);
 			}
@@ -812,16 +1098,31 @@ void TIMER1_IRQHandler()
 		}
 		else
 		{
-			
+			TIMER_InitCC(TIMER1, 0, &timerCCOff);
+			RADIO_SetState(RADIO_STATE_SLAVE_TIM1_CC0);
 		}
 	}
 	if (flags & TIMER_IF_CC1)
 	{
-		RADIO_SetState(RADIO_STATE_MASTER_TIM1_CC1);
+		if (config.master)
+		{
+			RADIO_SetState(RADIO_STATE_MASTER_TIM1_CC1);
+		}
+		else
+		{
+			RADIO_SetState(RADIO_STATE_SLAVE_TIM1_CC1);
+		}
 	}
 	if (flags & TIMER_IF_CC2)
 	{
-		RADIO_SetState(RADIO_STATE_MASTER_TIM1_CC2);
+		if (config.master)
+		{
+			RADIO_SetState(RADIO_STATE_MASTER_TIM1_CC2);
+		}
+		else
+		{
+			RADIO_SetState(RADIO_STATE_SLAVE_TIM1_CC2);
+		}
 	}
 	
 	TIMER_IntClear(TIMER1,flags);
@@ -836,5 +1137,54 @@ void TIMER3_IRQHandler()
 	
 	
 	TIMER_IntClear(TIMER3,flags);
+	
+}
+
+bool RADIO_SendData(const uint8_t *data, uint16_t len)
+{
+	
+	//if (RADIO_DATA_SIZE - QUEUE_Count(&dataQueue) < len/25)
+	if (QUEUE_Count(&dataQueue) > 500)
+		return false;
+	
+	// move to data queue
+	static uint8_t packet[32];
+	
+	packet[0] = BASESTATION_ID;
+	packet[1] = PACKET_TRANSPORT_DATA;
+	packet[2] = NODE_ID;
+	packet[3] = dataFrameId++;
+	
+	// flags
+	packet[6] = TRANSPORT_FLAG_SLOT_REQUEST;
+	
+	uint8_t segId = 0;
+	
+	while (len > 0)
+	{
+		
+		packet[4] = segId++;
+		
+		if (len > 25)
+		{
+			memcpy(&packet[7],data,25);
+			data += 25;
+			len -= 25;
+			packet[5] = 25;
+		}
+		else
+		{
+			memcpy(&packet[7],data,len);
+			packet[5] = len;
+			packet[6] |= TRANSPORT_FLAG_SEGMENT_END;
+			len = 0;
+		}
+		
+		QUEUE_Queue(&dataQueue,packet);
+		
+	}
+	
+	RADIO_SafeIncrement(irqCount);
+	return true;
 	
 }

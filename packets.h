@@ -66,12 +66,13 @@
 		
 		uint8_t lastFrameId;
 		uint8_t lastSegmentId;
+		uint8_t lastFlags;
 		bool secondSlot;
 		uint8_t seqNum;
 		uint8_t slotId;
 		uint8_t len;
 		uint8_t lease;
-		uint8_t padding[23];
+		uint8_t padding[22];
 		
 	}
 	PACKET_TransportAck;

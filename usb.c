@@ -127,19 +127,16 @@ static volatile bool           usbOnline, usbActive;
 // as on the base station all of these will need to be queued to 
 //		be sent back - this should ensure no waiting when  
 //		handling this
-#define USB_SEND_QUEUE_SIZE 20480
-
-#ifndef BASESTATION
-	#define USB_SEND_BUFFER_SIZE 32
+#define SEND_MEM_SIZE 10240
+#ifdef BASESTATION
+	#define MIN_SEND_SIZE 31
 #else
-	#define USB_SEND_BUFFER_SIZE 32
+	#define MIN_SEND_SIZE 0
 #endif
+static uint8_t usbSendMem[2][SEND_MEM_SIZE],
+	usbSending = 1;
+static uint16_t usbSendFill[2] = { 0, 0 };
 
-uint8_t usbSendMem[USB_SEND_QUEUE_SIZE],
-	usbXferMem[USB_SEND_BUFFER_SIZE];
-uint16_t usbQueueStart = 0,
-	usbQueueLen = 0,
-	usbTransferring = 0;
 queue_t usbQueue;
 uint8_t usbRecvMem[USB_RECV_SIZE * 32],
 	usbRecvPacket[32],
@@ -220,48 +217,6 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
                               uint32_t xferred,
                               uint32_t remaining);
 
-void USB_Send()
-{
-	
-	if (!usbOnline)
-	{
-		usbActive = false;
-		return;
-	}
-	
-	INT_Disable();
-	
-	if (usbActive)
-	{
-		INT_Enable();
-		return;
-	}
-	
-	if (usbQueueLen == 0)
-	{
-		INT_Enable();
-		return;
-	}
-	
-	usbActive = true;
-	
-	uint8_t* buf = &usbSendMem[usbQueueStart];
-	uint16_t len = (USB_SEND_QUEUE_SIZE - usbQueueStart > usbQueueLen) ? usbQueueLen : USB_SEND_QUEUE_SIZE - usbQueueStart;
-	
-	len = (len < USB_SEND_BUFFER_SIZE) ? len : USB_SEND_BUFFER_SIZE;
-	
-	memcpy(usbXferMem,buf,len);
-	
-	USBD_Write(EP_DATA_IN, usbXferMem, len, USB_TransmitComplete);
-	
-	usbTransferring = len;
-	usbQueueLen -= usbTransferring;
-	usbQueueStart = (usbQueueStart + usbTransferring) % USB_SEND_QUEUE_SIZE;
-	
-	INT_Enable();
-	
-}
-
 static int USB_TransmitComplete(USB_Status_TypeDef status,
                               uint32_t xferred,
                               uint32_t remaining)
@@ -272,11 +227,26 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
 	if (status == USB_STATUS_OK)
 	{
 		
-		//INT_Disable();
-		//usbTransferring = 0;
-		usbActive = false;
-		//USB_Send();
-		//INT_Enable();
+		uint8_t _usbWriting;
+		if (usbSending == 0)
+		{
+			_usbWriting = 1;
+		}
+		else
+		{
+			_usbWriting = 0;
+		}
+		
+		if (!usbActive && usbSendFill[_usbWriting] > MIN_SEND_SIZE)
+		{
+			USBD_Write(EP_DATA_IN, usbSendMem[_usbWriting], usbSendFill[_usbWriting], USB_TransmitComplete);
+			usbSending = _usbWriting;
+			usbSendFill[_usbWriting] = 0;
+		}
+		else
+		{
+			usbActive = false;
+		}
 		
 	}
 	
@@ -291,60 +261,31 @@ bool USB_Transmit(uint8_t *data, int len)
         return false;
 	}
 	
-	while (usbActive);
+	uint8_t _usbWriting;
+	if (usbSending == 0)
+	{
+		_usbWriting = 1;
+	}
+	else
+	{
+		_usbWriting = 0;
+	}
 	
-	usbActive = true;
-	USBD_Write(EP_DATA_IN, data, len, USB_TransmitComplete);
+	INT_Disable();
+	memcpy(&usbSendMem[_usbWriting][usbSendFill[_usbWriting]],data,len);
+	usbSendFill[_usbWriting] += len;
+	
+	if (!usbActive && usbSendFill[_usbWriting] > MIN_SEND_SIZE)
+	{
+		usbActive = true;
+		USBD_Write(EP_DATA_IN, usbSendMem[_usbWriting], usbSendFill[_usbWriting], USB_TransmitComplete);
+		usbSending = _usbWriting;
+		usbSendFill[_usbWriting] = 0;
+	}
+	INT_Enable();
 	
 	return true;
 	
-	while (true)
-	{
-		
-		USB_Send();
-		while ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len && usbActive);
-		
-		INT_Disable();
-		if ((USB_SEND_QUEUE_SIZE - usbQueueLen) >= len)
-		{
-			break;
-		}
-		INT_Enable();
-		
-	}
-	
-	/*
-	INT_Disable();
-	if ((USB_SEND_QUEUE_SIZE - usbQueueLen) < len)
-	{
-		INT_Enable();
-		LED_On(RED);
-		return false;
-	}
-	*/
-	
-	uint16_t usbQueueEnd = (usbQueueStart + usbQueueLen) % USB_SEND_QUEUE_SIZE;
-	
-	uint16_t totalLen = len, remaining, toCopy;
-	while (len > 0)
-	{
-		
-		remaining = USB_SEND_QUEUE_SIZE - usbQueueEnd;
-		toCopy = (remaining > len) ? len : remaining;
-		memcpy(&usbSendMem[usbQueueEnd],data,toCopy);
-		usbQueueEnd = (usbQueueEnd + toCopy) % USB_SEND_QUEUE_SIZE;
-		len -= toCopy;
-		data += toCopy;
-		
-	}
-	
-	usbQueueLen += totalLen;
-	
-	USB_Send();
-	
-	INT_Enable();
-	
-    return true;
 }
 
 /**************************************************************************//**

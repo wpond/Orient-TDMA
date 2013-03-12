@@ -98,7 +98,8 @@ led.c \
 main.c \
 radio.c \
 queue.c \
-usb.c
+usb.c \
+alloc.c
 
 S_SRC +=  \
 CMSIS/CM3/DeviceSupport/EnergyMicro/EFM32/startup/cs3/startup_efm32gg.s

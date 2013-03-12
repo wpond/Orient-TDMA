@@ -1,0 +1,7 @@
+TODO:
+
+* transport
+
+* allocation
+* second slot
+* optimisation of queue / transport code

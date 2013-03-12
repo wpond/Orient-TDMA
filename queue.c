@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-void QUEUE_Init(queue_t *queue, uint8_t *mem, uint8_t item_size, uint8_t item_count)
+void QUEUE_Init(queue_t *queue, uint8_t *mem, uint16_t item_size, uint16_t item_count)
 {
 	
 	queue->queue = mem;
@@ -61,13 +61,13 @@ uint8_t* QUEUE_Peek(queue_t *queue, bool complete)
 	
 }
 
-uint8_t* QUEUE_Get(queue_t *queue, uint8_t offset)
+uint8_t* QUEUE_Get(queue_t *queue, uint16_t offset)
 {
 	
-	if (offset >= queue->count || QUEUE_IsEmpty(queue))
+	if (offset >= queue->count)
 		return NULL;
 	
-	uint8_t pos = (queue->start + offset) % queue->item_count;
+	uint16_t pos = (queue->start + offset) % queue->item_count;
 	
 	uint8_t* item = &queue->queue[pos * queue->item_size];
 	
@@ -103,7 +103,7 @@ bool QUEUE_IsFull(queue_t *queue)
 	return queue->count == queue->item_count;
 }
 
-uint8_t QUEUE_Count(queue_t *queue)
+uint16_t QUEUE_Count(queue_t *queue)
 {
 	return queue->count;
 }

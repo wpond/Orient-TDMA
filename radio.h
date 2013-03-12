@@ -26,10 +26,12 @@
 	#define RADIO_USART USART0
 	#define RADIO_USART_LOCATION USART_ROUTE_LOCATION_LOC2
 	
-	#define NODE_CHANNEL 102
-	
 	#define RADIO_SEND_QUEUE_SIZE 128
-	#define RADIO_RECV_QUEUE_SIZE 255
+	
+	#define RADIO_DATA_SIZE 1024
+	
+	#define UNRESERVED_SLOT_COUNT 5
+	#define UNRESERVED_SLOT_OFFSET 5
 
 	typedef enum
 	{
@@ -58,7 +60,9 @@
 	bool RADIO_Recv(uint8_t packet[32]);
 	void RADIO_IRQHandler();
 	void RADIO_Main();
+	void RADIO_ConfigTDMA(RADIO_TDMAConfig *_config);
 	void RADIO_EnableTDMA();
 	void RADIO_DisableTDMA();
+	bool RADIO_SendData(const uint8_t *data, uint16_t len);
 	
 #endif

@@ -10,12 +10,14 @@
 #include "efm32_timer.h"
 #include "efm32_int.h"
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "led.h"
 #include "radio.h"
 #include "usb.h"
+#include "config.h"
+#include "packets.h"
 
 /* variables */
 
@@ -200,28 +202,92 @@ int main()
 	RADIO_Init();
 	
 	//RADIO_EnableTDMA();
-	//RADIO_SetMode(RADIO_RX);
-	RADIO_SetMode(RADIO_TX);
 	
-	uint32_t itr = 0;
+	uint8_t packet[32];
+	
+	int i;
+	uint8_t dPacket[85];
+	for (i = 0; i < 85; i++)
+	{
+		dPacket[i] = i;
+	}
+	
+	i = 0;
 	while (1)
 	{
 		
 		RADIO_Main();
-		uint8_t packet[32];
-		if (RADIO_Recv(packet))
-		{
-			static char msg[32];
-			USB_Transmit((uint8_t*)"RECV\n",5);
-		}
 		
-		if (itr++ % 100000 == 0)
-		{
-			static char msg[32];
-			//USB_Transmit((uint8_t*)"NOP \n",5);
-			USB_Transmit((uint8_t*)"SEND\n",5);
-			RADIO_Send(packet);
-		}
+		#ifdef BASESTATION
+			
+			if (USB_Recv(packet))
+			{
+				
+				if (packet[0] == BASESTATION_ID)
+				{
+					switch (packet[1])
+					{
+					case PACKET_TDMA_TIMING:
+						break;
+					case PACKET_HELLO:
+						if (packet[2] == 0xFF)
+						{
+							packet[2] = BASESTATION_ID;
+							USB_Transmit(packet,32);
+						}
+						break;
+					case PACKET_TDMA_CONFIG:
+					{
+						PACKET_TDMA *packetTDMA = (PACKET_TDMA*)&packet[2];
+						RADIO_TDMAConfig *c = (RADIO_TDMAConfig*)packetTDMA->payload;
+						RADIO_ConfigTDMA(c);
+						if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)])
+						{
+							RADIO_EnableTDMA();
+						}
+						else
+						{
+							RADIO_DisableTDMA();
+						}
+						break;
+					}
+					case PACKET_TDMA_ENABLE:
+						if (packet[3])
+						{
+							RADIO_EnableTDMA();
+						}
+						else
+						{
+							RADIO_DisableTDMA();
+						}
+						break;
+					case PACKET_TDMA_SLOT:
+					case PACKET_TDMA_ACK:
+					case PACKET_TRANSPORT_DATA:
+					case PACKET_TRANSPORT_ACK:
+					case PACKET_EVENT:
+						break;
+					}
+				}
+				else
+				{
+					RADIO_Send(packet);
+				}
+				
+			}
+			
+		#else
+			
+			RADIO_SendData(dPacket,85);
+			/*
+			if (i++ % 100000 == 0)
+			{
+				RADIO_SendData(dPacket,85);
+				TRACE("send data packet\n");
+			}
+			*/
+			
+		#endif
 		
 		// if no pending irqs, sleep
 		// (use energy micro tip of disabling interrupts before
