@@ -107,7 +107,7 @@ EFM32_ALIGN(4)
 EFM32_PACK_START(1)
 static cdcLineCoding_TypeDef __attribute__ ((aligned(4))) cdcLineCoding =
 {
-  115200, 0, 0, 8, 0
+  10000000, 0, 0, 8, 0
 };
 EFM32_PACK_END()
 
@@ -122,17 +122,9 @@ int            usbRxIndex, usbBytesReceived;
 static bool           usbRxActive, dmaTxActive;
 static volatile bool           usbOnline, usbActive;
 
-// motivation for 1280 buffer size
-// 32 (packet size) * 40 (absolute base case number of packets)
-// as on the base station all of these will need to be queued to 
-//		be sent back - this should ensure no waiting when  
-//		handling this
-#define SEND_MEM_SIZE 10240
-#ifdef BASESTATION
-	#define MIN_SEND_SIZE 31
-#else
-	#define MIN_SEND_SIZE 0
-#endif
+#define SEND_MEM_SIZE 19200
+#define MIN_SEND_SIZE 0
+
 static uint8_t usbSendMem[2][SEND_MEM_SIZE],
 	usbSending = 1;
 static uint16_t usbSendFill[2] = { 0, 0 };
@@ -237,7 +229,7 @@ static int USB_TransmitComplete(USB_Status_TypeDef status,
 			_usbWriting = 0;
 		}
 		
-		if (!usbActive && usbSendFill[_usbWriting] > MIN_SEND_SIZE)
+		if (usbSendFill[_usbWriting] > MIN_SEND_SIZE)
 		{
 			USBD_Write(EP_DATA_IN, usbSendMem[_usbWriting], usbSendFill[_usbWriting], USB_TransmitComplete);
 			usbSending = _usbWriting;
@@ -261,6 +253,7 @@ bool USB_Transmit(uint8_t *data, int len)
         return false;
 	}
 	
+	INT_Disable();
 	uint8_t _usbWriting;
 	if (usbSending == 0)
 	{
@@ -271,7 +264,22 @@ bool USB_Transmit(uint8_t *data, int len)
 		_usbWriting = 0;
 	}
 	
-	INT_Disable();
+	if (SEND_MEM_SIZE - usbSendFill[_usbWriting] < len)
+	{
+		if (!usbActive)
+		{
+			usbActive = true;
+			USBD_Write(EP_DATA_IN, usbSendMem[_usbWriting], usbSendFill[_usbWriting], USB_TransmitComplete);
+			usbSending = _usbWriting;
+		}
+		else
+		{
+			INT_Enable();
+			LED_On(RED);
+			return false;
+		}
+	}
+	
 	memcpy(&usbSendMem[_usbWriting][usbSendFill[_usbWriting]],data,len);
 	usbSendFill[_usbWriting] += len;
 	
