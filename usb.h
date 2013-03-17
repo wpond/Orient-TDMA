@@ -1,13 +1,13 @@
-#ifndef __USB_H
-#define __USB_H
+#ifndef __USB_H__
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#define USB_RECV_SIZE 4
-
-void USB_Init(void);
-bool USB_Transmit(uint8_t *buf, int len);
-bool USB_Recv(uint8_t packet[32]);
-
-#endif // __USB_H
+	#define __USB_H__
+	
+	#include <stdint.h>
+	#include <stdbool.h>
+	
+	#include "usb/usbd.h"
+	
+	static inline void USB_Transmit(uint8_t *d, uint16_t l) {}
+	static inline bool USB_Recv(uint8_t *d) { return false; }
+	
+#endif

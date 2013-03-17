@@ -35,6 +35,10 @@ typedef enum
 	RADIO_STATE_SLAVE_TIM1_CC1,
 	RADIO_STATE_SLAVE_TIM1_CC2,
 	
+	RADIO_STATE_SLAVE_TIM3_CC0,
+	RADIO_STATE_SLAVE_TIM3_CC1,
+	RADIO_STATE_SLAVE_TIM3_CC2,
+	
 	RADIO_STATE_SLAVE_SYNC_INIT,
 	RADIO_STATE_SLAVE_SYNC,
 	RADIO_STATE_SLAVE_SYNC_COMPLETE,
@@ -96,7 +100,11 @@ static uint32_t lastIrq = 0xFFFFFFFF,
 	countSinceSync = 0;
 static bool tdmaEnabled = false;
 static RADIO_DataState nodeStates[255];
-static uint8_t lastNodeAckd = 0;
+static uint8_t lastNodeAckd = 0,
+	secondSlotId = 0,
+	secondSlotLease = 0,
+	secondSlotLen = 0;
+static uint32_t timerOverflows = 0;
 
 static TIMER_Init_TypeDef timerInit =
 {
@@ -174,7 +182,7 @@ void RADIO_Init()
 	}
 	
 	#ifdef BASESTATION
-		ALLOC_Init(5,5);
+		ALLOC_Init(5,4);
 	#endif
 	
 	QUEUE_Init(&txQueue, (uint8_t*)txQueueMemory, 32, RADIO_SEND_QUEUE_SIZE);
@@ -250,7 +258,7 @@ void RADIO_Init()
 static void RADIO_TimingUpdate(char* msg)
 {
 	static char tmsg[255];
-	sprintf(tmsg,"%i: %s\n",(int)TIMER_CounterGet(TIMER0),msg);
+	sprintf(tmsg,"%i[%i]: %s\n",(int)TIMER_CounterGet(TIMER0),(int)timerOverflows,msg);
 	TRACE(tmsg);
 }
 
@@ -495,12 +503,26 @@ void RADIO_Main()
 			syncNextPacket = true;
 			countSinceSync++;
 			dataSendPos = 0; // reset send offset
-			RADIO_TimingUpdate("of");
+			if (secondSlotLease > 0)
+			{
+				secondSlotLease--;
+				if (secondSlotLease == 0)
+				{
+					TIMER_IntDisable(TIMER3,TIMER_IF_CC0);
+					TIMER_IntDisable(TIMER3,TIMER_IF_CC1);
+					TIMER_IntDisable(TIMER3,TIMER_IF_CC2);
+				}
+			}
+			sprintf(msg,"last send count = %i",count);
+			count = 0;
+			RADIO_TimingUpdate(msg);
 			break;
 		case RADIO_STATE_SLAVE_TIM0_CC0:
 			RADIO_SetMode(RADIO_OFF);
 			RADIO_TimingUpdate("radio off");
 			break;
+		case RADIO_STATE_SLAVE_TIM3_CC0:
+			TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * secondSlotId));
 		case RADIO_STATE_SLAVE_TIM0_CC1:
 			sendPackets = false;
 			RADIO_SetMode(RADIO_TX);
@@ -526,10 +548,13 @@ void RADIO_Main()
 			sendPackets = true;
 			RADIO_TimingUpdate("sending packets");
 			break;
+		case RADIO_STATE_SLAVE_TIM3_CC1:
 		case RADIO_STATE_SLAVE_TIM1_CC1:
 			sendPackets = false;
 			RADIO_TimingUpdate("protection period start");
 			break;
+		case RADIO_STATE_SLAVE_TIM3_CC2:
+			TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * config.slot));
 		case RADIO_STATE_SLAVE_TIM1_CC2:
 			RADIO_SetMode(RADIO_OFF);
 			RADIO_TimingUpdate("end transmission period");
@@ -708,6 +733,7 @@ void RADIO_Main()
 				if (packetPtr != NULL)
 				{
 					RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packetPtr,32);
+					count++;
 				}
 				
 			 }
@@ -720,6 +746,11 @@ void RADIO_Main()
 			while (!(fifoStatus & 0x01))
 			{
 				RADIO_ReadRegisterMultiple(NRF_R_RX_PAYLOAD,packet,32);
+				
+				if (fifoStatus & 0x02)
+				{
+					LED_On(BLUE);
+				}
 				
 				#ifdef BASESTATION
 					if (packet[1] == PACKET_TRANSPORT_DATA)
@@ -759,107 +790,133 @@ void RADIO_Main()
 						}
 						
 					}
-					USB_Transmit(packet,32);
+					//USB_Transmit(packet,32);
 				#else
-				RADIO_TimingUpdate("packet received");
-				if (packet[0] == NODE_ID || packet[0] == BROADCAST_ID || packet[1] == 0)
-				{
-					switch (packet[1])
+					RADIO_TimingUpdate("packet received");
+					if (packet[0] == NODE_ID || packet[0] == BROADCAST_ID || packet[1] == 0)
 					{
-					case PACKET_TDMA_TIMING:
-						countSinceSync = 0;
-						RADIO_TimingUpdate("sync packet found");
-						break;
-					case PACKET_HELLO:
-						if (packet[2] == 0xFF)
+						switch (packet[1])
 						{
-							packet[2] = NODE_ID;
-							RADIO_Send(packet);
-						}
-						break;
-					case PACKET_TDMA_CONFIG:
-					{
-						PACKET_TDMA *packetTDMA = (PACKET_TDMA*)&packet[2];
-						RADIO_TDMAConfig *c = (RADIO_TDMAConfig*)packetTDMA->payload;
-						RADIO_ConfigTDMA(c);
-						if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)])
-						{
-							RADIO_EnableTDMA();
-						}
-						else
-						{
-							RADIO_DisableTDMA();
-						}
-						break;
-					}
-					case PACKET_TDMA_ENABLE:
-						if (packet[3])
-						{
-							RADIO_EnableTDMA();
-						}
-						else
-						{
-							RADIO_DisableTDMA();
-						}
-					case PACKET_TDMA_SLOT:
-						break;
-					case PACKET_TDMA_ACK:
-						break;
-					case PACKET_TRANSPORT_DATA:
-						break;
-					case PACKET_TRANSPORT_ACK:
-					{
-						uint8_t *p = QUEUE_Peek(&dataQueue,false),
-							nextFrame = packet[2],
-							nextSeg = packet[3] + 1;
-						uint16_t sent = 0;
-						
-						if (packet[4] & TRANSPORT_FLAG_SEGMENT_END)
-						{
-							nextFrame++;
-							nextSeg = 0;
-						}
-						
-						static char msg[32];
-						
-						sprintf(msg,"fast forward to %i/%i",nextSeg,nextFrame);
-						RADIO_TimingUpdate(msg);
-						
-						while (p != NULL)
-						{
-							
-							if (p[3] == nextFrame && p[4] == nextSeg)
+						case PACKET_TDMA_TIMING:
+							countSinceSync = 0;
+							RADIO_TimingUpdate("sync packet found");
+							break;
+						case PACKET_HELLO:
+							if (packet[2] == 0xFF)
 							{
-								break;
+								packet[2] = NODE_ID;
+								RADIO_Send(packet);
+							}
+							break;
+						case PACKET_TDMA_CONFIG:
+						{
+							PACKET_TDMA *packetTDMA = (PACKET_TDMA*)&packet[2];
+							RADIO_TDMAConfig *c = (RADIO_TDMAConfig*)packetTDMA->payload;
+							RADIO_ConfigTDMA(c);
+							if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)])
+							{
+								RADIO_EnableTDMA();
+							}
+							else
+							{
+								RADIO_DisableTDMA();
+							}
+							break;
+						}
+						case PACKET_TDMA_ENABLE:
+							if (packet[3])
+							{
+								RADIO_EnableTDMA();
+							}
+							else
+							{
+								RADIO_DisableTDMA();
+							}
+						case PACKET_TDMA_SLOT:
+							break;
+						case PACKET_TDMA_ACK:
+							break;
+						case PACKET_TRANSPORT_DATA:
+							break;
+						case PACKET_TRANSPORT_ACK:
+						{
+							uint8_t *p = QUEUE_Peek(&dataQueue,false),
+								nextFrame = packet[2],
+								nextSeg = packet[3] + 1;
+							uint16_t sent = 0;
+							
+							if (packet[4] & TRANSPORT_FLAG_SEGMENT_END)
+							{
+								nextFrame++;
+								nextSeg = 0;
 							}
 							
-							sent++;
-							QUEUE_Peek(&dataQueue,true); // fast dequeue
-							p = QUEUE_Peek(&dataQueue,false);
-							
-						}
-						
-						sprintf(msg,"sent %i packets %i remaining [ack %i/%i]",sent,QUEUE_Count(&dataQueue),packet[3],packet[2]);
-						RADIO_TimingUpdate(msg);
-						
-						break;
-					}
-					case PACKET_EVENT:
-					{
-						uint8_t e, p = 2;
-						for (p = 2; p < 32; p++)
-						{
-							e = packet[p];
-							if (e == 0)
-								break;
 							static char msg[32];
-							sprintf(msg,"event 0x%2.2X",e);
+							
+							sprintf(msg,"fast forward to %i/%i [%i]",nextSeg,nextFrame,packet[6]);
 							RADIO_TimingUpdate(msg);
+							
+							while (p != NULL)
+							{
+								
+								if (p[3] == nextFrame && p[4] == nextSeg)
+								{
+									break;
+								}
+								
+								sent++;
+								QUEUE_Peek(&dataQueue,true); // fast dequeue
+								p = QUEUE_Peek(&dataQueue,false);
+								
+							}
+							
+							sprintf(msg,"sent %i packets %i remaining [ack %i/%i]",sent,QUEUE_Count(&dataQueue),packet[3],packet[2]);
+							RADIO_TimingUpdate(msg);
+							
+							// second slot config
+							if (packet[5])
+							{
+								secondSlotId = packet[7];
+								secondSlotLen = packet[8];
+								secondSlotLease = packet[9];
+								
+								TIMER_CompareSet(TIMER3, 0, (config.guardPeriod + config.transmitPeriod) * secondSlotId);
+								TIMER_CompareSet(TIMER3, 1, ((config.guardPeriod + config.transmitPeriod) * (secondSlotId + secondSlotLen))  - config.protectionPeriod);
+								TIMER_CompareSet(TIMER3, 2, ((config.guardPeriod + config.transmitPeriod) * (secondSlotId + secondSlotLen))  - 1);
+
+								INT_Disable();
+								TIMER_InitCC(TIMER3, 0, &timerCCCompare);
+								TIMER_InitCC(TIMER3, 1, &timerCCCompare);
+								TIMER_InitCC(TIMER3, 2, &timerCCCompare);
+								
+								TIMER_IntClear(TIMER3,TIMER_IF_CC0);
+								TIMER_IntClear(TIMER3,TIMER_IF_CC1);
+								TIMER_IntClear(TIMER3,TIMER_IF_CC2);
+
+								TIMER_IntEnable(TIMER3,TIMER_IF_CC0);
+								TIMER_IntEnable(TIMER3,TIMER_IF_CC1);
+								TIMER_IntEnable(TIMER3,TIMER_IF_CC2);
+								INT_Enable();
+							}
+							
+							break;
+						}
+						case PACKET_EVENT:
+						{
+							uint8_t e, p = 2;
+							for (p = 2; p < 32; p++)
+							{
+								e = packet[p];
+								if (e == 0)
+									break;
+								static char msg[32];
+								sprintf(msg,"event 0x%2.2X",e);
+								RADIO_TimingUpdate(msg);
+							}
+						}
+							break;
 						}
 					}
-						break;
-					}
-				}
 				#endif
 				
 				count++;
@@ -1080,6 +1137,7 @@ void TIMER1_IRQHandler()
 	
 	if (flags & TIMER_IF_OF)
 	{
+		timerOverflows++;
 		if (config.master)
 		{
 			RADIO_SetState(RADIO_STATE_MASTER_OF);
@@ -1134,7 +1192,18 @@ void TIMER3_IRQHandler()
 	
 	uint32_t flags = TIMER_IntGet(TIMER3);
 	
-	
+	if (flags & TIMER_IF_CC0)
+	{
+		RADIO_SetState(RADIO_STATE_SLAVE_TIM3_CC0);
+	}
+	if (flags & TIMER_IF_CC1)
+	{
+		RADIO_SetState(RADIO_STATE_SLAVE_TIM3_CC1);
+	}
+	if (flags & TIMER_IF_CC2)
+	{
+		RADIO_SetState(RADIO_STATE_SLAVE_TIM3_CC2);
+	}
 	
 	TIMER_IntClear(TIMER3,flags);
 	
@@ -1144,7 +1213,7 @@ bool RADIO_SendData(const uint8_t *data, uint16_t len)
 {
 	
 	//if (RADIO_DATA_SIZE - QUEUE_Count(&dataQueue) < len/25)
-	if (QUEUE_Count(&dataQueue) > 500)
+	if (QUEUE_Count(&dataQueue) >= 1000)
 		return false;
 	
 	// move to data queue

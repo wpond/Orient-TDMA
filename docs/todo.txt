@@ -5,3 +5,9 @@ TODO:
 * allocation
 * second slot
 * optimisation of queue / transport code
+
+
+
+
+# decrement lease on slave OF
+# disable on desync & after lease

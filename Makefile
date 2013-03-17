@@ -88,18 +88,14 @@ efm32lib/src/efm32_int.c \
 efm32lib/src/efm32_emu.c \
 efm32lib/src/efm32_adc.c \
 efm32lib/src/efm32_rtc.c \
-efm32usb/src/efm32_usbtimer.c \
-efm32usb/src/efm32_usbd.c \
-efm32usb/src/efm32_usbdch9.c \
-efm32usb/src/efm32_usbdep.c \
-efm32usb/src/efm32_usbdint.c \
-efm32usb/src/efm32_usbhal.c \
 led.c \
 main.c \
 radio.c \
 queue.c \
-usb.c \
-alloc.c
+alloc.c \
+usb/usbd.c \
+usb/usb-util.c \
+usb.c
 
 S_SRC +=  \
 CMSIS/CM3/DeviceSupport/EnergyMicro/EFM32/startup/cs3/startup_efm32gg.s

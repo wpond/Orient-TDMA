@@ -119,7 +119,7 @@ class OrientSerial:
 		
 	def __init__(self,port):
 		self.port = port
-		self.serial = serial.Serial(port=port,timeout=1,baudrate=1000000)
+		self.serial = serial.Serial(port=port,timeout=1,baudrate=10000000)
 		self.sender = OrientSerial.OrientSender(self.serial)
 		self.recvr = OrientSerial.OrientReceiver(self.serial)
 		self.connectionmanager = connectionmanager.ConnectionManager(self)
