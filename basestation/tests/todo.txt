@@ -1,0 +1,12 @@
+* optimal tx period for packet loss due to extended periods transmitting
+* 1 node 1 slot - throughput
+* 1 node max slots - throughput
+* 2 nodes max slots - throughput
+* 1 node systematic loss - throughput
+* 2 nodes systematic loss - throughput
+* 5 nodes systematic loss - throughput
+* systematic loss with max frame size enabled - throughput
+
+
+## to run
+* tx periods

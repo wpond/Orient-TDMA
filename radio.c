@@ -476,6 +476,7 @@ void RADIO_Main()
 			RADIO_TimingUpdate("radio off");
 			break;
 		case RADIO_STATE_MASTER_OF:
+			LED_Off(BLUE);
 			sendPackets = false;
 			lastNodeAckd = 0;
 			RADIO_SetMode(RADIO_TX);
@@ -790,7 +791,7 @@ void RADIO_Main()
 						}
 						
 					}
-					//USB_Transmit(packet,32);
+					USB_Transmit(packet,32);
 				#else
 					RADIO_TimingUpdate("packet received");
 					if (packet[0] == NODE_ID || packet[0] == BROADCAST_ID || packet[1] == 0)
