@@ -7,6 +7,15 @@
 * 5 nodes systematic loss - throughput
 * systematic loss with max frame size enabled - throughput
 
+# running
+tx period
+throughput, improved
+more nodes
+rates of data generation
 
-## to run
-* tx periods
+
+
+
+* store queue and sent for last frame
+** if queued >= sent, request slot
+** if sucessful sent << sent, maxframesize = sucessful sent * 2 else maxframesize = 0 (infinite)

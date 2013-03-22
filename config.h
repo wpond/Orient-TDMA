@@ -2,7 +2,7 @@
 
 	#define __CONFIG_H__
 	
-	#define BASESTATION
+	//#define BASESTATION
 	
 	
 	#define BASESTATION_ID 0x00

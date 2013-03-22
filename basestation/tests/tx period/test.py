@@ -5,10 +5,10 @@ import time
 #PACKETS = 100000
 PACKETS = 30000
 #TESTS = 20
-TESTS = 50
+TESTS = 10
 
 s = serial.Serial(port="COM4",timeout=1)
-txPeriods = [x*25 for x in range(8,32)]
+txPeriods = [x*100 for x in range(5,9)]
 #txPeriods = [100,200,300,400,500,600,700,800,900]
 
 f = open("speedtest.csv","w")
@@ -82,19 +82,18 @@ for txP in txPeriods:
 				if nframe == frame and nseg == seg:
 					hits += 1
 					byteCount += bytes
+					frame = nframe
+					seg = nseg
+					flags = nflags
+					
+					if flags & 0x01:
+						seg = 0
+						frame = (frame + 1) % 256
+					else:
+						seg += 1
 				else:
 					misses += 1
 			count += 1
-			frame = nframe
-			seg = nseg
-			flags = nflags
-			
-			if flags & 0x01:
-				seg = 0
-				frame = (frame + 1) % 256
-			else:
-				seg += 1
-
 		t2 = time.time()
 
 		tp = t2 - t1

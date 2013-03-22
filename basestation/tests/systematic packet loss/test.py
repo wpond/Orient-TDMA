@@ -11,8 +11,8 @@ f = open("packetloss.csv","w")
 f.write("packet loss, test number, packets, hits, misses, time (s), speed (kbps)\n")
 
 #for loss in [x*10 for x in range(25)]:
-for loss in [0]:
-	for testNum in xrange(3):
+for loss in [2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50,60,70,80,90,100]:
+	for testNum in xrange(20):
 
 		nodeTdma = struct.pack("=BBBBBBBIIIBBxxxxxxxxxxx",
 						1,
@@ -23,7 +23,7 @@ for loss in [0]:
 						1,
 						10,
 						100,
-						300,
+						900,
 						50,
 						True,
 						loss)
@@ -36,7 +36,7 @@ for loss in [0]:
 						1,
 						10,
 						100,
-						300,
+						900,
 						50,
 						True,
 						0)
@@ -61,6 +61,7 @@ for loss in [0]:
 				break
 			except:
 				print sys.exc_info()[0]
+				print "recvd: %s" % len(data)
 				pass
 
 		if flags & 0x01:
@@ -81,19 +82,18 @@ for loss in [0]:
 				if nframe == frame and nseg == seg:
 					hits += 1
 					byteCount += bytes
+					frame = nframe
+					seg = nseg
+					flags = nflags
+					if flags & 0x01:
+						seg = 0
+						frame = (frame + 1) % 256
+					else:
+						seg += 1
 				else:
 					misses += 1
 			count += 1
-			frame = nframe
-			seg = nseg
-			flags = nflags
 			
-			if flags & 0x01:
-				seg = 0
-				frame = (frame + 1) % 256
-			else:
-				seg += 1
-
 		t2 = time.time()
 
 		tp = t2 - t1

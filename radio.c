@@ -18,6 +18,11 @@
 #include "packets.h"
 #include "alloc.h"
 
+
+/** TESTING SECTION **/
+bool IMPROVEMENTS = false;
+/** END TESTING SECTION **/
+
 typedef enum
 {
 	RADIO_STATE_OFF,
@@ -105,6 +110,19 @@ static uint8_t lastNodeAckd = 0,
 	secondSlotLease = 0,
 	secondSlotLen = 0;
 static uint32_t timerOverflows = 0;
+uint16_t sentLastFrame = 0, 
+	queuedLastFrame = 0, 
+	queuedCount = 0,
+	maxFrameSize = 0;
+
+
+
+/** TESTING SECTION **/
+uint16_t packetLoss = 0, packetLossCounter = 0;
+/** END TESTING SECTION **/
+
+
+
 
 static TIMER_Init_TypeDef timerInit =
 {
@@ -473,7 +491,7 @@ void RADIO_Main()
 		{
 		case RADIO_STATE_OFF:
 			RADIO_SetMode(RADIO_OFF);
-			RADIO_TimingUpdate("radio off");
+			///RADIO_TimingUpdate("radio off");
 			break;
 		case RADIO_STATE_MASTER_OF:
 			LED_Off(BLUE);
@@ -489,15 +507,15 @@ void RADIO_Main()
 			break;
 		case RADIO_STATE_MASTER_TIM1_CC0:
 			sendPackets = true;
-			RADIO_TimingUpdate("send timing packet");
+			///RADIO_TimingUpdate("send timing packet");
 			break;
 		case RADIO_STATE_MASTER_TIM1_CC1:
 			sendPackets = false;
-			RADIO_TimingUpdate("protection period start");
+			///RADIO_TimingUpdate("protection period start");
 			break;
 		case RADIO_STATE_MASTER_TIM1_CC2:
 			RADIO_SetMode(RADIO_RX);
-			RADIO_TimingUpdate("receiving");
+			///RADIO_TimingUpdate("receiving");
 			break;
 		case RADIO_STATE_SLAVE_OF:
 			RADIO_SetMode(RADIO_RX);
@@ -515,12 +533,17 @@ void RADIO_Main()
 				}
 			}
 			sprintf(msg,"last send count = %i",count);
+			
+			sentLastFrame = count;
+			queuedLastFrame = queuedCount;
 			count = 0;
+			queuedCount = 0;
+			
 			RADIO_TimingUpdate(msg);
 			break;
 		case RADIO_STATE_SLAVE_TIM0_CC0:
 			RADIO_SetMode(RADIO_OFF);
-			RADIO_TimingUpdate("radio off");
+			///RADIO_TimingUpdate("radio off");
 			break;
 		case RADIO_STATE_SLAVE_TIM3_CC0:
 			TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * secondSlotId));
@@ -543,22 +566,22 @@ void RADIO_Main()
 					RADIO_WriteRegisterMultiple(NRF_W_TX_PAYLOAD,packetPtr,32);
 				}
 			}
-			RADIO_TimingUpdate("queuing first packet");
+			///RADIO_TimingUpdate("queuing first packet");
 			break;
 		case RADIO_STATE_SLAVE_TIM1_CC0:
 			sendPackets = true;
-			RADIO_TimingUpdate("sending packets");
+			///RADIO_TimingUpdate("sending packets");
 			break;
 		case RADIO_STATE_SLAVE_TIM3_CC1:
 		case RADIO_STATE_SLAVE_TIM1_CC1:
 			sendPackets = false;
-			RADIO_TimingUpdate("protection period start");
+			///RADIO_TimingUpdate("protection period start");
 			break;
 		case RADIO_STATE_SLAVE_TIM3_CC2:
 			TIMER_CompareSet(TIMER1, 0, config.guardPeriod + ((config.guardPeriod + config.transmitPeriod) * config.slot));
 		case RADIO_STATE_SLAVE_TIM1_CC2:
 			RADIO_SetMode(RADIO_OFF);
-			RADIO_TimingUpdate("end transmission period");
+			///RADIO_TimingUpdate("end transmission period");
 			break;
 		case RADIO_STATE_SLAVE_SYNC_INIT:
 		{
@@ -585,7 +608,7 @@ void RADIO_Main()
 			}
 			else
 			{
-				RADIO_TimingUpdate("timing packet found");
+				///RADIO_TimingUpdate("timing packet found");
 				RADIO_SetState(RADIO_STATE_SLAVE_SYNC);
 			}
 			
@@ -674,7 +697,36 @@ void RADIO_Main()
 				}
 				else
 				{
+					/** TESTING SECTION **/
+					if (packetLoss && (packetLossCounter++ % packetLoss) == 0)
+						dataSendPos++;
+					/** END TESTING SECTION **/
+					
+					// if we go over the max frame size, start sending again
+					if (maxFrameSize && dataSendPos > maxFrameSize)
+					{
+						dataSendPos = 0;
+					}
+					
 					packetPtr = QUEUE_Get(&dataQueue,dataSendPos++);
+					
+					if (QUEUE_Count(&dataQueue) >= 1000)
+					{
+						packetPtr[6] |= TRANSPORT_FLAG_BUFFER_FULL;
+					}
+					else if (QUEUE_Count(&dataQueue) >= 750)
+					{
+						packetPtr[6] |= TRANSPORT_FLAG_BUFFER_LEVEL_HIGH;
+					}
+					
+					if (IMPROVEMENTS)
+					{
+						if (packetPtr != NULL && queuedLastFrame >= sentLastFrame)
+						{
+							packetPtr[6] |= TRANSPORT_FLAG_SLOT_REQUEST;
+						}
+					}
+					
 				}
 				
 				#ifdef BASESTATION
@@ -708,9 +760,9 @@ void RADIO_Main()
 										packet[8] = len;
 										packet[9] = lease;
 										
-										static char msg[64];
-										sprintf(msg,"lease: [nid=%i,slotid=%i,len=%i,lease=%i,ack=%i]",lastNodeAckd,slotId,len,lease,ack);
-										RADIO_TimingUpdate(msg);
+										///static char msg[64];
+										///sprintf(msg,"lease: [nid=%i,slotid=%i,len=%i,lease=%i,ack=%i]",lastNodeAckd,slotId,len,lease,ack);
+										///RADIO_TimingUpdate(msg);
 									}
 									else
 									{
@@ -718,9 +770,9 @@ void RADIO_Main()
 									}
 									packetPtr = packet;
 									
-									static char msg[32];
-									sprintf(msg,"send ack n:%i %i/%i",(int)lastNodeAckd,(int)packet[3],(int)packet[2]);
-									RADIO_TimingUpdate(msg);
+									///static char msg[32];
+									///sprintf(msg,"send ack n:%i %i/%i",(int)lastNodeAckd,(int)packet[3],(int)packet[2]);
+									///RADIO_TimingUpdate(msg);
 									
 									nodeStates[lastNodeAckd].slotRequest = false;
 									break;
@@ -772,13 +824,16 @@ void RADIO_Main()
 								nodeStates[packet[2]].lastSeg = packet[4];
 								nodeStates[packet[2]].lastFrame = packet[3];
 								nodeStates[packet[2]].lastFlags = packet[6];
-								nodeStates[packet[2]].slotRequest |= (nodeStates[packet[2]].lastFlags & TRANSPORT_FLAG_SLOT_REQUEST);
+								nodeStates[packet[2]].slotRequest |= 
+									(nodeStates[packet[2]].lastFlags & TRANSPORT_FLAG_SLOT_REQUEST) | 
+									(nodeStates[packet[2]].lastFlags & TRANSPORT_FLAG_BUFFER_LEVEL_HIGH) | 
+									(nodeStates[packet[2]].lastFlags & TRANSPORT_FLAG_BUFFER_FULL);
 							}
 							else
 							{
-								static char msg[32];
-								sprintf(msg,"got %i/%i expecting %i/%i",packet[4],packet[3],nextSeg,nextFrame);
-								RADIO_TimingUpdate(msg);
+								///static char msg[32];
+								///sprintf(msg,"got %i/%i expecting %i/%i",packet[4],packet[3],nextSeg,nextFrame);
+								///RADIO_TimingUpdate(msg);
 							}
 						}
 						else
@@ -793,7 +848,7 @@ void RADIO_Main()
 					}
 					USB_Transmit(packet,32);
 				#else
-					RADIO_TimingUpdate("packet received");
+					///RADIO_TimingUpdate("packet received");
 					if (packet[0] == NODE_ID || packet[0] == BROADCAST_ID || packet[1] == 0)
 					{
 						switch (packet[1])
@@ -822,6 +877,33 @@ void RADIO_Main()
 							{
 								RADIO_DisableTDMA();
 							}
+							
+							/** TESTING SECTION **/
+							if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)+1])
+							{
+								packetLoss = packetTDMA->payload[sizeof(RADIO_TDMAConfig)+1];
+								static char msg[32];
+								sprintf(msg,"packet loss: 1 in %d",(int)packetLoss);
+								RADIO_TimingUpdate(msg);
+							}
+							else
+							{
+								packetLoss = 0;
+								RADIO_TimingUpdate("packet loss: 0");
+							}
+							if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)+2])
+							{
+								IMPROVEMENTS = true;
+								RADIO_TimingUpdate("improvements: enabled");
+							}
+							else
+							{
+								IMPROVEMENTS = false;
+								RADIO_TimingUpdate("improvements: disabled");
+								maxFrameSize = 0;
+							}
+							/** END TESTING SECTION **/
+							
 							break;
 						}
 						case PACKET_TDMA_ENABLE:
@@ -850,12 +932,18 @@ void RADIO_Main()
 							{
 								nextFrame++;
 								nextSeg = 0;
+								///RADIO_TimingUpdate("EoF found in fast forward");
 							}
 							
-							static char msg[32];
+							static char msg[64];
+							///sprintf(msg,"fast forward to %i/%i [%i]",nextSeg,nextFrame,packet[6]);
+							///RADIO_TimingUpdate(msg);
 							
-							sprintf(msg,"fast forward to %i/%i [%i]",nextSeg,nextFrame,packet[6]);
-							RADIO_TimingUpdate(msg);
+							///sprintf(msg,"next to send %i/%i",(int)nextSeg,(int)nextFrame);
+							///RADIO_TimingUpdate(msg);
+							
+							///sprintf(msg,"next in queue %i/%i",p[4],p[3]);
+							///RADIO_TimingUpdate(msg);
 							
 							while (p != NULL)
 							{
@@ -868,10 +956,24 @@ void RADIO_Main()
 								sent++;
 								QUEUE_Peek(&dataQueue,true); // fast dequeue
 								p = QUEUE_Peek(&dataQueue,false);
+								///sprintf(msg,"next in queue %i/%i",p[4],p[3]);
+								///RADIO_TimingUpdate(msg);
 								
 							}
 							
-							sprintf(msg,"sent %i packets %i remaining [ack %i/%i]",sent,QUEUE_Count(&dataQueue),packet[3],packet[2]);
+							if (IMPROVEMENTS)
+							{
+								if (sent*2 < sentLastFrame)
+								{
+									maxFrameSize = sent*2;
+								}
+								else
+								{
+									maxFrameSize = 0;
+								}
+							}
+							
+							sprintf(msg,"sent %i packets %i remaining [ack %i/%i] [maxFrameSize=%i]",sent,QUEUE_Count(&dataQueue),packet[3],packet[2],maxFrameSize);
 							RADIO_TimingUpdate(msg);
 							
 							// second slot config
@@ -910,9 +1012,9 @@ void RADIO_Main()
 								e = packet[p];
 								if (e == 0)
 									break;
-								static char msg[32];
-								sprintf(msg,"event 0x%2.2X",e);
-								RADIO_TimingUpdate(msg);
+								///static char msg[32];
+								///sprintf(msg,"event 0x%2.2X",e);
+								///RADIO_TimingUpdate(msg);
 							}
 						}
 							break;
@@ -1103,9 +1205,9 @@ void TIMER0_IRQHandler()
 			
 			INT_Enable();
 			
-			static char msg[32];
-			sprintf(msg,"sync timers[%i]",time);
-			//RADIO_TimingUpdate(msg);
+			///static char msg[32];
+			///sprintf(msg,"sync timers[%i]",time);
+			///RADIO_TimingUpdate(msg);
 			// enable full slave mode
 			if (!syncd)
 			{
@@ -1226,7 +1328,7 @@ bool RADIO_SendData(const uint8_t *data, uint16_t len)
 	packet[3] = dataFrameId++;
 	
 	// flags
-	packet[6] = TRANSPORT_FLAG_SLOT_REQUEST;
+	packet[6] = 0;
 	
 	uint8_t segId = 0;
 	
@@ -1251,6 +1353,7 @@ bool RADIO_SendData(const uint8_t *data, uint16_t len)
 		}
 		
 		QUEUE_Queue(&dataQueue,packet);
+		queuedCount++;
 		
 	}
 	
