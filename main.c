@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "alloc.h"
 #include "led.h"
 #include "radio.h"
 #include "usb.h"
@@ -20,6 +21,7 @@
 #include "packets.h"
 
 /* variables */
+static uint32_t rtcIrqCount = 0;
 
 /* prototypes */
 void InitClocks();
@@ -44,9 +46,25 @@ void GPIO_EVEN_IRQHandler()
 	
 }
 
+void RTC_IRQHandler()
+{
+	
+	uint32_t flags = RTC_IntGet();
+	
+	if (flags & RTC_IF_OF || flags & RTC_IF_COMP0)
+	{
+		rtcIrqCount += dataRate;
+	}
+	
+	RTC_IntClear(flags);
+	
+}
+
 /* functions */
 void wait(uint32_t ms)
 {
+	
+	int i; for (i = 0; i < 5000*ms; i++); return;
 	
 	uint32_t time, 
 		clockFreq = CMU_ClockFreqGet(cmuClock_RTC);
@@ -127,6 +145,10 @@ void InitClocks()
 	CMU_ClockEnable(cmuClock_RTC, true);
 	RTC_Reset();
 	RTC_Enable(true);
+	RTC_Init_TypeDef rtcInit = RTC_INIT_DEFAULT;
+	RTC_CompareSet(0, 1638);
+	RTC_IntEnable(RTC_IFC_COMP0);
+	RTC_Init(&rtcInit);
 	
 	// enable radio usart
 	CMU_ClockEnable(cmuClock_USART0, true);
@@ -153,6 +175,8 @@ void EnableInterrupts()
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
 	NVIC_EnableIRQ(TIMER3_IRQn);
+	
+	NVIC_EnableIRQ(RTC_IRQn);
 	
 	NVIC_SetPriority(USB_IRQn, 0);
 	
@@ -193,7 +217,9 @@ int main()
     EnableInterrupts();
 	
 	// start usb
-	USB_Init();
+	//#ifdef BASESTATION
+		USB_Init();
+	//#endif
 	
 	// show startup LEDs
 	StartupLEDs();
@@ -206,8 +232,8 @@ int main()
 	uint8_t packet[32];
 	
 	int i;
-	uint8_t dPacket[85];
-	for (i = 0; i < 85; i++)
+	uint8_t dPacket[5*25];
+	for (i = 0; i < 5*25; i++)
 	{
 		dPacket[i] = i;
 	}
@@ -241,6 +267,13 @@ int main()
 						PACKET_TDMA *packetTDMA = (PACKET_TDMA*)&packet[2];
 						RADIO_TDMAConfig *c = (RADIO_TDMAConfig*)packetTDMA->payload;
 						RADIO_ConfigTDMA(c);
+						
+						#ifdef BASESTATION
+							ALLOC_Init(packetTDMA->payload[sizeof(RADIO_TDMAConfig)+3],packetTDMA->payload[sizeof(RADIO_TDMAConfig)+1]);
+							ALLOC_SetLease(packetTDMA->payload[sizeof(RADIO_TDMAConfig)+2]);
+						#endif
+						RADIO_BasestationReset();
+						
 						if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)])
 						{
 							RADIO_EnableTDMA();
@@ -278,7 +311,27 @@ int main()
 			
 		#else
 			
-			RADIO_SendData(dPacket,85);
+			if (rtcIrqCount > 0)
+			{
+				if (rtcIrqCount > 5)
+				{
+					RADIO_SendData(dPacket,25*5);
+					INT_Disable();
+					rtcIrqCount -= 5;
+					INT_Enable();
+				}
+				else
+				{
+					RADIO_SendData(dPacket,25);
+					INT_Disable();
+					rtcIrqCount--;
+					INT_Enable();
+				}
+			}
+			else if (!dataRate)
+			{
+				RADIO_SendData(dPacket,85);
+			}
 			/*
 			if (i++ % 100000 == 0)
 			{

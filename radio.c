@@ -110,11 +110,12 @@ static uint8_t lastNodeAckd = 0,
 	secondSlotLease = 0,
 	secondSlotLen = 0;
 static uint32_t timerOverflows = 0;
-uint16_t sentLastFrame = 0, 
+static uint16_t sentLastFrame = 0, 
 	queuedLastFrame = 0, 
 	queuedCount = 0,
 	maxFrameSize = 0;
-
+	
+uint16_t dataRate = 0;
 
 
 /** TESTING SECTION **/
@@ -200,7 +201,7 @@ void RADIO_Init()
 	}
 	
 	#ifdef BASESTATION
-		ALLOC_Init(5,4);
+		ALLOC_Init(5,0);
 	#endif
 	
 	QUEUE_Init(&txQueue, (uint8_t*)txQueueMemory, 32, RADIO_SEND_QUEUE_SIZE);
@@ -520,7 +521,7 @@ void RADIO_Main()
 		case RADIO_STATE_SLAVE_OF:
 			RADIO_SetMode(RADIO_RX);
 			syncNextPacket = true;
-			countSinceSync++;
+			
 			dataSendPos = 0; // reset send offset
 			if (secondSlotLease > 0)
 			{
@@ -608,7 +609,7 @@ void RADIO_Main()
 			}
 			else
 			{
-				///RADIO_TimingUpdate("timing packet found");
+				RADIO_TimingUpdate("timing packet found");
 				RADIO_SetState(RADIO_STATE_SLAVE_SYNC);
 			}
 			
@@ -624,23 +625,31 @@ void RADIO_Main()
 			TIMER_CompareSet(TIMER1, 2, ((config.guardPeriod + config.transmitPeriod) * (config.slot + 1))  - 1);
 
 			INT_Disable();
-			TIMER_InitCC(TIMER0, 0, &timerCCCompare);
 			TIMER_InitCC(TIMER0, 1, &timerCCCompare);
 
 			TIMER_InitCC(TIMER1, 0, &timerCCOff);
 			TIMER_InitCC(TIMER1, 1, &timerCCCompare);
 			TIMER_InitCC(TIMER1, 2, &timerCCCompare);
 
-			TIMER_IntClear(TIMER0,TIMER_IF_CC0);
 			TIMER_IntClear(TIMER0,TIMER_IF_CC1);
 
 			TIMER_IntClear(TIMER1,TIMER_IF_OF);
 			TIMER_IntClear(TIMER1,TIMER_IF_CC0);
 			TIMER_IntClear(TIMER1,TIMER_IF_CC1);
 			TIMER_IntClear(TIMER1,TIMER_IF_CC2);
-
+			/*
 			if (config.slot > 1)
+			{
+				TIMER_InitCC(TIMER0, 0, &timerCCCompare);
+				TIMER_IntClear(TIMER0,TIMER_IF_CC0);
 				TIMER_IntEnable(TIMER0,TIMER_IF_CC0);
+			}
+			*/
+			TIMER_InitCC(TIMER0, 0, &timerCCCompare);
+			TIMER_IntClear(TIMER0,TIMER_IF_CC0);
+			TIMER_IntEnable(TIMER0,TIMER_IF_CC0);
+			
+			
 			TIMER_IntEnable(TIMER0,TIMER_IF_CC1);
 
 			TIMER_IntEnable(TIMER1,TIMER_IF_OF);
@@ -710,6 +719,12 @@ void RADIO_Main()
 					
 					packetPtr = QUEUE_Get(&dataQueue,dataSendPos++);
 					
+					if (IMPROVEMENTS && packetPtr == NULL && QUEUE_Count(&dataQueue) <= dataSendPos)
+					{
+						dataSendPos = 0;
+						packetPtr = QUEUE_Get(&dataQueue,dataSendPos++);
+					}
+					
 					if (QUEUE_Count(&dataQueue) >= 1000)
 					{
 						packetPtr[6] |= TRANSPORT_FLAG_BUFFER_FULL;
@@ -760,9 +775,9 @@ void RADIO_Main()
 										packet[8] = len;
 										packet[9] = lease;
 										
-										///static char msg[64];
-										///sprintf(msg,"lease: [nid=%i,slotid=%i,len=%i,lease=%i,ack=%i]",lastNodeAckd,slotId,len,lease,ack);
-										///RADIO_TimingUpdate(msg);
+										static char msg[64];
+										sprintf(msg,"lease: [nid=%i,slotid=%i,len=%i,lease=%i,ack=%i]",lastNodeAckd,slotId,len,lease,ack);
+										RADIO_TimingUpdate(msg);
 									}
 									else
 									{
@@ -770,9 +785,9 @@ void RADIO_Main()
 									}
 									packetPtr = packet;
 									
-									///static char msg[32];
-									///sprintf(msg,"send ack n:%i %i/%i",(int)lastNodeAckd,(int)packet[3],(int)packet[2]);
-									///RADIO_TimingUpdate(msg);
+									static char msg[32];
+									sprintf(msg,"send ack n:%i %i/%i",(int)lastNodeAckd,(int)packet[3],(int)packet[2]);
+									RADIO_TimingUpdate(msg);
 									
 									nodeStates[lastNodeAckd].slotRequest = false;
 									break;
@@ -869,6 +884,11 @@ void RADIO_Main()
 							PACKET_TDMA *packetTDMA = (PACKET_TDMA*)&packet[2];
 							RADIO_TDMAConfig *c = (RADIO_TDMAConfig*)packetTDMA->payload;
 							RADIO_ConfigTDMA(c);
+							RADIO_SetMode(RADIO_OFF);
+							LED_Off(RED);
+							QUEUE_Empty(&dataQueue);
+							dataFrameId = 0;
+							
 							if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)])
 							{
 								RADIO_EnableTDMA();
@@ -879,6 +899,7 @@ void RADIO_Main()
 							}
 							
 							/** TESTING SECTION **/
+							//QUEUE_Empty(&dataQueue);
 							if (packetTDMA->payload[sizeof(RADIO_TDMAConfig)+1])
 							{
 								packetLoss = packetTDMA->payload[sizeof(RADIO_TDMAConfig)+1];
@@ -901,6 +922,18 @@ void RADIO_Main()
 								IMPROVEMENTS = false;
 								RADIO_TimingUpdate("improvements: disabled");
 								maxFrameSize = 0;
+							}
+							dataRate = (packetTDMA->payload[sizeof(RADIO_TDMAConfig)+4] << 8) | packetTDMA->payload[sizeof(RADIO_TDMAConfig)+3];
+							if (dataRate)
+							{
+								static char msg[32];
+								sprintf(msg,"data rate: %i",dataRate);
+								RADIO_TimingUpdate(msg);
+								QUEUE_Empty(&dataQueue);
+							}
+							else
+							{
+								RADIO_TimingUpdate("data rate: auto");
 							}
 							/** END TESTING SECTION **/
 							
@@ -1156,9 +1189,39 @@ void RADIO_EnableTDMA()
 
 void RADIO_DisableTDMA()
 {
+	INT_Disable();
+	TIMER_IntDisable(TIMER0,TIMER_IF_CC0);
+	TIMER_IntDisable(TIMER0,TIMER_IF_CC1);
+
+	TIMER_IntDisable(TIMER1,TIMER_IF_OF);
+	TIMER_IntDisable(TIMER1,TIMER_IF_CC0);
+	TIMER_IntDisable(TIMER1,TIMER_IF_CC1);
+	TIMER_IntDisable(TIMER1,TIMER_IF_CC2);
+
+	TIMER_IntDisable(TIMER3,TIMER_IF_CC0);
+	TIMER_IntDisable(TIMER3,TIMER_IF_CC1);
+	TIMER_IntDisable(TIMER3,TIMER_IF_CC2);
+	
+	TIMER_IntClear(TIMER0,TIMER_IF_CC0);
+	TIMER_IntClear(TIMER0,TIMER_IF_CC1);
+
+	TIMER_IntClear(TIMER1,TIMER_IF_OF);
+	TIMER_IntClear(TIMER1,TIMER_IF_CC0);
+	TIMER_IntClear(TIMER1,TIMER_IF_CC1);
+	TIMER_IntClear(TIMER1,TIMER_IF_CC2);
+
+	TIMER_IntClear(TIMER3,TIMER_IF_CC0);
+	TIMER_IntClear(TIMER3,TIMER_IF_CC1);
+	TIMER_IntClear(TIMER3,TIMER_IF_CC2);
+	
+	TIMER_IntClear(TIMER0,TIMER_IntGet(TIMER0));
+	TIMER_IntClear(TIMER1,TIMER_IntGet(TIMER1));
+	TIMER_IntClear(TIMER2,TIMER_IntGet(TIMER2));
+	
 	TIMER_Reset(TIMER0);
 	TIMER_Reset(TIMER1);
 	TIMER_Reset(TIMER3);
+	INT_Enable();
 	
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	
@@ -1248,6 +1311,7 @@ void TIMER1_IRQHandler()
 		else
 		{
 			RADIO_SetState(RADIO_STATE_SLAVE_OF);
+			countSinceSync++;
 		}
 	}
 	if (flags & TIMER_IF_CC0)
@@ -1360,4 +1424,17 @@ bool RADIO_SendData(const uint8_t *data, uint16_t len)
 	RADIO_SafeIncrement(irqCount);
 	return true;
 	
+}
+
+void RADIO_BasestationReset()
+{
+	int i;
+	for (i = 0; i < 256; i++)
+	{
+		nodeStates[i].enabled = false;
+		nodeStates[i].lastFrame = 0;
+		nodeStates[i].lastSeg = 0;
+		nodeStates[i].lastFlags = 0;
+		nodeStates[i].slotRequest = false;
+	}
 }

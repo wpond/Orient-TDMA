@@ -12,7 +12,7 @@ tx period
 throughput, improved
 more nodes
 rates of data generation
-
+different payload sizes (wasted space)
 
 
 

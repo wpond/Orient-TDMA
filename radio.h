@@ -53,6 +53,8 @@
 	}
 	RADIO_TDMAConfig;
 	
+	extern uint16_t dataRate;
+	
 	void RADIO_Init();
 	void RADIO_SetMode(RADIO_Mode mode);
 	RADIO_Mode RADIO_GetMode();
@@ -64,5 +66,6 @@
 	void RADIO_EnableTDMA();
 	void RADIO_DisableTDMA();
 	bool RADIO_SendData(const uint8_t *data, uint16_t len);
+	void RADIO_BasestationReset();
 	
 #endif

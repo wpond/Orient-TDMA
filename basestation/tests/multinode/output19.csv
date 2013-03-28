@@ -1,0 +1,5 @@
+test,node id,transmit period,packet loss,optimisations,data rate,total,hits,misses,throughput
+0,1,300,0,True,78.125,10167,8961,1206,63.0224083844
+0,2,300,0,True,78.125,10192,8951,1241,62.9520787244
+0,3,300,0,True,78.125,9888,9158,730,64.4079026877
+0,4,300,0,True,78.125,9753,9583,170,67.3969132405

@@ -60,6 +60,7 @@
 
 #define BULK_EP_SIZE     USB_MAX_EP_SIZE  /* This is the max. ep size.    */
 #define USB_RX_BUF_SIZ   BULK_EP_SIZE /* Packet size when receiving on USB*/
+//#define USB_TX_BUF_SIZ   16383    /* Packet size when transmitting on USB.  */
 #define USB_TX_BUF_SIZ   127    /* Packet size when transmitting on USB.  */
 
 /* Calculate a timeout in ms corresponding to 5 char times on current     */
@@ -124,7 +125,13 @@ static volatile bool           usbOnline, usbActive;
 
 #define SEND_MEM_SIZE 19200
 #define MIN_SEND_SIZE 0
-
+/*
+#ifdef BASESTATION
+	#define MIN_SEND_SIZE 16383
+#else
+	#define MIN_SEND_SIZE 0
+#endif
+*/
 static uint8_t usbSendMem[2][SEND_MEM_SIZE],
 	usbSending = 1;
 static uint16_t usbSendFill[2] = { 0, 0 };

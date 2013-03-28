@@ -3,35 +3,24 @@ import struct
 import time
 import sys
 
-#PACKETS = 100000
-PACKETS = 10000
-#TESTS = 20
-TESTS = 1
+PACKETS = 30000
 
 s = serial.Serial(port="COM5",timeout=1)
-txPeriods = [x*100 for x in range(1,9)]
-#txPeriods = [100,200,300,400,500,600,700,800,900]
 
-f = open("speedtest.csv","w")
-f.write("tx period, test number, packets, hits, misses, time (s), speed (kbps)\n")
+f = open("packetloss.csv","w")
+f.write("packet loss, test number, improvements, packets, hits, misses, time (s), data generation rate (kbps), speed (kbps)\n")
 
-for txP in txPeriods:
-	for testNum in xrange(TESTS):
+#for improvements in [False,True]:
+	#for loss in [0,2,3,4,5,6,7,8,9,10,15,20,25,30]:
+
+#for dataRate in [5,6,7,8,9,10,11,12,13]:
+#for dataRate in [15,30,45]:
+for dataRate in [20,25,35,40]:
+	for testNum in xrange(1):
 		
-		'''
-		nodeTdma = struct.pack("=BBBBBBBIIIBxxxxxxxxxxxx",
-						1,
-						0x02,
-						0,
-						False,
-						102,
-						1,
-						10,
-						100,
-						txP,
-						50,
-						True)
-		'''
+		improvements = True
+		loss = 0
+		
 		nodeTdma = struct.pack("=BBBBBBBIIIBBBHxxxxxxxx",
 						1,
 						0x02,
@@ -41,13 +30,28 @@ for txP in txPeriods:
 						1,
 						10,
 						100,
-						300,
+						900,
 						50,
 						True,
+						loss,
+						improvements, # improvements enabled
+						dataRate)
+		nodeTdma2 = struct.pack("=BBBBBBBIIIBBBHxxxxxxxx",
+						2,
+						0x02,
 						0,
-						0, # improvements enabled
-						0)
-		bsTdma = struct.pack("=BBBBBBBIIIBxxxxxxxxxxxx",
+						False,
+						102,
+						2,
+						10,
+						100,
+						900,
+						50,
+						True,
+						loss,
+						improvements, # improvements enabled
+						dataRate)
+		bsTdma = struct.pack("=BBBBBBBIIIBBBHxxxxxxxx",
 						0,
 						0x02,
 						0,
@@ -56,11 +60,16 @@ for txP in txPeriods:
 						1,
 						10,
 						100,
-						txP,
+						900,
 						50,
-						True)
-
+						True,
+						0,
+						improvements,
+						0)
+		
 		s.write(nodeTdma)
+		time.sleep(0.5)
+		s.write(nodeTdma2)
 		time.sleep(0.5)
 		s.write(bsTdma)
 
@@ -80,6 +89,7 @@ for txP in txPeriods:
 				break
 			except:
 				print sys.exc_info()[0]
+				print "recvd: %s" % len(data)
 				pass
 
 		if flags & 0x01:
@@ -103,7 +113,6 @@ for txP in txPeriods:
 					frame = nframe
 					seg = nseg
 					flags = nflags
-					
 					if flags & 0x01:
 						seg = 0
 						frame = (frame + 1) % 256
@@ -112,20 +121,27 @@ for txP in txPeriods:
 				else:
 					misses += 1
 			count += 1
+			
 		t2 = time.time()
 
 		tp = t2 - t1
 		kbps = (byteCount * 8) / (tp)
 		
-		print "tx period: %s [%s]" % (txP,testNum)
+		print "loss: %s [%s]" % (loss,testNum)
+		if improvements:
+			print "Improvements: enabled"
+		else:
+			print "Improvements: disabled"
 		print "total packets: %s" % count
 		print "hits: %s" % hits
 		print "misses: %s" % misses
 		print "time taken: %s" % tp
-		print "speed: %s kbps" % kbps
+		print "data generation rate %s kbps" % ((dataRate * 20 * 25 * 8)/1024.0)
+		print "speed: %s kbps" % (kbps / 1024)
+		print
 		
 		#f.write("tx period, test number, packets, hits, misses, time (s), speed (kbps)\n")
-		f.write("%s, %s, %s, %s, %s, %s, %s\n" % (txP,testNum,count,hits,misses,tp,kbps))
+		f.write("%s, %s, %s, %s, %s, %s, %s, ,%s, %s\n" % (loss,testNum,improvements,count,hits,misses,tp,((dataRate * 20 * 25 * 8)/1024.0),kbps))
 		
 		dataOff = struct.pack("=BBBB28x",1,0x08,2,0)
 
@@ -135,12 +151,18 @@ for txP in txPeriods:
 						1,
 						0x03,
 						False)
+		nodeTdma2 = struct.pack("=BBB29x",
+						1,
+						0x03,
+						False)
 		bsTdma = struct.pack("=BBB29x",
 						0,
 						0x03,
 						False)
 
 		s.write(nodeTdma)
+		time.sleep(0.5)
+		s.write(nodeTdma2)
 		time.sleep(0.5)
 		s.write(bsTdma)
 		

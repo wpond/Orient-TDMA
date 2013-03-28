@@ -13,6 +13,8 @@ static ALLOC_Slot allocTable[255];
 static uint8_t slotCount,
 	slotOffset,
 	nextAck = 253;
+static bool leaseSet = false;
+static uint8_t lease;
 
 /* prototypes */
 static void ALLOC_ResetSlot(ALLOC_Slot* slot);
@@ -21,6 +23,7 @@ static uint8_t ALLOC_NodeSlot(uint8_t id);
 static uint8_t ALLOC_NextAck();
 static bool ALLOC_Alloc(uint8_t slotId, uint8_t id, uint8_t lease);
 static void ALLOC_TraceTable();
+static uint8_t ALLOC_GetLease();
 
 /* functions */
 static void ALLOC_TraceTable()
@@ -57,6 +60,8 @@ void ALLOC_Init(uint8_t _slotOffset, uint8_t _slotCount)
 	
 	slotCount = _slotCount;
 	slotOffset = _slotOffset;
+	
+	leaseSet = false;
 	
 }
 
@@ -134,7 +139,7 @@ bool ALLOC_Request(uint8_t id)
 		
 		if (slotId != 255)
 		{
-			return ALLOC_Alloc(slotId,id,ALLOC_LEASE_DEFAULT);
+			return ALLOC_Alloc(slotId,id,ALLOC_GetLease());
 		}
 		
 	}
@@ -157,7 +162,7 @@ bool ALLOC_Request(uint8_t id)
 			}
 			else
 			{
-				return ALLOC_Alloc(curId,id,ALLOC_LEASE_DEFAULT);
+				return ALLOC_Alloc(curId,id,ALLOC_GetLease());
 			}
 				
 		}
@@ -178,7 +183,7 @@ bool ALLOC_Request(uint8_t id)
 			}
 			else
 			{
-				return ALLOC_Alloc(curId,id,ALLOC_LEASE_DEFAULT);
+				return ALLOC_Alloc(curId,id,ALLOC_GetLease());
 			}
 			
 		}
@@ -232,4 +237,18 @@ bool ALLOC_CheckAndDecrement(uint8_t nodeId, uint8_t *_slotId, uint8_t *_len, ui
 	
 	return false;
 	
+}
+
+static uint8_t ALLOC_GetLease()
+{
+	if (leaseSet)
+		return lease;
+	else
+		return ALLOC_LEASE_DEFAULT;
+}
+
+void ALLOC_SetLease(uint8_t _lease)
+{
+	leaseSet = true;
+	lease = _lease;
 }
