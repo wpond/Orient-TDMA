@@ -1,0 +1,2 @@
+test id,repeat,node id,duration (s),node count, transmit period, packet loss, optimisations, data generation rate (kbps), unreserved slots, lease time, spread speed, throughput (kbps), accepted packets, dropped packets
+0,0,1,10.000000,1,300,0,0,0,0.000000,5,5,59.300781,3572,12

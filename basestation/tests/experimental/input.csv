@@ -1,0 +1,4 @@
+# test id, repeats, duration, node count, transmit period, packet loss, optimisations, data rate, slots, lease, spreadspeed
+# 0 test
+#0,1,10,1,300,0,0,0,0,0,0
+0,1,10,1,300,0,0,0,5,5,0

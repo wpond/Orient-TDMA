@@ -1,0 +1,64 @@
+application layer
+	
+	calls transport layer with buffer, blocks until completely dispatched to transport layer
+
+transport layer
+		
+	PACKETS
+		data
+		ack
+	
+	HEADERS	
+		ack
+			frame id
+			segment id
+		data
+			flags byte (congestion / more timeslots requested / sd card in use)
+				BUFFER_FULL			0x00
+				SLOT REQUEST		0x01
+				SD CARD IN USE		0x02
+				SEGMENT END			0x04
+			frame id
+			segment id (counting up from 1)
+			segment fill
+			data[26 bytes]
+
+mac layer
+	
+	PACKETS
+		tdma
+			timing packets
+				[0, ..., 0]
+			config settings
+			slot allocation
+			ack [config / slot]
+				sequence number
+		availability
+			hello packet
+				challenge/response byte
+				set to 0xFF for challenge (this way we can challenge specific nodes)
+				periodic broadcast [10 seconds?]
+				challenge only nodes with no data
+	
+	HEADERS
+		to address (1 byte / broadcast 0xFF / basestation 0)
+		type
+	
+	TYPES
+		0x00		TIMING PACKET
+		0x01		HELLO
+		0x02		TDMA CONFIG
+		0x03		TDMA ENABLE
+		0x04		SLOT ALLOCATION
+		0x05		TDMA ACK
+		0x06		TRANSPORT LAYER [data]
+		0x07		TRANSPORT LAYER [ack]
+		
+		0x08-0xFE	UNRESERVED
+		
+		0xFF		BASESTATION DEBUG
+
+physical layer
+	
+	controlled by mac layer
+	sends and receives packets when instructed

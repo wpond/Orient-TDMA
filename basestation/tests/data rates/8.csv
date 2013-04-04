@@ -1,0 +1,3 @@
+packet loss, test number, improvements, packets, hits, misses, time (s), data generation rate (kbps), speed (kbps)
+0, 0, True, 30000, 22617, 7383, 140.568000078, ,31.25, 32179.4433832
+0, 1, True, 30000, 22876, 7124, 143.76699996, ,31.25, 31823.7147696
