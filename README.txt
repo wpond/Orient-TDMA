@@ -31,6 +31,9 @@ The main project code which creates the firmware is located in the root director
 /docs
 	Documents used during development. These include the pins configured for the TDMA and an initial outline of the radio stack
 
+	/docs/dissertation
+		Latex source files and images of figures. Also included are the raw appendices and a small python application to make them latex friendly (adds "\newline" at the end of every line).
+
 =====
 INCLUDED LIBRARIES
 
