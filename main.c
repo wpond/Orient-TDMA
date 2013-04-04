@@ -343,7 +343,7 @@ int main()
 		#endif
 		
 		// if no pending irqs, sleep
-		// (use energy micro tip of disabling interrupts before
+		// (use trick of disabling interrupts before
 		// enabling after wake up - irq still wake cpu even if disabled)
 		//EMU_EnterEM1();
 		

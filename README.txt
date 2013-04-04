@@ -41,3 +41,6 @@ INCLUDED LIBRARIES
 
 /basestation/tests/experimental/rs232.{c,h}
 	RS 232 (serial) C library, supplied under GPL (see files for license).
+
+/usb.c
+	Energy micro USB library, with modifications as part of the project (see file for license).
