@@ -27,6 +27,7 @@
 	
 	static void inline TRACE(char* msg)
 	{
+		return;
 		#ifdef BASESTATION
 			//return;
 			uint8_t len, msglen;
